@@ -32,6 +32,8 @@ public class Report {
     private Itinerary itinerary;
 	
 	
+	public Report() {}
+	
 	public long getId() {
 		return id;
 	}
@@ -55,6 +57,22 @@ public class Report {
 	}
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+
+	public Itinerary getItinerary() {
+		return itinerary;
+	}
+
+	public void setItinerary(Itinerary itinerary) {
+		this.itinerary = itinerary;
 	}
 	
 	

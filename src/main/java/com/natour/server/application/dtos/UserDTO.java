@@ -1,4 +1,4 @@
-package com.natour.server.data.dtos;
+package com.natour.server.application.dtos;
 
 import java.sql.Date;
 

@@ -82,6 +82,14 @@ public class User {
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
+
+	public List<Itinerary> getItineraries() {
+		return itineraries;
+	}
+
+	public void setItineraries(List<Itinerary> itineraries) {
+		this.itineraries = itineraries;
+	}
 	
 	
 	
