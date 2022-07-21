@@ -1,27 +1,25 @@
 package com.natour.server.application.dtos;
 
-import java.time.Duration;
-
-import io.jenetics.jpx.GPX;
-
 public class ItineraryDTO {
 
-	private long id;
+	private Long id;
 	private String name;
-	private GPX wayPoints;
-	private Duration duration;
-	private float lenght;
-	private int difficulty;
+	private byte[] gpx;
+	private Float duration;
+	private Float lenght;
+	private Integer difficulty;
 	private String description;
 	
-	private long idUser;
+	private Long idUser;
 	
 	
-	public long getId() {
+	
+
+	public Long getId() {
 		return id;
 	}
 
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 
@@ -33,35 +31,35 @@ public class ItineraryDTO {
 		this.name = name;
 	}
 
-	public GPX getWayPoints() {
-		return wayPoints;
+	public byte[] getGpx() {
+		return gpx;
 	}
 
-	public void setWayPoints(GPX wayPoints) {
-		this.wayPoints = wayPoints;
+	public void setGpx(byte[] gpx) {
+		this.gpx = gpx;
 	}
 
-	public Duration getDuration() {
+	public Float getDuration() {
 		return duration;
 	}
 
-	public void setDuration(Duration duration) {
+	public void setDuration(Float duration) {
 		this.duration = duration;
 	}
 
-	public float getLenght() {
+	public Float getLenght() {
 		return lenght;
 	}
 
-	public void setLenght(float lenght) {
+	public void setLenght(Float lenght) {
 		this.lenght = lenght;
 	}
 
-	public int getDifficulty() {
+	public Integer getDifficulty() {
 		return difficulty;
 	}
 
-	public void setDifficulty(int difficulty) {
+	public void setDifficulty(Integer difficulty) {
 		this.difficulty = difficulty;
 	}
 
@@ -73,13 +71,15 @@ public class ItineraryDTO {
 		this.description = description;
 	}
 
-	public long getIdUser() {
+	public Long getIdUser() {
 		return idUser;
 	}
 
-	public void setIdUser(long idUser) {
+	public void setIdUser(Long idUser) {
 		this.idUser = idUser;
 	}
+
+	
 	
 	
 

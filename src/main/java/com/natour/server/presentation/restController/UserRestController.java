@@ -1,6 +1,5 @@
 package com.natour.server.presentation.restController;
 
-import java.sql.Date;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,8 +21,6 @@ import com.natour.server.application.services.UserService;
 @RestController
 @RequestMapping(value="/user")
 public class UserRestController {
-
-	//TODO definire alle api POST e PUT un body (RequestBody) e non parametri (RequestParam)
 	
 	@Autowired
 	private UserService userService;
@@ -35,34 +32,32 @@ public class UserRestController {
 		System.out.println("TEST: GET id");
 		
 		UserDTO result = userService.findUserById(id);
-		if(result != null) return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
-		return new ResponseEntity<UserDTO>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
+		
 	}
 	
 	//---
 	
 	@RequestMapping(value="/get", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<UserDTO> getUserByUsername(@RequestParam(required = true) String username){
+	public ResponseEntity<UserDTO> getUserByUsername(@RequestParam String username){
 		System.out.println("TEST: GET username");
 		
 		UserDTO result = userService.findUserByUsername(username);
-		if(result != null) return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
-		return new ResponseEntity<UserDTO>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
+		
 	}
 	
-
-	//---
 	
 	//SEARCH
 	@RequestMapping(value="/search", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<List<UserDTO>> searchUserByUsername(@RequestParam(required = true) String username){
+	public ResponseEntity<List<UserDTO>> searchUserByUsername(@RequestParam String username){
 		System.out.println("TEST: SEARCH");
 		
 		List<UserDTO> result = userService.searchUserByUsername(username);
-		if(result != null) return new ResponseEntity<List<UserDTO>>(result, HttpStatus.OK);
-		return new ResponseEntity<List<UserDTO>>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<List<UserDTO>>(result, HttpStatus.OK);
+		
 	}
 	
 	
@@ -73,48 +68,44 @@ public class UserRestController {
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<UserDTO> addUser(@RequestBody(required = true) String username){
+	public ResponseEntity<UserDTO> addUser(@RequestParam String username){
 		System.out.println("TEST: ADD");
 		
 		UserDTO result = userService.addUser(username);
 		
-		if(result != null) return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
-		return new ResponseEntity<UserDTO>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
+		
 	}
 	
 	
 	
 	
 	//PUTs
-	
-	
 	@RequestMapping(value="/update/image", method=RequestMethod.PUT)
 	@ResponseBody
-	public ResponseEntity<UserDTO> updateProfileImage(@RequestParam(required = true) String username,
-													  @RequestParam(required = true) byte[] image)
+	public ResponseEntity<UserDTO> updateProfileImage(@RequestParam String username,
+													  @RequestBody byte[] image)
 	{
 		System.out.println("TEST: UPDATE IMAGE");
 		
 		UserDTO result = userService.updateProfileImage(username, image);
 		
-		if(result != null) return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
-		return new ResponseEntity<UserDTO>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
+		
 	}
 	
+	//---
 	
 	@RequestMapping(value="/update/optional_info", method=RequestMethod.PUT)
 	@ResponseBody
-	public ResponseEntity<UserDTO> updateOptionalInfo(@RequestParam(required = true) String username,
-													  @RequestParam(required = false) String placeOfResidence,
-													  @RequestParam(required = false) Date dateOfBirth,
-													  @RequestParam(required = false) String gender)
+	public ResponseEntity<UserDTO> updateOptionalInfo(@RequestParam String username,
+													  @RequestBody OptionalInfoUserDTO optionalInfoDTO)
 	{
 		System.out.println("TEST: UPDATE IMAGE");
-		OptionalInfoUserDTO optionalInfoDTO = new OptionalInfoUserDTO(placeOfResidence, dateOfBirth, gender);
 		UserDTO result = userService.updateOptionalInfo(username, optionalInfoDTO);
 		
-		if(result != null) return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
-		return new ResponseEntity<UserDTO>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<UserDTO>(result, HttpStatus.OK);
+		
 	}
 	
 	//DELETEs
@@ -126,10 +117,7 @@ public class UserRestController {
 	
 	
 
-	
-	
-	
-	//UPDATE OPTIONAL INFORMATION
+
 	
 	
 	
@@ -161,7 +149,7 @@ public class UserRestController {
 		return new ResponseEntity<Object>(result, HttpStatus.OK);
 	}
 	
-	*/
+	
 	
 	//UPDATE PROFILE IMAGE
 		@RequestMapping(value="/update/image0", method=RequestMethod.PUT)
@@ -172,5 +160,5 @@ public class UserRestController {
 			Object result = userService.updateUserWithProfileImage0(username, imageURL);
 			return new ResponseEntity<Object>(result, HttpStatus.OK);
 		}
-	
+	*/
 }

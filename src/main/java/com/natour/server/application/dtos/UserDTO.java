@@ -2,24 +2,23 @@ package com.natour.server.application.dtos;
 
 import java.sql.Date;
 
-import org.springframework.core.io.FileSystemResource;
-
 public class UserDTO {
 
 
-	private long id;
+	private Long id;
 	private String username;
-	private FileSystemResource profileImage;
+	private byte[] profileImage;
 	private String placeOfResidence;
 	private Date dateOfBirth;
 	private String gender;
 	
 	
 	
-	public long getId() {
+	
+	public Long getId() {
 		return id;
 	}
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	public String getUsername() {
@@ -28,11 +27,12 @@ public class UserDTO {
 	public void setUsername(String username) {
 		this.username = username;
 	}
-	public FileSystemResource getProfileImage() {
+
+	public byte[] getProfileImage() {
 		return profileImage;
 	}
-	public void setProfileImage(FileSystemResource image) {
-		this.profileImage = image;
+	public void setProfileImage(byte[] profileImage) {
+		this.profileImage = profileImage;
 	}
 	public String getPlaceOfResidence() {
 		return placeOfResidence;

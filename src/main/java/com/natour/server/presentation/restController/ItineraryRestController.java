@@ -15,8 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.natour.server.application.dtos.ItineraryDTO;
+import com.natour.server.application.dtos.MessageDTO;
 import com.natour.server.application.services.ItineraryService;
-import com.natour.server.application.services.UserService;
+
 
 
 @RestController
@@ -25,8 +26,6 @@ public class ItineraryRestController {
 
 	@Autowired
 	private ItineraryService itineraryService;
-	@Autowired
-	private UserService userService;
 	
 	//GETs
 	@RequestMapping(value="/get/{id}", method=RequestMethod.GET)
@@ -35,32 +34,32 @@ public class ItineraryRestController {
 		System.out.println("TEST: GET id");
 		
 		ItineraryDTO result = itineraryService.findItineraryById(id);
-		if(result != null) return new ResponseEntity<ItineraryDTO>(result, HttpStatus.OK);
-		return new ResponseEntity<ItineraryDTO>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<ItineraryDTO>(result, HttpStatus.OK);
+		
 	}
 		
 	//---
 	
 	@RequestMapping(value="/get", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<List<ItineraryDTO>> getItineraryByIdUser(@RequestParam(required = true) long idUser){
+	public ResponseEntity<List<ItineraryDTO>> getItineraryByIdUser(@RequestParam Long idUser){
 		System.out.println("TEST: GET idUser");
 		
 		List<ItineraryDTO> result = itineraryService.findItineraryByIdUser(idUser);
-		if(result != null) return new ResponseEntity<List<ItineraryDTO>>(result, HttpStatus.OK);
-		return new ResponseEntity<List<ItineraryDTO>>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<List<ItineraryDTO>>(result, HttpStatus.OK);
+		
 	}
 	
 	//---
 	
 	@RequestMapping(value="/get", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<List<ItineraryDTO>> getItineraryByUsernameUser(@RequestParam(required = true) String usernameUser){
+	public ResponseEntity<List<ItineraryDTO>> getItineraryByUsernameUser(@RequestParam String usernameUser){
 		System.out.println("TEST: GET usernameUser");
 		
 		List<ItineraryDTO> result = itineraryService.findItineraryByUsernameUser(usernameUser);
-		if(result != null) return new ResponseEntity<List<ItineraryDTO>>(result, HttpStatus.OK);
-		return new ResponseEntity<List<ItineraryDTO>>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<List<ItineraryDTO>>(result, HttpStatus.OK);
+		
 	}
 	
 	
@@ -68,20 +67,20 @@ public class ItineraryRestController {
 	//SEARCH
 	@RequestMapping(value="/search", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<List<ItineraryDTO>> searchUserByUsername(@RequestParam(required = true) String name){
+	public ResponseEntity<List<ItineraryDTO>> searchUserByUsername(@RequestParam String name){
 		System.out.println("TEST: SEARCH");
 		
 		List<ItineraryDTO> result = itineraryService.searchItineraryByName(name);
-		if(result != null) return new ResponseEntity<List<ItineraryDTO>>(result, HttpStatus.OK);
-		return new ResponseEntity<List<ItineraryDTO>>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<List<ItineraryDTO>>(result, HttpStatus.OK);
+		
 	}
 	
 	
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<ItineraryDTO> addUser(@RequestParam(required = true) String usernameUser,
-												@RequestBody(required = true) ItineraryDTO itineraryDTO){
+	public ResponseEntity<ItineraryDTO> addUser(@RequestParam String usernameUser,
+												@RequestBody ItineraryDTO itineraryDTO){
 		System.out.println("TEST: ADD");
 		
 		/*
@@ -90,15 +89,34 @@ public class ItineraryRestController {
 		*/
 		ItineraryDTO result = itineraryService.addItinerary(usernameUser, itineraryDTO);
 		
-		if(result != null) return new ResponseEntity<ItineraryDTO>(result, HttpStatus.OK);
-		return new ResponseEntity<ItineraryDTO>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<ItineraryDTO>(result, HttpStatus.OK);
+		
 	}
 	
 	
 		
 	//PUTs
-
+	@RequestMapping(value="/update/{id}", method=RequestMethod.PUT)
+	@ResponseBody
+	public ResponseEntity<ItineraryDTO> updateItinerary(@PathVariable("id") long id,
+														@RequestBody ItineraryDTO itineraryDTO)
+	{
+		System.out.println("TEST: UPDATE ITINERARY");
+		
+		ItineraryDTO result = itineraryService.updateItineraray(id, itineraryDTO);
+		
+		return new ResponseEntity<ItineraryDTO>(result, HttpStatus.OK);
+		
+	}
 	
 	//DELETEs
-	
+	@RequestMapping(value="/delete/{id}", method=RequestMethod.DELETE)
+	@ResponseBody
+	public ResponseEntity<MessageDTO> deleteItineraryById(@PathVariable("id") long id){
+		System.out.println("TEST: DELETE id");
+		
+		MessageDTO result = itineraryService.removeItineraryById(id);
+		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);
+		
+	}
 }

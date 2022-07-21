@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.natour.server.data.entities.User;
@@ -46,7 +46,7 @@ public interface UserRepository extends JpaRepository<User, Long>{
 	@Query("update User u " + 
 		   "set u.profileImageURL = :profileImageURL" +
 		   "where u.username = :username" )
-	void updateProfileImageURL(@Param("username") String username,@Param("profileImageURL") String profileImageURL);
+	int updateProfileImageURL(@Param("username") String username,@Param("profileImageURL") String profileImageURL);
 	
 	//DA TESTARE
 	@Transactional
@@ -56,9 +56,9 @@ public interface UserRepository extends JpaRepository<User, Long>{
 			   "u.dateOfBirth = :dateOfBirth, " +
 		       "u.gender = :gender " +
 		   "where u.username = :username" )
-	void updateOptionalInfo(@Param("username") String username,
+	int updateOptionalInfo(@Param("username") String username,
 							@Param("placeOfResidence") String placeOfResidence,
-							@Param("dateOfBirth") Date dateOfBirth,
+							@Param("dateOfBirth") Timestamp dateOfBirth,
 							@Param("gender") String gender);
 	
 }

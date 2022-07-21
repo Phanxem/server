@@ -1,6 +1,8 @@
 package com.natour.server.application.services;
 
+import java.io.IOException;
 import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -9,8 +11,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Service;
 
+import com.natour.server.FileSystemUtils;
 import com.natour.server.application.dtos.OptionalInfoUserDTO;
 import com.natour.server.application.dtos.UserDTO;
+import com.natour.server.application.exceptionHandler.serverExceptions.OptionalInfoUserDTOInvalidException;
+import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
+import com.natour.server.application.exceptionHandler.serverExceptions.UserOptionalInfoUpdateFailureException;
+import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageNullException;
+import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageUpdateFailureException;
+import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageSaveFailureException;
+import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
+import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameUniqueException;
 import com.natour.server.data.entities.User;
 import com.natour.server.data.repository.FileSystemRepository;
 import com.natour.server.data.repository.UserRepository;
@@ -27,7 +38,12 @@ public class UserService {
 	
 	//ADDs
 	public UserDTO addUser(String username) {
-		User user = new User(username);
+		if(username == null) throw new UserUsernameNullException();
+		
+		User user = userRepository.findByUsername(username);
+		if(user != null) throw new UserUsernameUniqueException();
+		
+		user = new User(username);
 		User result = userRepository.save(user);
 		
 		return toUserDTO(result);
@@ -37,50 +53,75 @@ public class UserService {
 	//UPDATEs
 	public UserDTO updateProfileImage(String username, byte[] image) {
 		
+		if(username == null) throw new UserUsernameNullException();
+		
+		User user = userRepository.findByUsername(username);
+		if(user == null) throw new UserNotFoundException();
+		
+		if(image == null) throw new UserProfileImageNullException();
+			
+		/*
+		//Non necessaria
+		if(user.getProfileImageURL() != null) {
+			//TODO rimuovi l'immagine dal fileSystem
+		}
+		*/
+		
+		String imageUrl;
 		try {
-			String imageUrl = fileSystemRepository.save(username, image);
-			userRepository.updateProfileImageURL(username , imageUrl);
-			User result = userRepository.findByUsername(username);
-			
-			return toUserDTO(result);
+			imageUrl = fileSystemRepository.save(username, image);
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-			
-			return null;
+		catch (IOException e) {
+			throw new UserProfileImageSaveFailureException(e);
 		}
+		
+		int updatedElement = userRepository.updateProfileImageURL(username , imageUrl);
+		if(updatedElement == 0) throw new UserProfileImageUpdateFailureException();
+		
+		User result = userRepository.findByUsername(username);
+		return toUserDTO(result);
 	}
+	
 	
 	public UserDTO updateOptionalInfo(String username, OptionalInfoUserDTO optionalInfoDTO) {
 		
-		try {
-			String  placeOfResidence = optionalInfoDTO.getPlaceOfResidence();
-			Date dateOfBirth = optionalInfoDTO.getDateOfBirth();
-			String gender = optionalInfoDTO.getGender();
+		if(username == null) throw new UserUsernameNullException();
+		
+		if(isValidDTO(optionalInfoDTO)) throw new OptionalInfoUserDTOInvalidException();
+		
+		User user = userRepository.findByUsername(username);
+		if(user == null) throw new UserNotFoundException();
+		
+		String  placeOfResidence = optionalInfoDTO.getPlaceOfResidence();
+		String gender = optionalInfoDTO.getGender();
+		Date dateOfBirth = optionalInfoDTO.getDateOfBirth();
+		
+		Timestamp timestampOfBirth = null;
+		if(dateOfBirth != null) timestampOfBirth = new Timestamp(dateOfBirth.getTime());
 			
-			userRepository.updateOptionalInfo(username, placeOfResidence, dateOfBirth, gender);
-			User result = userRepository.findByUsername(username);
-			
-			return toUserDTO(result);
-		}
-		catch (Exception e) {
-			e.printStackTrace();
-			
-			return null;
-		}
+		int updatedElement = userRepository.updateOptionalInfo(username, placeOfResidence, timestampOfBirth, gender);
+		if(updatedElement == 0) throw new UserOptionalInfoUpdateFailureException();
+		
+		User result = userRepository.findByUsername(username);
+		return toUserDTO(result);
 	}
 	
 	
 	
 	//FINDs
-	public UserDTO findUserById(long id) {
+	public UserDTO findUserById(long id) {		
 		Optional<User> user = userRepository.findById(id);
-		if(user.isPresent()) return toUserDTO(user.get());
-		return null;
+		//TODO DA TESTARE
+		if(!user.isPresent()) throw new UserNotFoundException();
+		return toUserDTO(user.get());
 	}
 	
 	public UserDTO findUserByUsername(String username) {
+		if(username == null) throw new UserUsernameNullException();
+		
 		User user = userRepository.findByUsername(username);
+		//TODO DA TESTARE
+		if(user == null) throw new UserNotFoundException();
 		return toUserDTO(user);
 	}
 	
@@ -88,6 +129,8 @@ public class UserService {
 	//SEARCHs
 	
 	public List<UserDTO> searchUserByUsername(String username){
+		if(username == null) throw new UserUsernameNullException();
+		
 		List<User> users = userRepository.findByUsernameContaining(username);
 				
 		List<UserDTO> usersDTO = toListUserDTO(users);
@@ -103,23 +146,7 @@ public class UserService {
 	
 	
 	//-----------------------------------------------------------------------------------------------
-	public Object updateUserWithProfileImage0(String username, String profileImageURL) {
-		userRepository.updateProfileImageURL(username , profileImageURL);
-		
-		return null;
-	}
-	
-	
-	
-	
-	public FileSystemResource getProfileImage(String profileImageURL) {
-		FileSystemResource profileImage = fileSystemRepository.findInFileSystem(profileImageURL);
-		
-		return profileImage;
-	}
-	
-	
-	
+
 	
 	
 	
@@ -134,13 +161,16 @@ public class UserService {
 		UserDTO userDTO = new UserDTO();
 		userDTO.setId(user.getId());
 		userDTO.setGender(user.getGender());
-		userDTO.setDateOfBirth(user.getDateOfBirth());
 		userDTO.setPlaceOfResidence(user.getPlaceOfResidence());
 		userDTO.setUsername(user.getUsername());
 		
+		Date dateOfBirth = new Date(user.getDateOfBirth().getTime());
+		userDTO.setDateOfBirth(dateOfBirth);
+		
 		if(user.getProfileImageURL() != null) {
-			FileSystemResource image = getProfileImage(user.getProfileImageURL());
-			userDTO.setProfileImage(image);
+			FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(user.getProfileImageURL());
+			byte[] profileImage = FileSystemUtils.toArrayByte(fileSystemResource);
+			userDTO.setProfileImage(profileImage);
 		}
 		else userDTO.setProfileImage(null);
 		
@@ -157,19 +187,13 @@ public class UserService {
 		return usersDTO;
 	}
 	
-	/*
-	//UTILS
 	
-	public Long getIdByUsername(String username) {
-		User user = userRepository.findByUsername(username);
-		if(user == null) return null;
-		return user.getId();
-	}
 	
-	public String getUsernameById(long id) {
-		Optional<User> user = userRepository.findById(id);
-		if(!user.isPresent()) return null;
-		return user.get().getUsername();
+	//VALIDATORs
+	public boolean isValidDTO(OptionalInfoUserDTO optionalInfoDTO) {
+		if(optionalInfoDTO == null) return false;
+		
+		return true;
+		
 	}
-	*/
 }

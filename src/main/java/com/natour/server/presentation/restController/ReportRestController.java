@@ -13,10 +13,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.natour.server.application.dtos.ItineraryDTO;
+import com.natour.server.application.dtos.MessageDTO;
 import com.natour.server.application.dtos.ReportDTO;
 import com.natour.server.application.services.ReportService;
-import com.natour.server.application.services.UserService;
 
 
 
@@ -26,8 +25,6 @@ public class ReportRestController {
 	
 	@Autowired
 	private ReportService reportService;
-	@Autowired
-	private UserService userService;
 	
 	//GETs
 	@RequestMapping(value="/get/{id}", method=RequestMethod.GET)
@@ -44,7 +41,8 @@ public class ReportRestController {
 	
 	@RequestMapping(value="/get", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<List<ReportDTO>> getUserByIdItinerary(@RequestParam(required = true) long idItinerary){
+	public ResponseEntity<List<ReportDTO>> getUserByIdItinerary(@RequestParam Long idItinerary){
+		
 		System.out.println("TEST: GET idItinerary");
 		
 		List<ReportDTO> result = reportService.findReportByIdItinerary(idItinerary);
@@ -57,8 +55,8 @@ public class ReportRestController {
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<ReportDTO> addReport(@RequestParam(required = true) String usernameUser,
-												@RequestBody(required = true) ReportDTO reportDTO){
+	public ResponseEntity<ReportDTO> addReport(@RequestParam String usernameUser,
+											   @RequestBody ReportDTO reportDTO){
 		System.out.println("TEST: ADD");
 		
 		
@@ -71,5 +69,14 @@ public class ReportRestController {
 	//PUTs
 		
 	//DELETEs
+	@RequestMapping(value="/delete/{id}", method=RequestMethod.DELETE)
+	@ResponseBody
+	public ResponseEntity<MessageDTO> deleteItineraryById(@PathVariable("id") long id){
+		System.out.println("TEST: DELETE id");
+		
+		MessageDTO result = reportService.removeReportById(id);
+		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);
+		
+	}
 
 }

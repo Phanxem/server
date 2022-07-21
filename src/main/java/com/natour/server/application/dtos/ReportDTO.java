@@ -5,18 +5,19 @@ import java.util.Date;
 
 public class ReportDTO {
 
-	private long id;
+	private Long id;
 	private String name;
 	private Date dateOfInput;
 	private String description;
 	
-	private long idUser;
-	private long idItinerary;
+	private Long idUser;
+	private Long idItinerary;
 	
-	public long getId() {
+	
+	public Long getId() {
 		return id;
 	}
-	public void setId(long id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 	public String getName() {
@@ -37,18 +38,19 @@ public class ReportDTO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public long getIdUser() {
+	public Long getIdUser() {
 		return idUser;
 	}
-	public void setIdUser(long idUser) {
+	public void setIdUser(Long idUser) {
 		this.idUser = idUser;
 	}
-	public long getIdItinerary() {
+	public Long getIdItinerary() {
 		return idItinerary;
 	}
-	public void setIdItinerary(long idItinerary) {
+	public void setIdItinerary(Long idItinerary) {
 		this.idItinerary = idItinerary;
 	}
+
 	
 	
 	

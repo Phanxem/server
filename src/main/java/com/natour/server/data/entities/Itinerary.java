@@ -1,7 +1,5 @@
 package com.natour.server.data.entities;
 
-import java.sql.Timestamp;
-
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -19,13 +17,13 @@ public class Itinerary {
 	@Column(nullable=false)
 	private String name;
 	@Column(nullable=false)
-	private String wayPointsURL;
+	private String gpxURL;
 	@Column(nullable=false)
-	private Timestamp duration;
+	private Float duration;
 	@Column(nullable=false)
-	private float lenght;
+	private Float lenght;
 	@Column(nullable=false)
-	private int difficulty;
+	private Integer difficulty;
 	private String description;
 	
 	@ManyToOne
@@ -48,30 +46,47 @@ public class Itinerary {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public String getWayPointsURL() {
-		return wayPointsURL;
+	
+	public String getGpxURL() {
+		return gpxURL;
 	}
-	public void setWayPointsURL(String wayPointsURL) {
-		this.wayPointsURL = wayPointsURL;
+
+
+	public void setGpxURL(String gpxURL) {
+		this.gpxURL = gpxURL;
 	}
-	public Timestamp getDuration() {
+	
+
+	public Float getDuration() {
 		return duration;
 	}
-	public void setDuration(Timestamp duration) {
+
+
+	public void setDuration(Float duration) {
 		this.duration = duration;
 	}
-	public float getLenght() {
+
+
+	public Float getLenght() {
 		return lenght;
 	}
-	public void setLenght(float lenght) {
+
+
+	public void setLenght(Float lenght) {
 		this.lenght = lenght;
 	}
-	public int getDifficulty() {
+
+
+	public Integer getDifficulty() {
 		return difficulty;
 	}
-	public void setDifficulty(int difficulty) {
+
+
+	public void setDifficulty(Integer difficulty) {
 		this.difficulty = difficulty;
 	}
+
+
 	public String getDescription() {
 		return description;
 	}

@@ -1,7 +1,7 @@
 package com.natour.server.data.entities;
 
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.persistence.Column;
@@ -21,7 +21,7 @@ public class User {
 	private String username;
 	private String profileImageURL;
 	private String placeOfResidence;
-	private Date dateOfBirth;
+	private Timestamp dateOfBirth;
 	private String gender;
 	
 	@OneToMany(mappedBy = "user")
@@ -67,11 +67,11 @@ public class User {
 		this.placeOfResidence = placeOfResidence;
 	}
 
-	public Date getDateOfBirth() {
+	public Timestamp getDateOfBirth() {
 		return dateOfBirth;
 	}
 
-	public void setDateOfBirth(Date dateOfBirth) {
+	public void setDateOfBirth(Timestamp dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
 
