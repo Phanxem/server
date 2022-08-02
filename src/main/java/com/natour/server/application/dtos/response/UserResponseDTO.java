@@ -1,15 +1,9 @@
-package com.natour.server.application.dtos;
+package com.natour.server.application.dtos.response;
 
-import java.sql.Date;
+public class UserResponseDTO {
 
-import org.springframework.web.multipart.MultipartFile;
-
-public class UserDTO {
-
-
-	private Long id;
+	private long id;
 	private String username;
-	private MultipartFile profileImage;
 	private String placeOfResidence;
 	private String dateOfBirth;
 	private String gender;
@@ -17,10 +11,10 @@ public class UserDTO {
 	
 	
 	
-	public Long getId() {
+	public long getId() {
 		return id;
 	}
-	public void setId(Long id) {
+	public void setId(long id) {
 		this.id = id;
 	}
 	public String getUsername() {
@@ -28,14 +22,6 @@ public class UserDTO {
 	}
 	public void setUsername(String username) {
 		this.username = username;
-	}
-
-
-	public MultipartFile getProfileImage() {
-		return profileImage;
-	}
-	public void setProfileImage(MultipartFile profileImage) {
-		this.profileImage = profileImage;
 	}
 	public String getPlaceOfResidence() {
 		return placeOfResidence;
@@ -56,7 +42,5 @@ public class UserDTO {
 	public void setGender(String gender) {
 		this.gender = gender;
 	}
-	
-	
 	
 }

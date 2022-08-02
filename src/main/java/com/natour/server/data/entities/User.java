@@ -22,7 +22,6 @@ public class User {
 	private String profileImageURL;
 	private String placeOfResidence;
 	private Timestamp dateOfBirth;
-	private String gender;
 	
 	@OneToMany(mappedBy = "user")
     private List<Itinerary> itineraries;
@@ -75,13 +74,6 @@ public class User {
 		this.dateOfBirth = dateOfBirth;
 	}
 
-	public String getGender() {
-		return gender;
-	}
-
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
 
 	public List<Itinerary> getItineraries() {
 		return itineraries;

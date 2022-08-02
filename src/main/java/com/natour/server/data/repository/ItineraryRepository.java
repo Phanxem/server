@@ -31,8 +31,8 @@ public interface ItineraryRepository extends JpaRepository<Itinerary, Long>{
 	@Transactional
 	@Modifying
 	@Query("update Itinerary i " + 
-		   "set i.gpxURL = :gpxURL" +
-		   "where i.id = :id" )
+		   "set i.gpxURL = :gpxURL " +
+		   "where i.id = :id " )
 	int updateGPXFileURL(@Param("id") long id,@Param("gpxURL") String gpxURL);
 	
 }

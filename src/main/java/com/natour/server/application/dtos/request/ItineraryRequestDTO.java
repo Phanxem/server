@@ -1,10 +1,11 @@
-package com.natour.server.application.dtos;
+package com.natour.server.application.dtos.request;
 
-public class ItineraryDTO {
+import org.springframework.web.multipart.MultipartFile;
 
-	private Long id;
+public class ItineraryRequestDTO {
+
 	private String name;
-	private byte[] gpx;
+	private MultipartFile gpx;
 	private Float duration;
 	private Float lenght;
 	private Integer difficulty;
@@ -12,17 +13,6 @@ public class ItineraryDTO {
 	
 	private Long idUser;
 	
-	
-	
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -31,11 +21,13 @@ public class ItineraryDTO {
 		this.name = name;
 	}
 
-	public byte[] getGpx() {
+
+
+	public MultipartFile getGpx() {
 		return gpx;
 	}
 
-	public void setGpx(byte[] gpx) {
+	public void setGpx(MultipartFile gpx) {
 		this.gpx = gpx;
 	}
 

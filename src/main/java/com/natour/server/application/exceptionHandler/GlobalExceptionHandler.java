@@ -15,6 +15,7 @@ import com.natour.server.application.exceptionHandler.serverExceptions.ReportNot
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+	
 	@ExceptionHandler({UserNotFoundException.class,
 					   ItineraryNotFoundException.class, 
 					   ReportNotFoundException.class})
@@ -23,11 +24,13 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<MessageDTO>(errorDTO, HttpStatus.NOT_FOUND);
     }
 	
+	
 	@ExceptionHandler({UserUsernameNullException.class})
 		public ResponseEntity<MessageDTO> handleNullException(ServerException ex) {
 		MessageDTO errorDTO = new MessageDTO(ex.getCode(), ex.getMessage());
 		return new ResponseEntity<MessageDTO>(errorDTO, HttpStatus.BAD_REQUEST);
 	}
+	
 	
 	@ExceptionHandler({UserProfileImageSaveFailureException.class})
 	public ResponseEntity<MessageDTO> handleUpdateFailureException(ServerException ex) {
@@ -39,7 +42,7 @@ public class GlobalExceptionHandler {
 	
 	
 	//---
-	
+	/*
 	@ExceptionHandler(value = UserNotFoundException.class)
     public ResponseEntity<MessageDTO> handleUserNotFoundException(UserNotFoundException ex) {
         MessageDTO errorDTO = new MessageDTO(ex.getCode(), ex.getMessage());
@@ -51,5 +54,5 @@ public class GlobalExceptionHandler {
         MessageDTO errorDTO = new MessageDTO(ex.getCode(), ex.getMessage());
 		return new ResponseEntity<MessageDTO>(errorDTO, HttpStatus.NOT_FOUND);
     }
-	
+	*/
 }

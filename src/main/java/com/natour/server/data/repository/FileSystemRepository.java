@@ -8,18 +8,22 @@ import java.util.Date;
 
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.multipart.MultipartFile;
 
 @Repository
 public class FileSystemRepository {
 
-	String RESOURCES_DIR = FileSystemRepository.class.getResource("/").getPath();
+	//String RESOURCES_DIR = FileSystemRepository.class.getResource("/").getPath();
 
-	public String save(String fileName, byte[] content) throws IOException {
+	String RESOURCES_DIR = "C:/Users/franc/Documents/GitKraken/Android%20Studio/public/server/target/classes/";
+	
+	public String save(String fileName, byte[] image) throws IOException {
+		
 		Path path = Paths.get(RESOURCES_DIR + new Date().getTime() + "-" + fileName);
 	      
 		Files.createDirectories(path.getParent());
-		Files.write(path, content);
-
+		Files.write(path, image);
+		
 		return path.toAbsolutePath().toString();
 	}
 	

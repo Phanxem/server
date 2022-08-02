@@ -40,12 +40,12 @@ public interface UserRepository extends JpaRepository<User, Long>{
 	
 	
 	
-	
+/*	
 	@Transactional
 	@Modifying
 	@Query("update User u " + 
-		   "set u.profileImageURL = :profileImageURL" +
-		   "where u.username = :username" )
+		   "set u.profileImageURL = :profileImageURL " +
+		   "where u.username = :username " )
 	int updateProfileImageURL(@Param("username") String username,@Param("profileImageURL") String profileImageURL);
 	
 	//DA TESTARE
@@ -55,10 +55,11 @@ public interface UserRepository extends JpaRepository<User, Long>{
 		   "set u.placeOfResidence = :placeOfResidence, " +
 			   "u.dateOfBirth = :dateOfBirth, " +
 		       "u.gender = :gender " +
-		   "where u.username = :username" )
+		   "where u.username = :username " )
 	int updateOptionalInfo(@Param("username") String username,
 							@Param("placeOfResidence") String placeOfResidence,
 							@Param("dateOfBirth") Timestamp dateOfBirth,
 							@Param("gender") String gender);
-	
+
+	*/
 }
