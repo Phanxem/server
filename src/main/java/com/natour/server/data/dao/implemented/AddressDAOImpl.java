@@ -8,6 +8,9 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -43,107 +46,75 @@ public class AddressDAOImpl implements AddressDAO{
             return null;    
         }
              
+    	System.out.println("2");
+    	
         AddressDTO addressDTO = new AddressDTO();
         PointDTO pointDTO = new PointDTO();
             
-        pointDTO.setLon(jsonObjectResult.get("lot").getAsDouble());
+
+        pointDTO.setLon(jsonObjectResult.get("lon").getAsDouble());
         pointDTO.setLat(jsonObjectResult.get("lat").getAsDouble());
-            
         addressDTO.setPoint(pointDTO);
-            
-            
-        JsonObject jsonObjectAddress = jsonObjectResult.get("address").getAsJsonObject();
-           
+
         String addressLine = new String();
-            
-        if(jsonObjectAddress.has("road")) addressLine.concat(jsonObjectAddress.get("road").getAsString() );
+        JsonObject jsonObjectAddress = jsonObjectResult.get("address").getAsJsonObject();
+        
+        System.out.println("JSON:\n" + jsonObjectAddress);
+        
+        if(jsonObjectAddress.has("road")) {
+        	addressLine = addressLine.concat(jsonObjectAddress.get("road").getAsString() );
+        }
 
         if(jsonObjectAddress.has("postcode")) {
-        	if(!addressLine.isEmpty()) addressLine.concat(", ");
-        	addressLine.concat(jsonObjectAddress.get("postcode").getAsString()); 
+        	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
+        	addressLine = addressLine.concat(jsonObjectAddress.get("postcode").getAsString()); 
         }
             
         if(jsonObjectAddress.has("city")) {
-        	if(!addressLine.isEmpty()) addressLine.concat(", ");
-        	addressLine.concat(jsonObjectAddress.get("city").getAsString());
+        	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
+        	addressLine = addressLine.concat(jsonObjectAddress.get("city").getAsString());
         }
         else if(jsonObjectAddress.has("town")) {
-        	if(!addressLine.isEmpty()) addressLine.concat(", ");
-        	addressLine.concat(jsonObjectAddress.get("town").getAsString());
+        	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
+        	addressLine = addressLine.concat(jsonObjectAddress.get("town").getAsString());
         }
         else if(jsonObjectAddress.has("village")) {
-        	if(!addressLine.isEmpty()) addressLine.concat(", ");
-        	addressLine.concat(jsonObjectAddress.get("village").getAsString());
+        	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
+        	addressLine = addressLine.concat(jsonObjectAddress.get("village").getAsString());
         }
             
         if(jsonObjectAddress.has("country")) {
-        	if(!addressLine.isEmpty()) addressLine.concat(", ");
-        	addressLine.concat(jsonObjectAddress.get("country").getAsString());
+        	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
+        	addressLine = addressLine.concat(jsonObjectAddress.get("country").getAsString());
         }
 
         addressDTO.setAddressLine(addressLine);
-        
         return addressDTO;
     }
     
-	@Override
-	public AddressDTO findAddressByPoint(PointDTO point) {
-		String url = NOMINATIM_SERVICE_URL + OPERATON_REVERSE
+    public AddressDTO findAddressByPoint(PointDTO point) {
+    	String url = NOMINATIM_SERVICE_URL + OPERATON_REVERSE
                 + "?format=json"
                 //+ "&accept-language=" + Locale.getDefault().getLanguage()
                 + "&accept-language=it"
                 + "&lon=" + point.getLon()
 				+ "&lat=" + point.getLat();
+    	
+    	
 
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
+    	RestTemplate restTemplate = new RestTemplate();
+    	ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-        OkHttpClient client = new OkHttpClient();
-
-        Call call = client.newCall(request);
-
-        CompletableFuture<AddressDTO> completableFuture = new CompletableFuture<AddressDTO>();
-
-        call.enqueue((Callback) new Callback() {
-
-			@Override
-			public void onFailure(Call call, IOException e) {
-				completableFuture.complete(null);
-				return;
-			}
-
-			@Override
-			public void onResponse(Call call, Response response) throws IOException {
-				if(!response.isSuccessful()) {
-					completableFuture.complete(null);
-					return;
-				}
-				
-				String jsonStringResult = response.body().string();
-				JsonElement jsonElementResult = JsonParser.parseString(jsonStringResult);
-                JsonObject jsonObjectResult = jsonElementResult.getAsJsonObject();
-                
-                AddressDTO result = buildAddressDTO(jsonObjectResult);
-               
-                completableFuture.complete(result);
-			}
-        });
+    	String jsonStringResult = response.getBody();    	
+    	JsonElement jsonElementResult = JsonParser.parseString(jsonStringResult);
+        JsonObject jsonObjectResult = jsonElementResult.getAsJsonObject();
         
-        AddressDTO result = null;
-        
-        try {
-			result = completableFuture.get();
-		}
-        catch (InterruptedException | ExecutionException e) {
-			throw new AddressSearchByPointFailureException(e);
-		}
-        
-        if(result == null) throw new AddressSearchByPointFailureException();
-        
-        return result;		
-	}
+        AddressDTO result = buildAddressDTO(jsonObjectResult);
 
+    	return result;
+    }
+    
+	
 	@Override
 	public List<AddressDTO> findAddressesByQuery(String query) {
 		String url = null;

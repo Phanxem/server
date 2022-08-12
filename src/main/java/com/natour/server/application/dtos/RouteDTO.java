@@ -6,34 +6,41 @@ import java.util.List;
 import com.mapbox.services.commons.geojson.LineString;
 
 public class RouteDTO {
-	private float distance;
-	private float duration;
-	private List<PointDTO> geometry;
+	
+	private List<PointDTO> wayPoints;
+	private List<RouteLegDTO> tracks;
+	
+	//private List<PointDTO> geometry;
 	
 	public RouteDTO() {}
 	
 	public RouteDTO(float distance, float duration, LineString geometry) {
-		this.distance = distance;
-		this.duration = duration;
-		this.geometry = new ArrayList<PointDTO>();
+
+		//this.geometry = new ArrayList<PointDTO>();
+	
+		this.setWayPoints(new ArrayList<PointDTO>());
+		this.tracks = new ArrayList<RouteLegDTO>();
 	}
 
-	public float getDistance() {
-		return distance;
+	public List<RouteLegDTO> getTracks() {
+		return tracks;
 	}
 
-	public void setDistance(float distance) {
-		this.distance = distance;
+	public void setTracks(List<RouteLegDTO> tracks) {
+		this.tracks = tracks;
 	}
 
-	public float getDuration() {
-		return duration;
+	public List<PointDTO> getWayPoints() {
+		return wayPoints;
 	}
 
-	public void setDuration(float duration) {
-		this.duration = duration;
+	public void setWayPoints(List<PointDTO> wayPoints) {
+		this.wayPoints = wayPoints;
 	}
-
+	
+	
+	
+/*
 	public List<PointDTO> getGeometry() {
 		return geometry;
 	}
@@ -41,7 +48,7 @@ public class RouteDTO {
 	public void setGeometry(List<PointDTO> geometry) {
 		this.geometry = geometry;
 	}
-
+*/
 
 	
 	

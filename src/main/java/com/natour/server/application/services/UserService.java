@@ -1,12 +1,12 @@
 package com.natour.server.application.services;
 
 import java.io.IOException;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -17,6 +17,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.natour.server.DateUtils;
 import com.natour.server.FileSystemUtils;
 import com.natour.server.application.dtos.MessageDTO;
 import com.natour.server.application.dtos.SuccessMessageDTO;
@@ -118,7 +119,15 @@ public class UserService {
 		
 		String stringDateOfBirth = optionalInfoDTO.getDateOfBirth();
 		if(stringDateOfBirth != null) {
-			dateOfBirth =  Timestamp.valueOf(stringDateOfBirth);
+			
+			Calendar calendar = null;
+			try {
+				calendar = DateUtils.toCalendar(stringDateOfBirth);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			dateOfBirth =  new Timestamp(calendar.getTimeInMillis());
 		}
 		 
 		user.setPlaceOfResidence(placeOfResidence);
@@ -284,20 +293,18 @@ public class UserService {
 		
 		String stringDate = optionalInfoDTO.getDateOfBirth();
 		if(stringDate != null) {
-			DateFormat dateFormat = new SimpleDateFormat();
-            Date date = null;
-            try { date = (Date) dateFormat.parse(stringDate); }
-            catch (ParseException e) {
-                e.printStackTrace();
-                //TODO EXCEPTION
-                return false;
-            }
-
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(date);
-
+			
+			//VERIFICA SE LA STRINGA E' NEL FORMATO CORRETTO
+			Calendar calendar = null;
+			try {
+				calendar = DateUtils.toCalendar(stringDate);
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		
+			//VERIFICA CHE LA STRINGA NON SIA PRECEDENTE A QUELLA ATTUALE
             Calendar currentCalendar = Calendar.getInstance();
-
             if(!calendar.before(currentCalendar)){
                 //TODO EXCEPTION
                 return false;

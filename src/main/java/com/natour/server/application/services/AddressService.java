@@ -23,9 +23,9 @@ public class AddressService {
 	public AddressDTO findAddressByCoordinates(String coordinates) {		
 		
 		PointDTO pointDTO = CoordinatesUtils.toPointDTO(coordinates);
-		
+		System.out.println("before dao");
 		AddressDTO result = addressDAO.findAddressByPoint(pointDTO);
-		
+		System.out.println("after dao");
 		if(result == null) throw new AddressNotFoundException();
 	
 		return result;
