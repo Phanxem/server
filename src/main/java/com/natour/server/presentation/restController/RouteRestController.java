@@ -29,7 +29,7 @@ public class RouteRestController {
 	@ResponseBody
 	public ResponseEntity<RouteDTO> getRouteByCoordinates(@PathVariable("coordinates") String coordinates){
 		System.out.println("TEST: GET coordinates");
-		
+		System.out.println(coordinates);
 		RouteDTO result = routeService.findRouteByCoordinates(coordinates);
 		return new ResponseEntity<RouteDTO>(result, HttpStatus.OK);
 	}

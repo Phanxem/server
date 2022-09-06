@@ -37,55 +37,62 @@ public class AddressDAOImpl implements AddressDAO{
     private static final int MAX_NUM_RESULTS = 20;
 	
     
+    private static final String KEY_LATITUDE = "lat";
+    private static final String KEY_LONGITUDE = "lon";
+    private static final String KEY_ADDRESS = "address";
+    private static final String KEY_ROAD = "road";
+    private static final String KEY_POSTCODE = "postcode";
+    private static final String KEY_CITY = "city";
+    private static final String KEY_TOWN = "town";
+    private static final String KEY_VILLAGE = "village";
+    private static final String KEY_COUNTRY = "country";
+    
+    
     private AddressDTO buildAddressDTO(JsonObject jsonObjectResult) {
     	
-    	if (!jsonObjectResult.has("lat") ||
-            !jsonObjectResult.has("lon") ||
-            !jsonObjectResult.has("address"))
+    	if (!jsonObjectResult.has(KEY_LATITUDE) ||
+            !jsonObjectResult.has(KEY_LONGITUDE) ||
+            !jsonObjectResult.has(KEY_ADDRESS))
         {
             return null;    
         }
-             
-    	System.out.println("2");
     	
         AddressDTO addressDTO = new AddressDTO();
         PointDTO pointDTO = new PointDTO();
             
 
-        pointDTO.setLon(jsonObjectResult.get("lon").getAsDouble());
-        pointDTO.setLat(jsonObjectResult.get("lat").getAsDouble());
+        pointDTO.setLon(jsonObjectResult.get(KEY_LONGITUDE).getAsDouble());
+        pointDTO.setLat(jsonObjectResult.get(KEY_LATITUDE).getAsDouble());
         addressDTO.setPoint(pointDTO);
 
         String addressLine = new String();
-        JsonObject jsonObjectAddress = jsonObjectResult.get("address").getAsJsonObject();
+        JsonObject jsonObjectAddress = jsonObjectResult.get(KEY_ADDRESS).getAsJsonObject();
         
-        System.out.println("JSON:\n" + jsonObjectAddress);
-        
-        if(jsonObjectAddress.has("road")) {
-        	addressLine = addressLine.concat(jsonObjectAddress.get("road").getAsString() );
+        if(jsonObjectAddress.has(KEY_ROAD)) {
+        	addressLine = addressLine.concat(jsonObjectAddress.get(KEY_ROAD).getAsString() );
         }
 
-        if(jsonObjectAddress.has("postcode")) {
+        if(jsonObjectAddress.has(KEY_POSTCODE)) {
         	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
-        	addressLine = addressLine.concat(jsonObjectAddress.get("postcode").getAsString()); 
+        	addressLine = addressLine.concat(jsonObjectAddress.get(KEY_POSTCODE).getAsString()); 
         }
             
-        if(jsonObjectAddress.has("city")) {
+        if(jsonObjectAddress.has(KEY_CITY)) {
         	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
-        	addressLine = addressLine.concat(jsonObjectAddress.get("city").getAsString());
+        	addressLine = addressLine.concat(jsonObjectAddress.get(KEY_CITY).getAsString());
         }
-        else if(jsonObjectAddress.has("town")) {
+        else if(jsonObjectAddress.has(KEY_TOWN)) {
         	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
-        	addressLine = addressLine.concat(jsonObjectAddress.get("town").getAsString());
+        	addressLine = addressLine.concat(jsonObjectAddress.get(KEY_TOWN).getAsString());
         }
-        else if(jsonObjectAddress.has("village")) {
+        else if(jsonObjectAddress.has(KEY_VILLAGE)) {
         	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
-        	addressLine = addressLine.concat(jsonObjectAddress.get("village").getAsString());
+        	addressLine = addressLine.concat(jsonObjectAddress.get(KEY_VILLAGE).getAsString());
         }
             
-        if(jsonObjectAddress.has("country")) {
+        if(jsonObjectAddress.has(KEY_COUNTRY)) {
         	if(!addressLine.isEmpty()) addressLine = addressLine.concat(", ");
-        	addressLine = addressLine.concat(jsonObjectAddress.get("country").getAsString());
+        	addressLine = addressLine.concat(jsonObjectAddress.get(KEY_COUNTRY).getAsString());
         }
 
         addressDTO.setAddressLine(addressLine);
@@ -114,10 +121,8 @@ public class AddressDAOImpl implements AddressDAO{
     	return result;
     }
     
-	
-	@Override
-	public List<AddressDTO> findAddressesByQuery(String query) {
-		String url = null;
+    public List<AddressDTO> findAddressesByQuery(String query) {
+    	String url = null;
         try {
             url = NOMINATIM_SERVICE_URL + OPERATION_SEARCH
                     + "?format=json"
@@ -130,64 +135,25 @@ public class AddressDAOImpl implements AddressDAO{
         catch (UnsupportedEncodingException e) {
         	throw new AddressSearchByQueryFailureException(e);
         }
-
-        Request request = new Request.Builder()
-                .url(url)
-                .build();
-
-        OkHttpClient client = new OkHttpClient();
-
-        Call call = client.newCall(request);
-
-        CompletableFuture<List<AddressDTO>> completableFuture = new CompletableFuture<List<AddressDTO>>();
-
-        call.enqueue(new Callback() {
-
-        	@Override
-			public void onFailure(Call call, IOException e) {
-				completableFuture.complete(null);
-				return;
-			}
-
-			@Override
-			public void onResponse(Call call, Response response) throws IOException {
-				if(!response.isSuccessful()) {
-					completableFuture.complete(null);
-					return;
-				}
-				
-				String jsonStringResult = response.body().string();
-				JsonElement jsonElementResult = JsonParser.parseString(jsonStringResult);
-                JsonArray jsonArrayResult = jsonElementResult.getAsJsonArray();
-				
-				List<AddressDTO> addresses = new ArrayList<AddressDTO>();
-			
-				for(int i = 0; i < jsonArrayResult.size(); i++){
-					JsonObject jsonObjectResult = jsonArrayResult.get(i).getAsJsonObject();
-	                AddressDTO address = buildAddressDTO(jsonObjectResult);
-	                if(address != null) addresses.add(address);
-	            }
-				 
-				completableFuture.complete(addresses);
-			}
-        	
-        });
         
+        RestTemplate restTemplate = new RestTemplate();
+    	ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
-        List<AddressDTO> results = null;
-
-        try {
-        	results = completableFuture.get();
-		} 
-        catch (InterruptedException | ExecutionException e) {
-        	throw new AddressSearchByQueryFailureException(e);
-		}
+    	String jsonStringResult = response.getBody();    	
+    	JsonElement jsonElementResult = JsonParser.parseString(jsonStringResult);
+        JsonArray jsonArrayResult = jsonElementResult.getAsJsonArray();
+		
+		List<AddressDTO> addresses = new ArrayList<AddressDTO>();
+	
+		for(int i = 0; i < jsonArrayResult.size(); i++){
+			JsonObject jsonObjectResult = jsonArrayResult.get(i).getAsJsonObject();
+            AddressDTO address = buildAddressDTO(jsonObjectResult);
+            if(address != null) addresses.add(address);
+        }
         
-        if(results == null) throw new AddressSearchByQueryFailureException();
-        
-		return results;
-	}
-
+    	return addresses;
+    }
+    
 
 
 

@@ -5,6 +5,7 @@ package com.natour.server.application.services;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -311,19 +312,26 @@ public class ItineraryService {
 	public boolean isValidDTO(ItineraryRequestDTO itineraryDTO) {
 		
 		if(itineraryDTO == null) return false;
+				
+		if(itineraryDTO.getName() == null) System.out.println("errore nome");
 		
-		
-		
-		if(itineraryDTO.getName() == null ||
-		   itineraryDTO.getDifficulty() == null ||
-		   itineraryDTO.getDifficulty() <= 0 ||
-		   itineraryDTO.getDifficulty() > 3 ||
-		   itineraryDTO.getLenght() == null ||
-		   itineraryDTO.getDuration() == null ||
-		   itineraryDTO.getGpx() == null ||
-		   itineraryDTO.getIdUser() == null )
-		{
-			return false;
+
+		try {
+			if(itineraryDTO.getName() == null ||
+			   itineraryDTO.getDifficulty() == null ||
+			   itineraryDTO.getDifficulty() < 0 ||
+			   itineraryDTO.getDifficulty() > 2 ||
+			   itineraryDTO.getLenght() == null ||
+			   itineraryDTO.getDuration() == null ||
+			   itineraryDTO.getGpx() == null ||
+			   itineraryDTO.getGpx().getBytes().length == 0 ||
+			   itineraryDTO.getIdUser() == null )
+			{
+				return false;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 		
 		return true;

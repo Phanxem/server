@@ -8,7 +8,7 @@ public class ServerException extends RuntimeException{
 	public ServerException(){}
 	
 	public ServerException(Exception exception) {
-		super("TODO: ", exception);
+		super(exception);
 	}
 	
 	public long getCode() {

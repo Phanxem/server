@@ -11,6 +11,7 @@ import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFo
 import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageSaveFailureException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
 import com.natour.server.application.exceptionHandler.serverExceptions.ReportNotFoundException;
+import com.natour.server.application.exceptionHandler.serverExceptions.TODORouteException;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -38,6 +39,11 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<MessageDTO>(errorDTO, HttpStatus.BAD_REQUEST);
 	}
 	
+	@ExceptionHandler({TODORouteException.class})
+	public ResponseEntity<MessageDTO> handleTODOException(ServerException ex) {
+		MessageDTO errorDTO = new MessageDTO(ex.getCode(), ex.getMessage());
+		return new ResponseEntity<MessageDTO>(errorDTO, HttpStatus.BAD_REQUEST);
+	}
 	
 	
 	
