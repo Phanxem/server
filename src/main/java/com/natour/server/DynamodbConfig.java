@@ -88,16 +88,7 @@ public class DynamodbConfig {
     */
     
     
-    @Bean
-    public DynamoDBMapper dynamoDBMapper() {
-    	
-    	AmazonDynamoDB amazonDynamoDB = buildAmazonDynamoDB();
-    	DynamoDBMapper dynamoDBMapper =  new DynamoDBMapper(amazonDynamoDB);
-    	
-    	init(dynamoDBMapper, amazonDynamoDB);
-    	
-    	return dynamoDBMapper;
-    }
+    
     
    /* 
     private AmazonDynamoDB buildAmazonDynamoDB() {
@@ -115,6 +106,22 @@ public class DynamodbConfig {
     	return result;
     }
     */
+    
+    
+    
+    
+    @Bean
+    public DynamoDBMapper dynamoDBMapper() {
+    	
+    	AmazonDynamoDB amazonDynamoDB = buildAmazonDynamoDB();
+    	DynamoDBMapper dynamoDBMapper =  new DynamoDBMapper(amazonDynamoDB);
+    	
+    	init(dynamoDBMapper, amazonDynamoDB);
+    	
+    	return dynamoDBMapper;
+    }
+    
+    
     
     @Bean
     public AmazonDynamoDB buildAmazonDynamoDB() {

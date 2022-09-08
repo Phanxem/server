@@ -76,7 +76,6 @@ public class UserService {
 		//TODO e che sia di un formato valido
 			
 		/*
-		//Non necessaria
 		if(user.getProfileImageURL() != null) {
 			//TODO rimuovi l'immagine dal fileSystem
 		}
