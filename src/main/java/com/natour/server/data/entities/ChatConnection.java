@@ -8,30 +8,31 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 public class ChatConnection {
 	
 	@DynamoDBHashKey
-	private String connectionId;
+	private String idConnection;
 	@DynamoDBAttribute
-	private String username;
+	private String idUser;
 	
 	public ChatConnection() {}
 	
-	public ChatConnection(String connectionId, String username) {
-		this.connectionId = connectionId;
-		this.username = username;
+	public ChatConnection(String idConnection, String idUser) {
+		this.idConnection = idConnection;
+		this.idUser = idUser;
 	}
-	
-	
-	public String getConnectionId() {
-		return connectionId;
+
+	public String getIdConnection() {
+		return idConnection;
 	}
-	public void setConnectionId(String connectionId) {
-		this.connectionId = connectionId;
+
+	public void setIdConnection(String idConnection) {
+		this.idConnection = idConnection;
 	}
-	
-	public String getUsername() {
-		return username;
+
+	public String getIdUser() {
+		return idUser;
 	}
-	public void setUsername(String username) {
-		this.username = username;
+
+	public void setIdUser(String idUser) {
+		this.idUser = idUser;
 	}
 	
 	

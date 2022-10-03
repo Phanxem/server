@@ -27,6 +27,8 @@ import com.natour.server.data.entities.ChatConnection;
 @RequestMapping(value="/chat")
 public class ChatRestController {
 
+	/*
+	
 	@Autowired
 	private ChatService chatService;
 	
@@ -92,7 +94,7 @@ public class ChatRestController {
 	
 
 	
-	
+	*/
 
 	
 }

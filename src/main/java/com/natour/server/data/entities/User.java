@@ -9,6 +9,9 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinTable;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 
 @Entity
@@ -18,14 +21,32 @@ public class User {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long id;
 	@Column(nullable=false,unique=true)
+	private String identityProvider;
+	@Column(nullable=false,unique=true)
+	private String idIdentityProvided;
+	
+	@Column(nullable=false,unique=true)
 	private String username;
 	private String profileImageURL;
 	private String placeOfResidence;
 	private Timestamp dateOfBirth;
 	
+	private boolean isFacebookLinked;
+	private boolean isGoogleLinked;
+	
+	
 	@OneToMany(mappedBy = "user")
     private List<Itinerary> itineraries;
 
+	
+	@ManyToMany
+	@JoinTable(name = "UserChat",
+			   joinColumns = @JoinColumn(name = "idUser"),
+			   inverseJoinColumns = @JoinColumn(name = "idChat"))
+	private List<Chat> chats;
+	
+	
+	
 	
 	public User() {}
 	
@@ -81,6 +102,22 @@ public class User {
 
 	public void setItineraries(List<Itinerary> itineraries) {
 		this.itineraries = itineraries;
+	}
+
+	public boolean isFacebookLinked() {
+		return isFacebookLinked;
+	}
+
+	public void setFacebookLinked(boolean isFacebookLinked) {
+		this.isFacebookLinked = isFacebookLinked;
+	}
+
+	public boolean isGoogleLinked() {
+		return isGoogleLinked;
+	}
+
+	public void setGoogleLinked(boolean isGoogleLinked) {
+		this.isGoogleLinked = isGoogleLinked;
 	}
 	
 	

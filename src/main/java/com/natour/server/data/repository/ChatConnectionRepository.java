@@ -13,6 +13,8 @@ import com.natour.server.data.entities.ChatConnection;
 @Repository
 public class ChatConnectionRepository {
 
+	/*
+	
 	@Autowired
 	private DynamoDBMapper dynamoDBMapper;
 	
@@ -54,7 +56,7 @@ public class ChatConnectionRepository {
 		}
 	}
 	
-	
+	*/
 	
 	
 	

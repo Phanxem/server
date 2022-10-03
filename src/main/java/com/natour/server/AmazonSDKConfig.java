@@ -11,6 +11,8 @@ import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagement
 @Configuration
 public class AmazonSDKConfig {
 
+	/*
+	
     @Bean
     public AmazonApiGatewayManagementApi settingAPIGWConnection(){
         AmazonApiGatewayManagementApiClientBuilder builder = AmazonApiGatewayManagementApiClientBuilder.standard();
@@ -26,4 +28,5 @@ public class AmazonSDKConfig {
                 .build();
         return agma;
     }
+    */
 }

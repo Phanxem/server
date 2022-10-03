@@ -23,10 +23,12 @@ import com.natour.server.data.entities.ChatConnection;
 import antlr.StringUtils;
 
 @Configuration
-@EnableDynamoDBRepositories
-(basePackages = "com.baeldung.spring.data.dynamodb.repositories")
+//@EnableDynamoDBRepositories
+//(basePackages = "com.baeldung.spring.data.dynamodb.repositories")
 public class DynamodbConfig {
 
+	/*
+	
     @Value("${amazon.dynamodb.endpoint}")
     private String endpoint;
     
@@ -39,7 +41,7 @@ public class DynamodbConfig {
     @Value("${amazon.aws.secretkey}")
     private String secretKey;
 
-    
+*/    
     /*
     
     public AWSCredentialsProvider amazonAWSCredentialsProvider() {
@@ -108,7 +110,7 @@ public class DynamodbConfig {
     */
     
     
-    
+    /*
     
     @Bean
     public DynamoDBMapper dynamoDBMapper() {
@@ -148,5 +150,7 @@ public class DynamodbConfig {
             System.out.println("Table created");
         }
     }
+    
+    */
     
 }

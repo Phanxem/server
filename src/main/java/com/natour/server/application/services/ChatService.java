@@ -87,6 +87,8 @@ public class ChatService {
 	
 	//---------
 	
+	/*
+	
 	public MessageDTO addConnection() {		
 		return new SuccessMessageDTO();
 	}
@@ -122,14 +124,14 @@ public class ChatService {
 		
 		return new SuccessMessageDTO();
 	}
-
-	
+*/
+	/*
 	//TODO da completare con ApiGatewayManagement
 	public MessageDTO sendMessage(ChatRequestDTO chatRequestDTO) {
 		if(!isValid(chatRequestDTO)) {
 			
 		}
-		
+		*/
 		/*
 		if(connectionId_username == null || connectionId_username.isEmpty()) System.out.println("map empty");
 		
@@ -162,13 +164,13 @@ public class ChatService {
 */
 		
 		
-		
+		/*
 		
 		return new SuccessMessageDTO();
 	}
-
+*/
 		
-	
+	/*
 	public MessageDTO removeConnection(ChatRequestDTO chatRequestDTO) {
 		
 		String connectionId = chatRequestDTO.getConnectionId();
@@ -177,13 +179,13 @@ public class ChatService {
 		
 		return new SuccessMessageDTO();
 	}
-
+*/
 	
 	
 	
 	
 	
-	
+	/*
 	public boolean isValid(ChatRequestDTO chatRequestDTO) {
 
 		if(chatRequestDTO == null) return false;
@@ -223,5 +225,7 @@ public class ChatService {
 		
 		return true;
 	}
+	
+	*/
 	
 }
