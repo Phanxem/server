@@ -13,16 +13,17 @@ import javax.persistence.JoinTable;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 @Entity
+@Table(uniqueConstraints = @UniqueConstraint(columnNames = {"identityProvider", "idIdentityProvided"}))
 public class User {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long id;
-	@Column(nullable=false,unique=true)
 	private String identityProvider;
-	@Column(nullable=false,unique=true)
 	private String idIdentityProvided;
 	
 	@Column(nullable=false,unique=true)
@@ -45,10 +46,40 @@ public class User {
 	
 	
 	
+	public String getIdentityProvider() {
+		return identityProvider;
+	}
+
+	public void setIdentityProvider(String identityProvider) {
+		this.identityProvider = identityProvider;
+	}
+
+	public String getIdIdentityProvided() {
+		return idIdentityProvided;
+	}
+
+	public void setIdIdentityProvided(String idIdentityProvided) {
+		this.idIdentityProvided = idIdentityProvided;
+	}
+
+	public List<Chat> getChats() {
+		return chats;
+	}
+
+	public void setChats(List<Chat> chats) {
+		this.chats = chats;
+	}
+
+	
+	
+	
+	
 	
 	public User() {}
 	
-	public User(String username) {
+	public User(String identityProvider, String idIdentityProvided, String username) {
+		this.identityProvider = identityProvider;
+		this.idIdentityProvided = idIdentityProvided;
 		this.username = username;
 	}
 	
