@@ -34,10 +34,8 @@ public class User {
 	private boolean isFacebookLinked;
 	private boolean isGoogleLinked;
 	
-	
 	@OneToMany(mappedBy = "user")
     private List<Itinerary> itineraries;
-
 	
 	@ManyToMany
 	@JoinTable(name = "UserChat",
