@@ -5,6 +5,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class ItineraryResponseDTO {
 
+	private MessageResponseDTO resultMessage;
+	
 	private Long id;
 	private String name;
 	private Resource gpx;
@@ -17,6 +19,14 @@ public class ItineraryResponseDTO {
 	
 	
 	
+
+	public MessageResponseDTO getResultMessage() {
+		return resultMessage;
+	}
+
+	public void setResultMessage(MessageResponseDTO resultMessage) {
+		this.resultMessage = resultMessage;
+	}
 
 	public Long getId() {
 		return id;

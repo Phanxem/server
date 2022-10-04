@@ -5,7 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import com.natour.server.application.dtos.MessageDTO;
+import com.natour.server.application.dtos.response.MessageResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageSaveFailureException;
@@ -20,29 +20,29 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler({UserNotFoundException.class,
 					   ItineraryNotFoundException.class, 
 					   ReportNotFoundException.class})
-    public ResponseEntity<MessageDTO> handleNotFoundException(ServerException ex) {
-        MessageDTO errorDTO = new MessageDTO(ex.getCode(), ex.getMessage());
-		return new ResponseEntity<MessageDTO>(errorDTO, HttpStatus.NOT_FOUND);
+    public ResponseEntity<MessageResponseDTO> handleNotFoundException(ServerException ex) {
+        MessageResponseDTO errorDTO = new MessageResponseDTO(ex.getCode(), ex.getMessage());
+		return new ResponseEntity<MessageResponseDTO>(errorDTO, HttpStatus.NOT_FOUND);
     }
 	
 	
 	@ExceptionHandler({UserUsernameNullException.class})
-		public ResponseEntity<MessageDTO> handleNullException(ServerException ex) {
-		MessageDTO errorDTO = new MessageDTO(ex.getCode(), ex.getMessage());
-		return new ResponseEntity<MessageDTO>(errorDTO, HttpStatus.BAD_REQUEST);
+		public ResponseEntity<MessageResponseDTO> handleNullException(ServerException ex) {
+		MessageResponseDTO errorDTO = new MessageResponseDTO(ex.getCode(), ex.getMessage());
+		return new ResponseEntity<MessageResponseDTO>(errorDTO, HttpStatus.BAD_REQUEST);
 	}
 	
 	
 	@ExceptionHandler({UserProfileImageSaveFailureException.class})
-	public ResponseEntity<MessageDTO> handleUpdateFailureException(ServerException ex) {
-		MessageDTO errorDTO = new MessageDTO(ex.getCode(), ex.getMessage());
-		return new ResponseEntity<MessageDTO>(errorDTO, HttpStatus.BAD_REQUEST);
+	public ResponseEntity<MessageResponseDTO> handleUpdateFailureException(ServerException ex) {
+		MessageResponseDTO errorDTO = new MessageResponseDTO(ex.getCode(), ex.getMessage());
+		return new ResponseEntity<MessageResponseDTO>(errorDTO, HttpStatus.BAD_REQUEST);
 	}
 	
 	@ExceptionHandler({TODORouteException.class})
-	public ResponseEntity<MessageDTO> handleTODOException(ServerException ex) {
-		MessageDTO errorDTO = new MessageDTO(ex.getCode(), ex.getMessage());
-		return new ResponseEntity<MessageDTO>(errorDTO, HttpStatus.BAD_REQUEST);
+	public ResponseEntity<MessageResponseDTO> handleTODOException(ServerException ex) {
+		MessageResponseDTO errorDTO = new MessageResponseDTO(ex.getCode(), ex.getMessage());
+		return new ResponseEntity<MessageResponseDTO>(errorDTO, HttpStatus.BAD_REQUEST);
 	}
 	
 	

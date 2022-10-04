@@ -1,7 +1,7 @@
 package com.natour.server.data.dao.interfaces;
 
-import com.natour.server.application.dtos.RouteDTO;
-import com.natour.server.application.dtos.PointDTO;
+import com.natour.server.application.dtos.response.PointResponseDTO;
+import com.natour.server.application.dtos.response.RouteResponseDTO;
 
 import java.util.List;
 
@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface RouteDAO {
 
-	RouteDTO findRouteByCoordinates(String coordinates);
-	
-	RouteDTO findRouteByPoints(List<PointDTO> points);
+	RouteResponseDTO findRouteByCoordinates(String coordinates);
 	
 }

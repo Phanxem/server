@@ -15,8 +15,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.natour.server.application.dtos.AddressDTO;
-import com.natour.server.application.dtos.PointDTO;
+import com.natour.server.application.dtos.response.AddressResponseDTO;
+import com.natour.server.application.dtos.response.ListAddressResponseDTO;
+import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.PointResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.AddressSearchByPointFailureException;
 import com.natour.server.application.exceptionHandler.serverExceptions.AddressSearchByQueryFailureException;
 import com.natour.server.data.dao.interfaces.AddressDAO;
@@ -48,19 +50,20 @@ public class AddressDAOImpl implements AddressDAO{
     private static final String KEY_COUNTRY = "country";
     
     
-    private AddressDTO buildAddressDTO(JsonObject jsonObjectResult) {
+    private AddressResponseDTO buildAddressDTO(JsonObject jsonObjectResult) {
+    	
+    	 AddressResponseDTO addressDTO = new AddressResponseDTO();
+         PointResponseDTO pointDTO = new PointResponseDTO();
     	
     	if (!jsonObjectResult.has(KEY_LATITUDE) ||
             !jsonObjectResult.has(KEY_LONGITUDE) ||
             !jsonObjectResult.has(KEY_ADDRESS))
         {
-            return null;    
+    		MessageResponseDTO messageResponseDTO = new MessageResponseDTO(-100, "error");
+    		addressDTO.setResultMessage(messageResponseDTO);
+    		return addressDTO;
         }
-    	
-        AddressDTO addressDTO = new AddressDTO();
-        PointDTO pointDTO = new PointDTO();
-            
-
+    
         pointDTO.setLon(jsonObjectResult.get(KEY_LONGITUDE).getAsDouble());
         pointDTO.setLat(jsonObjectResult.get(KEY_LATITUDE).getAsDouble());
         addressDTO.setPoint(pointDTO);
@@ -99,7 +102,12 @@ public class AddressDAOImpl implements AddressDAO{
         return addressDTO;
     }
     
-    public AddressDTO findAddressByPoint(PointDTO point) {
+    
+    
+    
+    
+    
+    public AddressResponseDTO findAddressByPoint(PointResponseDTO point) {
     	String url = NOMINATIM_SERVICE_URL + OPERATON_REVERSE
                 + "?format=json"
                 //+ "&accept-language=" + Locale.getDefault().getLanguage()
@@ -116,12 +124,12 @@ public class AddressDAOImpl implements AddressDAO{
     	JsonElement jsonElementResult = JsonParser.parseString(jsonStringResult);
         JsonObject jsonObjectResult = jsonElementResult.getAsJsonObject();
         
-        AddressDTO result = buildAddressDTO(jsonObjectResult);
+        AddressResponseDTO result = buildAddressDTO(jsonObjectResult);
 
     	return result;
     }
     
-    public List<AddressDTO> findAddressesByQuery(String query) {
+    public ListAddressResponseDTO findAddressesByQuery(String query) {
     	String url = null;
         try {
             url = NOMINATIM_SERVICE_URL + OPERATION_SEARCH
@@ -133,6 +141,7 @@ public class AddressDAOImpl implements AddressDAO{
                     + "&q=" + URLEncoder.encode(query,"UTF-8");
         }
         catch (UnsupportedEncodingException e) {
+        	//TODO
         	throw new AddressSearchByQueryFailureException(e);
         }
         
@@ -143,15 +152,19 @@ public class AddressDAOImpl implements AddressDAO{
     	JsonElement jsonElementResult = JsonParser.parseString(jsonStringResult);
         JsonArray jsonArrayResult = jsonElementResult.getAsJsonArray();
 		
-		List<AddressDTO> addresses = new ArrayList<AddressDTO>();
+		List<AddressResponseDTO> addresses = new ArrayList<AddressResponseDTO>();
 	
 		for(int i = 0; i < jsonArrayResult.size(); i++){
 			JsonObject jsonObjectResult = jsonArrayResult.get(i).getAsJsonObject();
-            AddressDTO address = buildAddressDTO(jsonObjectResult);
+            AddressResponseDTO address = buildAddressDTO(jsonObjectResult);
             if(address != null) addresses.add(address);
         }
         
-    	return addresses;
+		ListAddressResponseDTO listAddressResponseDTO = new ListAddressResponseDTO();
+		listAddressResponseDTO.setListAddresses(addresses);
+		listAddressResponseDTO.setResultMessage(new MessageResponseDTO());
+		
+    	return listAddressResponseDTO;
     }
     
 

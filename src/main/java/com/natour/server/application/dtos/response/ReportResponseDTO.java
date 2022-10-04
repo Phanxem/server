@@ -1,10 +1,12 @@
-package com.natour.server.application.dtos;
+package com.natour.server.application.dtos.response;
 
 
 import java.util.Date;
 
-public class ReportDTO {
+public class ReportResponseDTO {
 
+	private MessageResponseDTO resultMessage;
+	
 	private Long id;
 	private String name;
 	private Date dateOfInput;
@@ -14,6 +16,14 @@ public class ReportDTO {
 	private Long idItinerary;
 	
 	
+	
+	
+	public MessageResponseDTO getResultMessage() {
+		return resultMessage;
+	}
+	public void setResultMessage(MessageResponseDTO resultMessage) {
+		this.resultMessage = resultMessage;
+	}
 	public Long getId() {
 		return id;
 	}

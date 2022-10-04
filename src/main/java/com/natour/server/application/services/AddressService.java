@@ -5,8 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.natour.server.CoordinatesUtils;
-import com.natour.server.application.dtos.AddressDTO;
-import com.natour.server.application.dtos.PointDTO;
+import com.natour.server.application.dtos.response.AddressResponseDTO;
+import com.natour.server.application.dtos.response.ListAddressResponseDTO;
+import com.natour.server.application.dtos.response.PointResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.AddressCoordinatesInvalidException;
 import com.natour.server.application.exceptionHandler.serverExceptions.AddressNotFoundException;
 import com.natour.server.data.dao.implemented.AddressDAOImpl;
@@ -20,24 +21,19 @@ public class AddressService {
 	AddressDAO addressDAO = new AddressDAOImpl();
 	
 	//FINDs
-	public AddressDTO findAddressByCoordinates(String coordinates) {		
+	public AddressResponseDTO findAddressByCoordinates(String coordinates) {		
 		
-		PointDTO pointDTO = CoordinatesUtils.toPointDTO(coordinates);
-		System.out.println("before dao");
-		AddressDTO result = addressDAO.findAddressByPoint(pointDTO);
-		System.out.println("after dao");
-		if(result == null) throw new AddressNotFoundException();
-	
+		PointResponseDTO pointDTO = CoordinatesUtils.toPointDTO(coordinates);
+		AddressResponseDTO result = addressDAO.findAddressByPoint(pointDTO);
+
 		return result;
 	}
 
 	//SEARCHs
-	public List<AddressDTO> searchAddressesByQuery(String query) {		
+	public ListAddressResponseDTO searchAddressesByQuery(String query) {		
 		
-		List<AddressDTO> results = addressDAO.findAddressesByQuery(query);
+		ListAddressResponseDTO results = addressDAO.findAddressesByQuery(query);
 		
-		//if(results == null) throw new AddressNotFoundException();
-	
 		return results;
 	}
 	

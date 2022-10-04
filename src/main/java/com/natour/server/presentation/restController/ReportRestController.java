@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.natour.server.application.dtos.MessageDTO;
-import com.natour.server.application.dtos.ReportDTO;
+import com.natour.server.application.dtos.request.ReportRequestDTO;
+import com.natour.server.application.dtos.response.ListReportResponseDTO;
+import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ReportResponseDTO;
 import com.natour.server.application.services.ReportService;
+import com.natour.server.application.services.ResultCodeUtils;
 
 
 
@@ -26,28 +29,32 @@ public class ReportRestController {
 	@Autowired
 	private ReportService reportService;
 	
+	
 	//GETs
-	@RequestMapping(value="/get/{id}", method=RequestMethod.GET)
+	@RequestMapping(value="/get/{idReport}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ReportDTO> getUserById(@PathVariable("id") long id){
+	public ResponseEntity<ReportResponseDTO> getReportById(@PathVariable("idReport") long idReport){
 		System.out.println("TEST: GET id");
 		
-		ReportDTO result = reportService.findReportById(id);
-		if(result != null) return new ResponseEntity<ReportDTO>(result, HttpStatus.OK);
-		return new ResponseEntity<ReportDTO>(result, HttpStatus.NOT_FOUND);
+		ReportResponseDTO result = reportService.findReportById(idReport);
+		MessageResponseDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		
+		return new ResponseEntity<ReportResponseDTO>(result, resultHttpStatus);
 	}
 	
-	//---
 	
 	@RequestMapping(value="/get", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<List<ReportDTO>> getUserByIdItinerary(@RequestParam Long idItinerary){
+	public ResponseEntity<ListReportResponseDTO> getReportByIdItinerary(@RequestParam long idItinerary, @RequestParam int page){
 		
 		System.out.println("TEST: GET idItinerary");
 		
-		List<ReportDTO> result = reportService.findReportByIdItinerary(idItinerary);
-		if(result != null) return new ResponseEntity<List<ReportDTO>>(result, HttpStatus.OK);
-		return new ResponseEntity<List<ReportDTO>>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		ListReportResponseDTO result = reportService.findReportByIdItinerary(idItinerary, page);
+		MessageResponseDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		
+		return new ResponseEntity<ListReportResponseDTO>(result, resultHttpStatus);
 	}
 		
 	//SEARCH
@@ -55,28 +62,27 @@ public class ReportRestController {
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<ReportDTO> addReport(@RequestParam String usernameUser,
-											   @RequestBody ReportDTO reportDTO){
+	public ResponseEntity<MessageResponseDTO> addReport(@RequestParam long idUser,
+											   		   @RequestBody ReportRequestDTO reportDTO){
 		System.out.println("TEST: ADD");
 		
+		MessageResponseDTO result = reportService.addReport(idUser, reportDTO);
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
 		
-		ReportDTO result = reportService.addReport(usernameUser, reportDTO);
-		
-		if(result != null) return new ResponseEntity<ReportDTO>(result, HttpStatus.OK);
-		return new ResponseEntity<ReportDTO>(result, HttpStatus.INTERNAL_SERVER_ERROR);
+		return new ResponseEntity<MessageResponseDTO>(result, resultHttpStatus);
 	}
 		
 	//PUTs
 		
 	//DELETEs
-	@RequestMapping(value="/delete/{id}", method=RequestMethod.DELETE)
+	@RequestMapping(value="/delete/{idReport}", method=RequestMethod.DELETE)
 	@ResponseBody
-	public ResponseEntity<MessageDTO> deleteItineraryById(@PathVariable("id") long id){
+	public ResponseEntity<MessageResponseDTO> deleteItineraryById(@PathVariable("idReport") long idReport){
 		System.out.println("TEST: DELETE id");
 		
-		MessageDTO result = reportService.removeReportById(id);
-		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);
+		MessageResponseDTO result = reportService.removeReportById(idReport);
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
 		
+		return new ResponseEntity<MessageResponseDTO>(result, resultHttpStatus);
 	}
-
 }

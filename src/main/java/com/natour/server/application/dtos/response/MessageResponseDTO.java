@@ -1,12 +1,15 @@
-package com.natour.server.application.dtos;
+package com.natour.server.application.dtos.response;
 
-public class MessageDTO {
+public class MessageResponseDTO {
 	private long code;
 	private String message;
 	
-	public MessageDTO() {}
+	public MessageResponseDTO() {
+		this.code = 200;
+		this.message = "Operazione effettuata con successo";
+	}
 	
-	public MessageDTO(long code, String message) {
+	public MessageResponseDTO(long code, String message) {
 		this.code = code;
 		this.message = message;
 	}

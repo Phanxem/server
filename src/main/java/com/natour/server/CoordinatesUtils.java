@@ -6,7 +6,7 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.natour.server.application.dtos.PointDTO;
+import com.natour.server.application.dtos.response.PointResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.AddressCoordinatesInvalidException;
 
 
@@ -72,7 +72,7 @@ public class CoordinatesUtils {
 	}
 	*/
 	
-	public static PointDTO toPointDTO(String coordinates) {
+	public static PointResponseDTO toPointDTO(String coordinates) {
 		
 		String[] stringCoordinates = coordinates.split(",");
 		
@@ -98,18 +98,18 @@ public class CoordinatesUtils {
 			throw new AddressCoordinatesInvalidException();
 		}
 	
-		PointDTO pointDTO = new PointDTO(lon, lat);
+		PointResponseDTO pointDTO = new PointResponseDTO(lon, lat);
 		
 		return pointDTO;
 	}
 	
 	
-	public static List<PointDTO> toListPointDTO(String coordinates) {
+	public static List<PointResponseDTO> toListPointDTO(String coordinates) {
 		
 		String[] stringPoints = coordinates.split(";");
 
-		List<PointDTO> pointsDTO = new ArrayList<PointDTO>();
-		PointDTO pointDTO;
+		List<PointResponseDTO> pointsDTO = new ArrayList<PointResponseDTO>();
+		PointResponseDTO pointDTO;
 		
 		for(String stringPoint: stringPoints) {
 			pointDTO = toPointDTO(stringPoint);

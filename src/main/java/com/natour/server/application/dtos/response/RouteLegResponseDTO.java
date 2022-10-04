@@ -1,39 +1,39 @@
-package com.natour.server.application.dtos;
+package com.natour.server.application.dtos.response;
 
 import java.util.List;
 
-public class RouteLegDTO {
-	private PointDTO startingPoint;
-	private PointDTO destinationPoint;
+public class RouteLegResponseDTO {
+	private PointResponseDTO startingPoint;
+	private PointResponseDTO destinationPoint;
 	
-	private List<PointDTO> track;
+	private List<PointResponseDTO> track;
 	
 	private float duration;
 	private float distance;
 
 	
 
-	public PointDTO getStartingPoint() {
+	public PointResponseDTO getStartingPoint() {
 		return startingPoint;
 	}
 
-	public void setStartingPoint(PointDTO startingPoint) {
+	public void setStartingPoint(PointResponseDTO startingPoint) {
 		this.startingPoint = startingPoint;
 	}
 
-	public PointDTO getDestinationPoint() {
+	public PointResponseDTO getDestinationPoint() {
 		return destinationPoint;
 	}
 
-	public void setDestinationPoint(PointDTO destinationPoint) {
+	public void setDestinationPoint(PointResponseDTO destinationPoint) {
 		this.destinationPoint = destinationPoint;
 	}
 
-	public List<PointDTO> getTrack() {
+	public List<PointResponseDTO> getTrack() {
 		return track;
 	}
 
-	public void setTrack(List<PointDTO> track) {
+	public void setTrack(List<PointResponseDTO> track) {
 		this.track = track;
 	}
 

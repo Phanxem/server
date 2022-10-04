@@ -1,13 +1,13 @@
 package com.natour.server.application.dtos.request;
 
-public class OptionalInfoUserRequestDTO {
+public class UpdateUserOptionalInfoRequestDTO {
 
 	private String placeOfResidence;
 	private String dateOfBirth;
 	
-	public OptionalInfoUserRequestDTO() {}
+	public UpdateUserOptionalInfoRequestDTO() {}
 	
-	public OptionalInfoUserRequestDTO(String placeOfResidence, String dateOfBirth) {
+	public UpdateUserOptionalInfoRequestDTO(String placeOfResidence, String dateOfBirth) {
 		this.placeOfResidence = placeOfResidence;
 		this.dateOfBirth = dateOfBirth;
 

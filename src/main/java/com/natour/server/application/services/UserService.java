@@ -1,6 +1,8 @@
 package com.natour.server.application.services;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -11,18 +13,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import javax.imageio.ImageIO;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.natour.server.DateUtils;
 import com.natour.server.FileSystemUtils;
-import com.natour.server.application.dtos.MessageDTO;
-import com.natour.server.application.dtos.SuccessMessageDTO;
 import com.natour.server.application.dtos.UserDTO;
-import com.natour.server.application.dtos.request.OptionalInfoUserRequestDTO;
+import com.natour.server.application.dtos.request.AddUserRequestDTO;
+import com.natour.server.application.dtos.request.UpdateUserOptionalInfoRequestDTO;
+import com.natour.server.application.dtos.response.ImageResponseDTO;
+import com.natour.server.application.dtos.response.ListUserResponseDTO;
+import com.natour.server.application.dtos.response.MessageResponseDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.OptionalInfoUserDTOInvalidException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
@@ -46,158 +54,184 @@ public class UserService {
 	private FileSystemRepository fileSystemRepository;
 
 	
+	private final static String IDENTITY_PROVIDER_COGNITO = "Cognito";
+	private final static String IDENTITY_PROVIDER_FACEBOOK = "Facebook";
+	private final static String IDENTITY_PROVIDER_GOOGLE = "Google";
+	
+	private final static int IMAGE_MIN_HEIGHT_PX = 300;
+	private final static int IMAGE_MIN_WIDTH_PX = 300;
+	
+	private final static int IMAGE_MAX_SIZE_BYTES = 1000000;
+	
+	private final static int USER_PER_PAGE = 20;
+	
+	
 	//ADDs
-	public MessageDTO addUser(String username) {
-		if(username == null) throw new UserUsernameNullException();
+	public MessageResponseDTO addUser(AddUserRequestDTO addUserRequestDTO) {
+		if(!isValidDTO(addUserRequestDTO)) {
+			//TODO new exception
+			throw new UserUsernameNullException();
+		}
 		
-		User user = userRepository.findByUsername(username);
-		if(user != null) throw new UserUsernameUniqueException();
+		User user = userRepository.findByIdentityProviderAndIdIdentityProvided(addUserRequestDTO.getIdentityProvider(), addUserRequestDTO.getIdIdentityProvided());
+		if(user != null) {
+			//TODO new exception
+			throw new UserUsernameUniqueException();
+		}
 		
-		user = new User(username);
+		user = new User(addUserRequestDTO.getIdentityProvider(), addUserRequestDTO.getIdIdentityProvided(), addUserRequestDTO.getUsername());
 		User result = userRepository.save(user);
 		
-		//return toUserDTO(result);
-		return new SuccessMessageDTO();
+		return new MessageResponseDTO();
 	}
 	
 	
+	
 	//UPDATEs
-	public MessageDTO updateProfileImage(String username,  MultipartFile image) {
+	public MessageResponseDTO updateProfileImage(long idUser,  MultipartFile image) {
 		
-		if(username == null) throw new UserUsernameNullException();
-		
-		User user = userRepository.findByUsername(username);
-		if(user == null) throw new UserNotFoundException();
-		
-		if(image == null) throw new UserProfileImageNullException();
-		
-		//TODO verifica che l'immagine abbia una grandezza (in px) minima,
-		//TODO abbia una grandiezza (in kb) massima
-		//TODO e che sia di un formato valido
-			
-		/*
-		if(user.getProfileImageURL() != null) {
-			//TODO rimuovi l'immagine dal fileSystem
+		if(idUser < 0) {
+			//TODO new exception
+			throw new UserUsernameNullException();
 		}
-		*/
+		
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(optionalUser.isEmpty()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
+		User user = optionalUser.get();
+		
+		
+		if(!isValidImage(image)) {
+			//TODO
+			throw new UserProfileImageNullException();
+		}
 		
 		String imageUrl;
 		try {
-			imageUrl = fileSystemRepository.save("profileImage-" + username, image.getBytes());
+			imageUrl = fileSystemRepository.save("profileImage-" + user.getId(), image.getBytes());
 		}
 		catch (IOException e) {
+			//TODO
 			throw new UserProfileImageSaveFailureException(e);
+		}
+		
+		if(user.getProfileImageURL() != null) {
+			//TODO rimuovi l'immagine dal fileSystem
 		}
 		
 		user.setProfileImageURL(imageUrl);
 		
-		//int updatedElement = userRepository.updateProfileImageURL(username , imageUrl);
-		//if(updatedElement == 0) throw new UserProfileImageUpdateFailureException();
-		
 		User result = userRepository.save(user);
 		
-		//User result = userRepository.findByUsername(username);
-		return new SuccessMessageDTO();
+		return new MessageResponseDTO();
 	}
 	
 	
 	
-	public MessageDTO updateOptionalInfo(String username, OptionalInfoUserRequestDTO optionalInfoDTO) {
+	public MessageResponseDTO updateOptionalInfo(long idUser, UpdateUserOptionalInfoRequestDTO optionalInfoUserRequestDTO) {
 		
-		if(username == null) throw new UserUsernameNullException();
+		if(idUser < 0) {
+			//TODO
+			throw new UserUsernameNullException();
+		}
 		
-		if(!isValidDTO(optionalInfoDTO)) throw new OptionalInfoUserDTOInvalidException();
+		if(!isValidDTO(optionalInfoUserRequestDTO)) {
+			//TODO
+			throw new OptionalInfoUserDTOInvalidException();
+		}
 		
-		User user = userRepository.findByUsername(username);
-		if(user == null) throw new UserNotFoundException();
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(optionalUser.isEmpty()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
+		User user = optionalUser.get();
 		
 		
+		String  placeOfResidence = optionalInfoUserRequestDTO.getPlaceOfResidence();
 		
-		String  placeOfResidence = optionalInfoDTO.getPlaceOfResidence();
 		Timestamp dateOfBirth = null;
-		
-		String stringDateOfBirth = optionalInfoDTO.getDateOfBirth();
+		String stringDateOfBirth = optionalInfoUserRequestDTO.getDateOfBirth();
 		if(stringDateOfBirth != null) {
 			
 			Calendar calendar = null;
 			try {
 				calendar = DateUtils.toCalendar(stringDateOfBirth);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
+			}
+			catch (ParseException e) {
+				// TODO
 				e.printStackTrace();
 			}
-			dateOfBirth =  new Timestamp(calendar.getTimeInMillis());
+			dateOfBirth = new Timestamp(calendar.getTimeInMillis());
 		}
 		 
 		user.setPlaceOfResidence(placeOfResidence);
 		user.setDateOfBirth(dateOfBirth);
-
-		/*	
-		int updatedElement = userRepository.updateOptionalInfo(username, placeOfResidence, timestampOfBirth, gender);
-		if(updatedElement == 0) throw new UserOptionalInfoUpdateFailureException();
-		*/
-		
-		
 		
 		User result = userRepository.save(user);
-		return new SuccessMessageDTO();
+		return new MessageResponseDTO();
 	}
 	
 	
 	
 	//FINDs
-	public UserResponseDTO findUserById(long id) {		
-		Optional<User> user = userRepository.findById(id);
-		if(!user.isPresent()) throw new UserNotFoundException();
+	public UserResponseDTO findUserById(long idUser) {		
+		Optional<User> user = userRepository.findById(idUser);
+		if(!user.isPresent()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
 		
 		return toUserResponseDTO(user.get());
 	}
 	
-	public UserResponseDTO findUserByUsername(String username) {
-		if(username == null) throw new UserUsernameNullException();
-		
-		User user = userRepository.findByUsername(username);
-		if(user == null) throw new UserNotFoundException();
-		return toUserResponseDTO(user);
-	}
+
 	
 	
-	public Resource findUserImageById(long id) {
-		Optional<User> optUser = userRepository.findById(id);
-		if(!optUser.isPresent()) throw new UserNotFoundException();
+	public ImageResponseDTO findUserImageById(long idUser) {
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(!optionalUser.isPresent()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
+		User user = optionalUser.get();
 		
-		User user = optUser.get();
-		
+		ImageResponseDTO imageResponseDTO = new ImageResponseDTO();
 		if(user.getProfileImageURL() != null) {
 			FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(user.getProfileImageURL());
-			//TODO check error
-			return fileSystemResource;
+			if(fileSystemResource != null) {
+				imageResponseDTO.setImage(fileSystemResource);
+				imageResponseDTO.setResultMessage(new MessageResponseDTO());
+				
+				return imageResponseDTO;
+			}
+			imageResponseDTO.setResultMessage(new MessageResponseDTO(-100, "errore1"));
+			return imageResponseDTO;
 		}
-		else return null;
+		imageResponseDTO.setResultMessage(new MessageResponseDTO(-100, "errore1"));
+		return imageResponseDTO;
 	}
-	
-	public Resource findUserImageByUsername(String username) {		
-		User user = userRepository.findByUsername(username);
-		
-		if(user.getProfileImageURL() != null) {
-			FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(user.getProfileImageURL());
-			//TODO check error
-			return fileSystemResource;
-		}
-		else return null;
-	}
-	
-	
+
 	//SEARCHs
 	
-	public List<UserResponseDTO> searchUserByUsername(String username){
-		if(username == null) throw new UserUsernameNullException();
-		
-		List<User> users = userRepository.findByUsernameContaining(username);
+	public ListUserResponseDTO searchUserByUsername(String username, int page){
+		if(username == null) {
+			//TODO
+			throw new UserUsernameNullException();
+		}
+		Pageable pageable = PageRequest.of(page, USER_PER_PAGE);
+		List<User> users = userRepository.findByUsernameContaining(username, pageable);
 				
 		List<UserResponseDTO> usersDTO = toListUserResponseDTO(users);
 		
-		return usersDTO;
+		ListUserResponseDTO listUserResponseDTO = new ListUserResponseDTO();
+		
+		listUserResponseDTO.setResultMessage(new MessageResponseDTO());
+		listUserResponseDTO.setListUser(usersDTO);
+		
+		return listUserResponseDTO;
 	}
 	
 	//REMOVEs
@@ -212,47 +246,7 @@ public class UserService {
 	
 	
 	
-	
-	
-	//MAPPER
-	/*
-	public UserDTO toUserDTO(User user) {
-		
-		if(user == null) return null;
-		
-		UserDTO userDTO = new UserDTO();
-		userDTO.setId(user.getId());
-		userDTO.setGender(user.getGender());
-		userDTO.setPlaceOfResidence(user.getPlaceOfResidence());
-		userDTO.setUsername(user.getUsername());
-		
-		Date dateOfBirth = new Date(user.getDateOfBirth().getTime());
-		userDTO.setDateOfBirth(dateOfBirth);
-		
-		if(user.getProfileImageURL() != null) {
-			FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(user.getProfileImageURL());
-			byte[] profileImage = FileSystemUtils.toArrayByte(fileSystemResource);
-			//userDTO.setProfileImage(profileImage);
-		}
-		else userDTO.setProfileImage(null);
-		
-		return userDTO;
-	}
-	
-	public List<UserDTO> toListUserDTO(List<User> users){
-		if(users == null) return null;
-		
-		List<UserDTO> usersDTO = new LinkedList<UserDTO>();
-		for(User user : users) {
-			usersDTO.add(toUserDTO(user));
-		}
-		return usersDTO;
-	}
-	
-	*/
-	
-	//--
-	
+
 	public UserResponseDTO toUserResponseDTO(User user) {
 		
 		if(user == null) return null;
@@ -271,6 +265,8 @@ public class UserService {
 		}
 		else dto.setDateOfBirth(null);
 		
+		dto.setResultMessage(new MessageResponseDTO());
+		
 		return dto;
 	}
 	
@@ -286,34 +282,86 @@ public class UserService {
 	}
 	
 	
+	
 	//VALIDATORs
-	public boolean isValidDTO(OptionalInfoUserRequestDTO optionalInfoDTO) {
+	public static boolean isValidDTO(UpdateUserOptionalInfoRequestDTO optionalInfoDTO) {
 		if(optionalInfoDTO == null) return false;
 		
 		String stringDate = optionalInfoDTO.getDateOfBirth();
 		if(stringDate != null) {
 			
-			//VERIFICA SE LA STRINGA E' NEL FORMATO CORRETTO
 			Calendar calendar = null;
 			try {
 				calendar = DateUtils.toCalendar(stringDate);
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
+			}
+			catch (ParseException e) {
 				e.printStackTrace();
+				return false;
 			}
 		
 			//VERIFICA CHE LA STRINGA NON SIA PRECEDENTE A QUELLA ATTUALE
             Calendar currentCalendar = Calendar.getInstance();
             if(!calendar.before(currentCalendar)){
-                //TODO EXCEPTION
                 return false;
             }
 		}
 		
 		return true;
-		
 	}
 
+	public static boolean isValidDTO(AddUserRequestDTO dto) {
+		String username = dto.getUsername();
+		if(username == null || username.isBlank()) return false;
+		
+		String identityProvider = dto.getIdentityProvider();
+		if(identityProvider == null || 
+		   identityProvider.isBlank() ||
+		   !identityProvider.equals(IDENTITY_PROVIDER_COGNITO) ||
+		   !identityProvider.equals(IDENTITY_PROVIDER_FACEBOOK) ||
+		   !identityProvider.equals(IDENTITY_PROVIDER_GOOGLE))
+		{
+			return false;
+		}
+		
+		String idIdentityProvided = dto.getIdIdentityProvided();
+		if(idIdentityProvided == null || idIdentityProvided.isBlank()) return false;
+		
+		return true;
+	}
 
-	
+	public static boolean isValidImage(MultipartFile image) {
+		
+		if(image == null || image.isEmpty()) return false;
+		
+		InputStream inputStream = null;
+		try {
+			inputStream = image.getInputStream();
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		BufferedImage bufferedImage = null;
+		try {
+			bufferedImage = ImageIO.read(inputStream);
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		int width = bufferedImage.getWidth();
+		if(width < IMAGE_MIN_WIDTH_PX) return false;
+		
+		int height = bufferedImage.getHeight();
+		if(height < IMAGE_MIN_HEIGHT_PX) return false;
+		
+		
+		long imageSizeBytes = image.getSize();
+		
+		if(imageSizeBytes > IMAGE_MAX_SIZE_BYTES) return false;
+		
+		return true;
+	}
 }

@@ -7,10 +7,14 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.natour.server.application.dtos.MessageDTO;
-import com.natour.server.application.dtos.ReportDTO;
+import com.natour.server.application.dtos.request.ReportRequestDTO;
+import com.natour.server.application.dtos.response.ListReportResponseDTO;
+import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ReportResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.ReportDTOInvalidException;
 import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryIdNullException;
@@ -26,9 +30,8 @@ import com.natour.server.data.repository.UserRepository;
 
 @Service
 public class ReportService {
-
-	private final static long SUCCESSFUL_REMOVAL_CODE = 101;
-	private final static String SUCCESSFUL_REMOVAL_MESSAGE = "Segnalazione rimossa con successo.";
+	
+	private final static int REPORT_PER_PAGE = 10;
 	
 	@Autowired
 	private ReportRepository reportRepository;
@@ -37,27 +40,30 @@ public class ReportService {
 	@Autowired
 	private ItineraryRepository itineraryRepository;
 	
-	/*
-	@Autowired
-	private UserService userService;
-*/
-	
 	
 	//ADDs
-	public ReportDTO addReport(String usernameUser, ReportDTO reportDTO) {
-		if(usernameUser == null) throw new UserUsernameNullException();
+	public MessageResponseDTO addReport(long idUser, ReportRequestDTO reportRequestDTO) {
+		if(idUser < 0) {
+			//TODO
+			throw new UserUsernameNullException();
+		}
 		
-		if(!isValidDTO(reportDTO)) throw new ReportDTOInvalidException();
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(optionalUser.isEmpty()) {
+			//TODO
+		}
 		
-		Long idUser = userRepository.findIdByUsername(usernameUser);
-		if(idUser == null) throw new UserNotFoundException();
+		if(!isValidDTO(reportRequestDTO)) {
+			//TODO
+			throw new ReportDTOInvalidException();
+		}
 		
-		reportDTO.setIdUser(idUser);
-		Report report = toReportEntity(reportDTO);
+		reportRequestDTO.setIdUser(idUser);
+		Report report = toReportEntity(reportRequestDTO);
 		
 		Report result = reportRepository.save(report);
 		
-		return toReportDTO(result);
+		return new MessageResponseDTO();
 	}
 
 		
@@ -67,47 +73,63 @@ public class ReportService {
 		
 		
 	//FINDs
-	public ReportDTO findReportById(long id) {
-		Optional<Report> report = reportRepository.findById(id);
-		if(!report.isPresent()) throw new ReportNotFoundException();
-		return toReportDTO(report.get());
+	public ReportResponseDTO findReportById(long id) {
+		Optional<Report> optionalReport = reportRepository.findById(id);
+		if(!optionalReport.isPresent()) {
+			//TODO
+			throw new ReportNotFoundException();
+		}
+		Report report = optionalReport.get();
+		
+		ReportResponseDTO reportResponseDTO = toReportResponseDTO(report);
+		
+		return reportResponseDTO;
 	}
 	
-	public List<ReportDTO> findReportByIdItinerary(Long idItinerary) {
-		if(idItinerary == null) throw new ItineraryIdNullException();
+	
+	public ListReportResponseDTO findReportByIdItinerary(Long idItinerary, int page) {
+		if(idItinerary == null || idItinerary < 0) {
+			//TODO
+			throw new ItineraryIdNullException();
+		}
 		
-		Optional<Itinerary> itinerary = itineraryRepository.findById(idItinerary);
-		if(!itinerary.isPresent()) throw new ItineraryNotFoundException();
+		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(idItinerary);
+		if(!optionalItinerary.isPresent()) {
+			//TODO
+			throw new ItineraryNotFoundException();
+		}
 		
-		//List<Report> reports = reportRepository.findByItinerary_id(itinerary.get().getId());
-		List<Report> reports = reportRepository.findByItinerary(itinerary.get());
-		List<ReportDTO> reportsDTO = toListReportDTO(reports);
-		return reportsDTO;
+		Pageable pageable = PageRequest.of(page, REPORT_PER_PAGE);
+		List<Report> reports = reportRepository.findByItinerary_id(idItinerary, pageable);
+		ListReportResponseDTO listReportResponseDTO = toListReportResponseDTO(reports);
+		return listReportResponseDTO;
 	}
 		
 	//SEARCHs
 		
 		
 	//REMOVEs
-	public MessageDTO removeReportById(long id) {
+	public MessageResponseDTO removeReportById(long id) {
 		Optional<Report> report = reportRepository.findById(id);
-		if(!report.isPresent()) throw new ReportNotFoundException();
+		if(!report.isPresent()) {
+			//TODO
+			throw new ReportNotFoundException();
+		}
 		
 		reportRepository.delete(report.get());
-		
-		MessageDTO message = new MessageDTO(SUCCESSFUL_REMOVAL_CODE, SUCCESSFUL_REMOVAL_MESSAGE);
-		return message;
+	
+		return new MessageResponseDTO();
 	}
+	
 	
 	
 	
 	//MAPPERs
 	//Entities -> DTOs
-	
-	public ReportDTO toReportDTO(Report report) {
+	public ReportResponseDTO toReportResponseDTO(Report report) {
 		if(report == null) return null;
 		
-		ReportDTO reportDTO = new ReportDTO();
+		ReportResponseDTO reportDTO = new ReportResponseDTO();
 		reportDTO.setId(report.getId());
 		reportDTO.setName(report.getName());
 		reportDTO.setDescription(report.getDescription());
@@ -118,52 +140,60 @@ public class ReportService {
 		Date date = new Date(report.getDateOfInput().getTime());
 		reportDTO.setDateOfInput(date);
 		
+		reportDTO.setResultMessage(new MessageResponseDTO());
+		
 		return reportDTO;
 	}
 	
-	public List<ReportDTO> toListReportDTO(List<Report> reports){
-		if(reports == null) return null;
+	public ListReportResponseDTO toListReportResponseDTO(List<Report> reports){
+		ListReportResponseDTO listReportResponseDTO = new ListReportResponseDTO();
+		List<ReportResponseDTO> reportsDTO = new LinkedList<ReportResponseDTO>();
 		
-		List<ReportDTO> reportsDTO = new LinkedList<ReportDTO>();
-		
-		if(reports.isEmpty()) return reportsDTO;
+		if(reports == null) {
+			listReportResponseDTO.setListReport(null);
+			listReportResponseDTO.setResultMessage(new MessageResponseDTO());
+			return listReportResponseDTO;
+		}
 		
 		for(Report report : reports) {
-			reportsDTO.add(toReportDTO(report));
+			reportsDTO.add(toReportResponseDTO(report));
 		}
-		return reportsDTO;
+		
+		listReportResponseDTO.setListReport(reportsDTO);
+		listReportResponseDTO.setResultMessage(new MessageResponseDTO());
+		return listReportResponseDTO;
 	}
 
-	//DTOs -> Entities
 	
-	private Report toReportEntity(ReportDTO reportDTO) {
+	//DTOs -> Entities
+	private Report toReportEntity(ReportRequestDTO reportRequestDTO) {
 		
 		Report report = new Report();
-		report.setId(reportDTO.getId());
-		report.setName(reportDTO.getName());
-		report.setDescription(reportDTO.getDescription());
+		report.setId(reportRequestDTO.getId());
+		report.setName(reportRequestDTO.getName());
+		report.setDescription(reportRequestDTO.getDescription());
 		
-		Optional<User> user = userRepository.findById(reportDTO.getIdUser());
+		Optional<User> user = userRepository.findById(reportRequestDTO.getIdUser());
 		if(!user.isPresent()) throw new UserNotFoundException();
 		report.setUser(user.get());
 		
-		Optional<Itinerary> itinerary = itineraryRepository.findById(reportDTO.getIdItinerary());
+		Optional<Itinerary> itinerary = itineraryRepository.findById(reportRequestDTO.getIdItinerary());
 		if(!itinerary.isPresent()) throw new ItineraryNotFoundException();
 		report.setItinerary(itinerary.get());
 		
 		return report;
 	}
 
-	//VALIDATORs
 	
-	boolean isValidDTO(ReportDTO reportDTO) {
+	//VALIDATORs
+	boolean isValidDTO(ReportRequestDTO reportRequestDTO) {
 			
-		if(reportDTO == null) return false;
+		if(reportRequestDTO == null) return false;
 			
-		if(reportDTO.getName() == null ||
-		   reportDTO.getDateOfInput() == null ||
-		   reportDTO.getIdUser() == null ||
-		   reportDTO.getIdItinerary() == null)
+		if(reportRequestDTO.getName() == null ||
+		   reportRequestDTO.getDateOfInput() == null ||
+		   reportRequestDTO.getIdUser() == null ||
+		   reportRequestDTO.getIdItinerary() == null)
 		{
 			return false;
 		}
@@ -171,8 +201,4 @@ public class ReportService {
 		return true;
 	}
 
-
-
-
-	
 }

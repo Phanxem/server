@@ -12,13 +12,15 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.natour.server.application.dtos.MessageDTO;
-import com.natour.server.application.dtos.SuccessMessageDTO;
 import com.natour.server.application.dtos.request.ItineraryRequestDTO;
 import com.natour.server.application.dtos.response.ItineraryResponseDTO;
+import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
+import com.natour.server.application.dtos.response.MessageResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserIdNullException;
 import com.natour.server.application.exceptionHandler.serverExceptions.FileConvertionFailureException;
 import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryDTOInvalidException;
@@ -38,8 +40,7 @@ import io.jenetics.jpx.GPX;
 @Service
 public class ItineraryService {
 
-	private final static long SUCCESSFUL_REMOVAL_CODE = 100;
-	private final static String SUCCESSFUL_REMOVAL_MESSAGE = "Itinerario rimosso con successo.";
+	private final static int ITINERARY_PER_PAGE = 20;
 	
 	@Autowired
 	private ItineraryRepository itineraryRepository;
@@ -49,16 +50,14 @@ public class ItineraryService {
 	private FileSystemRepository fileSystemRepository;
 	
 	//ADDs
-	public MessageDTO addItinerary(String usernameUser, ItineraryRequestDTO itineraryRequestDTO) {
-		
-		if(usernameUser == null) throw new UserUsernameNullException();
-		
-		Long idUser = userRepository.findIdByUsername(usernameUser);
-		if(idUser == null) throw new UserNotFoundException();
-		itineraryRequestDTO.setIdUser(idUser);
+	public MessageResponseDTO addItinerary(ItineraryRequestDTO itineraryRequestDTO) {
 		
 		
-		if(!isValidDTO(itineraryRequestDTO)) throw new ItineraryDTOInvalidException();
+		
+		if(!isValidDTO(itineraryRequestDTO)) {
+			//TODO
+			throw new ItineraryDTOInvalidException();
+		}
 		
 		Itinerary itinerary = toItineraryEntityWithoutGPXUrl(itineraryRequestDTO);
 		itinerary = itineraryRepository.save(itinerary);
@@ -66,58 +65,58 @@ public class ItineraryService {
 		
 		String gpxName = "gpx-" + itinerary.getId();
 		MultipartFile gpx = itineraryRequestDTO.getGpx();
-		
-		
 		String gpxUrl;	
 		try {
 			gpxUrl = fileSystemRepository.save(gpxName, gpx.getBytes());
 		}
 		catch (IOException e) {
+			//TODO
+			itineraryRepository.delete(itinerary);
 			throw new ItineraryGPXFileSaveFailureException(e);
 		}
 		itinerary.setGpxURL(gpxUrl);
 		
-		
 		Itinerary result = itineraryRepository.save(itinerary);
 		
-		return new SuccessMessageDTO();
+		return new MessageResponseDTO();
 	}
 
 	
 	//UPDATEs
-	public MessageDTO updateItineraray(long id, ItineraryRequestDTO itineraryRequestDTO) {
+	public MessageResponseDTO updateItineraray(long idItinerary, ItineraryRequestDTO itineraryRequestDTO) {
 		
-		Optional<Itinerary> itinerary = itineraryRepository.findById(id);
-		if(!itinerary.isPresent()) throw new ItineraryNotFoundException();
+		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(idItinerary);
+		if(!optionalItinerary.isPresent()) {
+			//TODO
+			throw new ItineraryNotFoundException();
+		}
+		Itinerary oldItinerary = optionalItinerary.get();
 				
-		if(!isValidDTO(itineraryRequestDTO)) throw new ItineraryDTOInvalidException();
-
-		/*
-		GPX gpx = itineraryDTO.getGpx();
-		byte[] gpxByte = toArrayByte(gpx, "gpx-" + id);
-		*/
+		if(!isValidDTO(itineraryRequestDTO)) {
+			//TODO
+			throw new ItineraryDTOInvalidException();
+		}
 		
-		MultipartFile gpx = itineraryRequestDTO.getGpx();
-		
-		//non necessario
-		//TODO rimuovi il file dal fileSystem;
-		
-		
+	
+		MultipartFile gpx = itineraryRequestDTO.getGpx();		
 		String gpxUrl;	
 		try {
-			gpxUrl = fileSystemRepository.save("gpx-" + id, gpx.getBytes());
+			//TODO testare
+			fileSystemRepository.delete(oldItinerary.getGpxURL());
+			gpxUrl = fileSystemRepository.save("gpx-" + idItinerary, gpx.getBytes());
 		}
 		catch (IOException e) {
+			//TODO
 			throw new ItineraryGPXFileSaveFailureException(e);
 		}
 		
-		//non necessario?
-		int updatedElement = itineraryRepository.updateGPXFileURL(id,gpxUrl);
-		if(updatedElement == 0) throw new ItineraryGPXFileUpdateFailureException();
+		Itinerary itinerary = toItineraryEntityWithoutGPXUrl(itineraryRequestDTO);
+		itinerary.setId(idItinerary);
+		itinerary.setGpxURL(gpxUrl);
 		
-	
-		Optional<Itinerary> result = itineraryRepository.findById(id);
-		return new SuccessMessageDTO();
+		Itinerary result = itineraryRepository.save(itinerary);
+		
+		return new MessageResponseDTO();
 	}
 	
 	
@@ -125,126 +124,69 @@ public class ItineraryService {
 	
 	//FINDs
 	public ItineraryResponseDTO findItineraryById(long id) {
-		Optional<Itinerary> itinerary = itineraryRepository.findById(id);
-		//TODO DA TESTARE
-		if(!itinerary.isPresent()) throw new ItineraryNotFoundException(); 
+		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(id);
+		if(!optionalItinerary.isPresent()) {
+			//TODO
+			throw new ItineraryNotFoundException(); 
+		}
+		Itinerary itinerary = optionalItinerary.get();
 		
-		return toItineraryResponseDTO(itinerary.get());
+		ItineraryResponseDTO itineraryResponseDTO = toItineraryResponseDTO(itinerary);
+		
+		return itineraryResponseDTO;
 	}
 	
-	public List<ItineraryResponseDTO> findItineraryByIdUser(Long idUser) {
-		if(idUser == null) throw new UserIdNullException();
+	
+	
+	
+	public ListItineraryResponseDTO findItineraryByIdUser(Long idUser, int page) {
+		if(idUser == null || idUser < 0) {
+			//TODO
+			throw new UserIdNullException();
+		}
 		
-		Optional<User> user = userRepository.findById(idUser);
-		if(!user.isPresent()) throw new UserNotFoundException();
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(!optionalUser.isPresent()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
 		
-		//List<Itinerary> itineraries = itineraryRepository.findByUser_id(user.get().getId());
-		List<Itinerary> itineraries = itineraryRepository.findByUser(user.get());
-		List<ItineraryResponseDTO> itinerariesDTO = toListItineraryResponseDTO(itineraries);
+		Pageable pageable = PageRequest.of(page, ITINERARY_PER_PAGE);
+		List<Itinerary> itineraries = itineraryRepository.findByUser_id(idUser, pageable);
+		ListItineraryResponseDTO itinerariesDTO = toListItineraryResponseDTO(itineraries);
 		
 		return itinerariesDTO;
 	}
-	
-	public List<ItineraryResponseDTO> findItineraryByUsernameUser(String usernameUser) {
-		if(usernameUser == null) throw new UserUsernameNullException();
-		
-		User user = userRepository.findByUsername(usernameUser);
-		if(user == null) throw new UserNotFoundException();
-		
-		//List<Itinerary> itineraries = itineraryRepository.findByUser_username(usernameUser);
-		List<Itinerary> itineraries = itineraryRepository.findByUser(user);
-		List<ItineraryResponseDTO> itinerariesDTO = toListItineraryResponseDTO(itineraries);
-		
-		return itinerariesDTO;
-	}
-
 		
 	
 	//SEARCHs
-	public List<ItineraryResponseDTO> searchItineraryByName(String name) {
-		List<Itinerary> itineraries = itineraryRepository.findByNameContaining(name);
+	public ListItineraryResponseDTO searchItineraryByName(String name, int page) {
+		Pageable pageable = PageRequest.of(page, ITINERARY_PER_PAGE);
+		List<Itinerary> itineraries = itineraryRepository.findByNameContaining(name,pageable);
 		
-		List<ItineraryResponseDTO> itinerariesDTO = toListItineraryResponseDTO(itineraries);
+		ListItineraryResponseDTO itinerariesDTO = toListItineraryResponseDTO(itineraries);
 
 		return itinerariesDTO;
 	}
 		
 		
 	//REMOVEs
-	public MessageDTO removeItineraryById(long id) {
-		
+	public MessageResponseDTO removeItineraryById(long id) {
 		Optional<Itinerary> itinerary = itineraryRepository.findById(id);
-		if(!itinerary.isPresent()) throw new ItineraryNotFoundException();
+		if(!itinerary.isPresent()) {
+			//TODO
+			throw new ItineraryNotFoundException();
+		}
 		
 		itineraryRepository.delete(itinerary.get());
 		
-		MessageDTO message = new MessageDTO(SUCCESSFUL_REMOVAL_CODE, SUCCESSFUL_REMOVAL_MESSAGE);
-		return message;
+		return new MessageResponseDTO();
 	}
 	
 	//----------------------------------------------------------------------
 	
 	//MAPPER
-	/*
-	public ItineraryDTO toItineraryDTO(Itinerary itinerary) {
-		
-		if(itinerary == null) return null;
-		
-		ItineraryDTO itineraryDTO = new ItineraryDTO();
-		itineraryDTO.setId(itinerary.getId());
-		itineraryDTO.setName(itinerary.getName());
-		itineraryDTO.setDescription(itinerary.getDescription());
-		itineraryDTO.setDifficulty(itinerary.getDifficulty());
-		itineraryDTO.setDuration(itinerary.getDuration());
-		itineraryDTO.setLenght(itinerary.getLenght());
-		
-		itineraryDTO.setIdUser(itinerary.getUser().getId());
-		
-		FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(itinerary.getGpxURL());
-		byte[] gpx = FileSystemUtils.toArrayByte(fileSystemResource);
-		itineraryDTO.setGpx(gpx);
-		
-		return itineraryDTO;
-	}
 
-
-	public List<ItineraryDTO> toListItineraryDTO(List<Itinerary> itineraries){
-		if(itineraries == null) return null;
-		
-		List<ItineraryDTO> itinerariesDTO = new LinkedList<ItineraryDTO>();
-		
-		if(itineraries.isEmpty()) return itinerariesDTO;
-		
-		for(Itinerary itinerary : itineraries) {
-			itinerariesDTO.add(toItineraryDTO(itinerary));
-		}
-		
-		return itinerariesDTO;
-	}
-
-*/
-	/*
-	public Itinerary toItineraryEntity(ItineraryDTO itineraryDTO) {
-		
-		Itinerary itinerary = new Itinerary();
-		itinerary.setName(itineraryDTO.getName());
-		itinerary.setDescription(itineraryDTO.getDescription());
-		itinerary.setDifficulty(itineraryDTO.getDifficulty());
-		itinerary.setLenght(itineraryDTO.getLenght());
-		
-		Optional<User> user = userRepository.findById(itineraryDTO.getIdUser());
-		if(!user.isPresent()) throw new UserNotFoundException();
-		itinerary.setUser(user.get());
-		
-		//TODOs
-		itinerary.setDuration(null);
-		
-		itinerary.setGpxURL("");
-		
-		return itinerary;
-	}
-	*/
-	
 	public Itinerary toItineraryEntityWithoutGPXUrl(ItineraryRequestDTO itineraryDTO) {
 		
 		Itinerary itinerary = new Itinerary();
@@ -287,22 +229,31 @@ public class ItineraryService {
 		FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(itinerary.getGpxURL());
 		dto.setGpx(fileSystemResource);
 		
+		dto.setResultMessage(new MessageResponseDTO());
+		
 		return dto;
 	}
 	
 	
-	public List<ItineraryResponseDTO> toListItineraryResponseDTO(List<Itinerary> itineraries){
-		if(itineraries == null) return null;
+	public ListItineraryResponseDTO toListItineraryResponseDTO(List<Itinerary> itineraries){
+		ListItineraryResponseDTO listItineraryResponseDTO = new ListItineraryResponseDTO();
+		List<ItineraryResponseDTO> itinerariesDTO = new LinkedList<ItineraryResponseDTO>();
 		
-		List<ItineraryResponseDTO> dto = new LinkedList<ItineraryResponseDTO>();
 		
-		if(itineraries.isEmpty()) return dto;
-		
-		for(Itinerary itinerary : itineraries) {
-			dto.add(toItineraryResponseDTO(itinerary));
+		if(itineraries == null) {
+			listItineraryResponseDTO.setListItinerary(null);
+			listItineraryResponseDTO.setResultMessage(new MessageResponseDTO());
+			return listItineraryResponseDTO;
 		}
 		
-		return dto;
+		
+		for(Itinerary itinerary : itineraries) {
+			itinerariesDTO.add(toItineraryResponseDTO(itinerary));
+		}
+		
+		listItineraryResponseDTO.setListItinerary(itinerariesDTO);
+		listItineraryResponseDTO.setResultMessage(new MessageResponseDTO());
+		return listItineraryResponseDTO;
 	}
 	
 	
@@ -315,24 +266,30 @@ public class ItineraryService {
 				
 		if(itineraryDTO.getName() == null) System.out.println("errore nome");
 		
-
-		try {
-			if(itineraryDTO.getName() == null ||
-			   itineraryDTO.getDifficulty() == null ||
-			   itineraryDTO.getDifficulty() < 0 ||
-			   itineraryDTO.getDifficulty() > 2 ||
-			   itineraryDTO.getLenght() == null ||
-			   itineraryDTO.getDuration() == null ||
-			   itineraryDTO.getGpx() == null ||
-			   itineraryDTO.getGpx().getBytes().length == 0 ||
-			   itineraryDTO.getIdUser() == null )
-			{
-				return false;
-			}
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if(itineraryDTO.getName() == null ||
+		   itineraryDTO.getDifficulty() == null ||
+		   itineraryDTO.getDifficulty() < 0 ||
+		   itineraryDTO.getDifficulty() > 2 ||
+		   itineraryDTO.getLenght() == null ||
+		   itineraryDTO.getDuration() == null ||
+		   itineraryDTO.getGpx() == null ||
+		   itineraryDTO.getIdUser() == null )
+		{
+			return false;
 		}
+		
+		try {
+			if(itineraryDTO.getGpx().getBytes().length == 0) return false;
+		}
+		catch (IOException e) {
+			e.printStackTrace();
+			return false;
+		}
+		
+		if(itineraryDTO.getIdUser() < 0) return false;
+		
+		Optional<User> optionalUser = userRepository.findById(itineraryDTO.getIdUser());
+		if(optionalUser.isEmpty()) return false;
 		
 		return true;
 	}

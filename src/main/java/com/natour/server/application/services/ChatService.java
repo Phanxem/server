@@ -18,9 +18,8 @@ import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagement
 import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagementApiClientBuilder;
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionRequest;
 import com.google.gson.JsonObject;
-import com.natour.server.application.dtos.MessageDTO;
-import com.natour.server.application.dtos.SuccessMessageDTO;
 import com.natour.server.application.dtos.request.ChatRequestDTO;
+import com.natour.server.application.dtos.response.MessageResponseDTO;
 import com.natour.server.data.entities.ChatConnection;
 import com.natour.server.data.repository.ChatConnectionRepository;
 import com.natour.server.presentation.restController.ChatRestController;

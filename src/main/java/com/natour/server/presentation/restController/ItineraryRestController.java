@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.natour.server.application.dtos.MessageDTO;
 import com.natour.server.application.dtos.request.ItineraryRequestDTO;
 import com.natour.server.application.dtos.response.ItineraryResponseDTO;
+import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
+import com.natour.server.application.dtos.response.MessageResponseDTO;
 import com.natour.server.application.services.ItineraryService;
+import com.natour.server.application.services.ResultCodeUtils;
 
 
 
@@ -31,51 +33,47 @@ public class ItineraryRestController {
 	
 	
 	//GETs
-	@RequestMapping(value="/get/{id}", method=RequestMethod.GET)
+	@RequestMapping(value="/get/{idItinerary}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ItineraryResponseDTO> getItineraryById(@PathVariable("id") long id){
+	public ResponseEntity<ItineraryResponseDTO> getItineraryById(@PathVariable("idItinerary") long idItinerary){
 		System.out.println("TEST: GET id");
 		
-		ItineraryResponseDTO result = itineraryService.findItineraryById(id);
-		return new ResponseEntity<ItineraryResponseDTO>(result, HttpStatus.OK);
+		ItineraryResponseDTO result = itineraryService.findItineraryById(idItinerary);
+		MessageResponseDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		
+		return new ResponseEntity<ItineraryResponseDTO>(result, resultHttpStatus);
 		
 	}
 		
 	//---
 	
-	@RequestMapping(value="/get/user/{idUser}", method=RequestMethod.GET)
+	@RequestMapping(value="/get", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<List<ItineraryResponseDTO>> getItinerariesByIdUser(@PathVariable("idUser") Long idUser){
-		System.out.println("TEST: GET idUser");
+	public ResponseEntity<ListItineraryResponseDTO> getItinerariesByIdUser(@RequestParam long idUser, @RequestParam int page){
+		System.out.println("TEST: GET by idUser");
 		
-		List<ItineraryResponseDTO> result = itineraryService.findItineraryByIdUser(idUser);
-		return new ResponseEntity<List<ItineraryResponseDTO>>(result, HttpStatus.OK);
+		ListItineraryResponseDTO result = itineraryService.findItineraryByIdUser(idUser, page);
+		MessageResponseDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
 		
+		return new ResponseEntity<ListItineraryResponseDTO>(result, resultHttpStatus);
 	}
 	
 	//---
-	
-	@RequestMapping(value="/get/user", method=RequestMethod.GET)
-	@ResponseBody
-	public ResponseEntity<List<ItineraryResponseDTO>> getItineraryByUsernameUser(@RequestParam String username){
-		System.out.println("TEST: GET usernameUser");
-		
-		List<ItineraryResponseDTO> result = itineraryService.findItineraryByUsernameUser(username);
-		return new ResponseEntity<List<ItineraryResponseDTO>>(result, HttpStatus.OK);
-		
-	}
-	
-	
+
 		
 	//SEARCH
 	@RequestMapping(value="/search", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<List<ItineraryResponseDTO>> searchUserByUsername(@RequestParam String name){
+	public ResponseEntity<ListItineraryResponseDTO> searchUserByUsername(@RequestParam String name, @RequestParam int page){
 		System.out.println("TEST: SEARCH");
 		
-		List<ItineraryResponseDTO> result = itineraryService.searchItineraryByName(name);
-		return new ResponseEntity<List<ItineraryResponseDTO>>(result, HttpStatus.OK);
+		ListItineraryResponseDTO result = itineraryService.searchItineraryByName(name, page);
+		MessageResponseDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
 		
+		return new ResponseEntity<ListItineraryResponseDTO>(result, resultHttpStatus);
 	}
 	
 	
@@ -83,45 +81,43 @@ public class ItineraryRestController {
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<MessageDTO> addUser(@RequestParam String usernameUser,
-											  @ModelAttribute ItineraryRequestDTO itineraryRequestDTO){
+	public ResponseEntity<MessageResponseDTO> addUser(@ModelAttribute ItineraryRequestDTO itineraryRequestDTO){
 		System.out.println("TEST: ADD");
 		
-		/*
-		Long idUser = userService.getIdByUsername(usernameUser);
-		itineraryDTO.setIdUser(idUser);
-		*/
+		MessageResponseDTO result = itineraryService.addItinerary(itineraryRequestDTO);
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
 		
-		MessageDTO result = itineraryService.addItinerary(usernameUser, itineraryRequestDTO);
-		
-		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);
+		return new ResponseEntity<MessageResponseDTO>(result, resultHttpStatus);
 		
 	}
 	
 	
 		
 	//PUTs
-	@RequestMapping(value="/update/{id}", method=RequestMethod.PUT)
+	@RequestMapping(value="/update/{idItinerary}", method=RequestMethod.PUT)
 	@ResponseBody
-	public ResponseEntity<MessageDTO> updateItinerary(@PathVariable("id") long id,
-														@RequestBody ItineraryRequestDTO itineraryDTO)
+	public ResponseEntity<MessageResponseDTO> updateItinerary(@PathVariable("idItinerary") long idItinerary,
+															  @RequestBody ItineraryRequestDTO itineraryDTO)
 	{
 		System.out.println("TEST: UPDATE ITINERARY");
 		
-		MessageDTO result = itineraryService.updateItineraray(id, itineraryDTO);
+		MessageResponseDTO result = itineraryService.updateItineraray(idItinerary, itineraryDTO);
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
 		
-		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);
+		return new ResponseEntity<MessageResponseDTO>(result, resultHttpStatus);
 		
 	}
 	
 	//DELETEs
-	@RequestMapping(value="/delete/{id}", method=RequestMethod.DELETE)
+	@RequestMapping(value="/delete/{idItinerary}", method=RequestMethod.DELETE)
 	@ResponseBody
-	public ResponseEntity<MessageDTO> deleteItineraryById(@PathVariable("id") long id){
+	public ResponseEntity<MessageResponseDTO> deleteItineraryById(@PathVariable("idItinerary") long idItinerary){
 		System.out.println("TEST: DELETE id");
 		
-		MessageDTO result = itineraryService.removeItineraryById(id);
-		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);
+		MessageResponseDTO result = itineraryService.removeItineraryById(idItinerary);
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		
+		return new ResponseEntity<MessageResponseDTO>(result, resultHttpStatus);
 		
 	}
 }

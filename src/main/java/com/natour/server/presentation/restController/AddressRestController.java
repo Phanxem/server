@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.natour.server.application.dtos.AddressDTO;
+import com.natour.server.application.dtos.response.AddressResponseDTO;
+import com.natour.server.application.dtos.response.ListAddressResponseDTO;
 import com.natour.server.application.services.AddressService;
 
 @RestController
@@ -25,22 +26,22 @@ public class AddressRestController {
 	//GETs
 	@RequestMapping(value="/get/{coordinates}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<AddressDTO> getAddressByCoordinates(@PathVariable("coordinates") String coordinates){
+	public ResponseEntity<AddressResponseDTO> getAddressByCoordinates(@PathVariable("coordinates") String coordinates){
 		System.out.println("TEST: GET coordinates");
 		
-		AddressDTO result = addressService.findAddressByCoordinates(coordinates);
-		return new ResponseEntity<AddressDTO>(result, HttpStatus.OK);
+		AddressResponseDTO result = addressService.findAddressByCoordinates(coordinates);
+		return new ResponseEntity<AddressResponseDTO>(result, HttpStatus.OK);
 	}
 	
 			
 	//SEARCH
 	@RequestMapping(value="/search", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<List<AddressDTO>> searchAddressByQuery(@RequestParam("query") String query){
+	public ResponseEntity<ListAddressResponseDTO> searchAddressByQuery(@RequestParam("query") String query){
 		System.out.println("TEST: SEARCH query");
 		
-		List<AddressDTO> result = addressService.searchAddressesByQuery(query);
-		return new ResponseEntity<List<AddressDTO>>(result, HttpStatus.OK);
+		ListAddressResponseDTO result = addressService.searchAddressesByQuery(query);
+		return new ResponseEntity<ListAddressResponseDTO>(result, HttpStatus.OK);
 		
 	}
 		

@@ -1,12 +1,12 @@
-package com.natour.server.application.dtos;
+package com.natour.server.application.dtos.response;
 
-public class PointDTO {
+public class PointResponseDTO {
 	private double lon;
 	private double lat;
 	
-	public PointDTO() {}
+	public PointResponseDTO() {}
 	
-	public PointDTO(double lon, double lat) {
+	public PointResponseDTO(double lon, double lat) {
 		this.lon = lon;
 		this.lat = lat;
 	}

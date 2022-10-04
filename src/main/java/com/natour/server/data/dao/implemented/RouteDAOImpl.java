@@ -12,10 +12,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.natour.server.application.dtos.MessageDTO;
-import com.natour.server.application.dtos.PointDTO;
-import com.natour.server.application.dtos.RouteDTO;
-import com.natour.server.application.dtos.RouteLegDTO;
+import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.PointResponseDTO;
+import com.natour.server.application.dtos.response.RouteLegResponseDTO;
+import com.natour.server.application.dtos.response.RouteResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.TODORouteException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
 import com.natour.server.data.dao.interfaces.RouteDAO;
@@ -38,11 +38,19 @@ public class RouteDAOImpl implements RouteDAO{
     private static final String KEY_DURATION = "duration";
     
 	
-    private RouteDTO buildRouteDTO(JsonObject jsonObject) {
+    private RouteResponseDTO buildRouteDTO(JsonObject jsonObject) {
 
-    	if(!jsonObject.has(KEY_CODE)) return null;
-    	if(!jsonObject.get(KEY_CODE).getAsString().equals(OK_CODE)) return null;
-    	if(!jsonObject.has(KEY_ROUTES) || !jsonObject.has(KEY_WAYPOINTS) ) return null;
+    	RouteResponseDTO routeDTO = new RouteResponseDTO();
+    	
+    	if(!jsonObject.has(KEY_CODE) ||
+    	   !jsonObject.get(KEY_CODE).getAsString().equals(OK_CODE) ||
+    	   !jsonObject.has(KEY_ROUTES) ||
+    	   !jsonObject.has(KEY_WAYPOINTS) )
+    	{
+    		MessageResponseDTO messageResponseDTO = new MessageResponseDTO(-100, "error");
+    		routeDTO.setResultMessage(messageResponseDTO);
+    		return routeDTO;
+    	}
 
     	JsonArray jsonArrayRoute = jsonObject.get(KEY_ROUTES).getAsJsonArray();
     	JsonObject jsonObjectRoute = jsonArrayRoute.get(0).getAsJsonObject();
@@ -51,12 +59,12 @@ public class RouteDAOImpl implements RouteDAO{
     	JsonArray jsonArrayLegs = jsonObjectRoute.get(KEY_LEGS).getAsJsonArray();
     	JsonArray jsonArrayWayPoints = jsonObject.get(KEY_WAYPOINTS).getAsJsonArray();
     	
-    	List<PointDTO> wayPoints = new ArrayList<PointDTO>();
+    	List<PointResponseDTO> wayPoints = new ArrayList<PointResponseDTO>();
     	for(JsonElement jsonElementWayPoint: jsonArrayWayPoints) {
     		JsonObject jsonObjectWayPoint = jsonElementWayPoint.getAsJsonObject();
     		JsonArray jsonArrayLocation = jsonObjectWayPoint.get(KEY_LOCATION).getAsJsonArray();
     		
-    		PointDTO pointDTO = new PointDTO();
+    		PointResponseDTO pointDTO = new PointResponseDTO();
     		pointDTO.setLon(jsonArrayLocation.get(0).getAsDouble());
     		pointDTO.setLat(jsonArrayLocation.get(1).getAsDouble());
     		
@@ -64,10 +72,10 @@ public class RouteDAOImpl implements RouteDAO{
     	}
     	
     	
-    	List<RouteLegDTO> tracks = new ArrayList<RouteLegDTO>();
+    	List<RouteLegResponseDTO> tracks = new ArrayList<RouteLegResponseDTO>();
     	int j = 0;
     	for(int i = 0; i < jsonArrayLegs.size(); i++) {
-    		RouteLegDTO routeLeg = new RouteLegDTO();
+    		RouteLegResponseDTO routeLeg = new RouteLegResponseDTO();
     		
     		routeLeg.setStartingPoint(wayPoints.get(i));
     		routeLeg.setDestinationPoint(wayPoints.get(i+1));
@@ -77,9 +85,9 @@ public class RouteDAOImpl implements RouteDAO{
     		routeLeg.setDuration(jsonObjectLeg.get(KEY_DURATION).getAsFloat());
     		
     		
-    		List<PointDTO> routeLegTrack = new ArrayList<PointDTO>();
+    		List<PointResponseDTO> routeLegTrack = new ArrayList<PointResponseDTO>();
     		for(; j < jsonArrayCoordinates.size(); j++) {
-    			PointDTO pointDTO = new PointDTO();
+    			PointResponseDTO pointDTO = new PointResponseDTO();
     			JsonArray jsonArrayPoint = jsonArrayCoordinates.get(j).getAsJsonArray();
     			
     			pointDTO.setLon(jsonArrayPoint.get(0).getAsDouble());
@@ -98,23 +106,16 @@ public class RouteDAOImpl implements RouteDAO{
     	}
     	
     	
-    	RouteDTO routeDTO = new RouteDTO();
     	routeDTO.setWayPoints(wayPoints);
     	routeDTO.setTracks(tracks);
+    	routeDTO.setResultMessage(new MessageResponseDTO());
     	
     	return routeDTO;
     }
     
-    
-    
-    
-	@Override
-	public RouteDTO findRouteByPoints(List<PointDTO> points) {
-		return null;
-	}
 
 	@Override
-	public RouteDTO findRouteByCoordinates(String coordinates) {
+	public RouteResponseDTO findRouteByCoordinates(String coordinates) {
 		String url = ROUTING_SERVICE_URL + MEAN_BY_FOOT
 				   + coordinates
 				   + "?overview=full"
@@ -132,7 +133,7 @@ public class RouteDAOImpl implements RouteDAO{
 		
         
         
-        RouteDTO result = buildRouteDTO(jsonObjectResult);
+        RouteResponseDTO result = buildRouteDTO(jsonObjectResult);
         
         if(result == null) throw new TODORouteException();
         

@@ -1,11 +1,8 @@
 package com.natour.server.application.dtos;
 
-import java.sql.Date;
-
 import org.springframework.web.multipart.MultipartFile;
 
 public class UserDTO {
-
 
 	private Long id;
 	private String username;

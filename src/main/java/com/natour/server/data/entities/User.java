@@ -46,6 +46,14 @@ public class User {
 	
 	
 	
+	public User() {}
+	
+	public User(String identityProvider, String idIdentityProvided, String username) {
+		this.identityProvider = identityProvider;
+		this.idIdentityProvided = idIdentityProvided;
+		this.username = username;
+	}
+	
 	public String getIdentityProvider() {
 		return identityProvider;
 	}
@@ -70,18 +78,6 @@ public class User {
 		this.chats = chats;
 	}
 
-	
-	
-	
-	
-	
-	public User() {}
-	
-	public User(String identityProvider, String idIdentityProvided, String username) {
-		this.identityProvider = identityProvider;
-		this.idIdentityProvided = idIdentityProvided;
-		this.username = username;
-	}
 	
 	public String getUsername() {
 		return username;
