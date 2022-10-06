@@ -4,14 +4,14 @@ import java.util.List;
 
 public class ListAddressResponseDTO {
 
-	private MessageResponseDTO resultMessage;
+	private ResultMessageDTO resultMessage;
 	private List<AddressResponseDTO> listAddresses;
 	
 	
-	public MessageResponseDTO getResultMessage() {
+	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
-	public void setResultMessage(MessageResponseDTO resultMessage) {
+	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
 	public List<AddressResponseDTO> getListAddresses() {

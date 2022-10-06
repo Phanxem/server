@@ -5,7 +5,7 @@ import java.util.Date;
 
 public class ReportResponseDTO {
 
-	private MessageResponseDTO resultMessage;
+	private ResultMessageDTO resultMessage;
 	
 	private Long id;
 	private String name;
@@ -18,10 +18,10 @@ public class ReportResponseDTO {
 	
 	
 	
-	public MessageResponseDTO getResultMessage() {
+	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
-	public void setResultMessage(MessageResponseDTO resultMessage) {
+	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
 	public Long getId() {

@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.natour.server.application.dtos.request.ItineraryRequestDTO;
 import com.natour.server.application.dtos.response.ItineraryResponseDTO;
 import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
-import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserIdNullException;
 import com.natour.server.application.exceptionHandler.serverExceptions.FileConvertionFailureException;
 import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryDTOInvalidException;
@@ -50,7 +50,7 @@ public class ItineraryService {
 	private FileSystemRepository fileSystemRepository;
 	
 	//ADDs
-	public MessageResponseDTO addItinerary(ItineraryRequestDTO itineraryRequestDTO) {
+	public ResultMessageDTO addItinerary(ItineraryRequestDTO itineraryRequestDTO) {
 		
 		
 		
@@ -78,12 +78,12 @@ public class ItineraryService {
 		
 		Itinerary result = itineraryRepository.save(itinerary);
 		
-		return new MessageResponseDTO();
+		return new ResultMessageDTO();
 	}
 
 	
 	//UPDATEs
-	public MessageResponseDTO updateItineraray(long idItinerary, ItineraryRequestDTO itineraryRequestDTO) {
+	public ResultMessageDTO updateItineraray(long idItinerary, ItineraryRequestDTO itineraryRequestDTO) {
 		
 		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(idItinerary);
 		if(!optionalItinerary.isPresent()) {
@@ -116,7 +116,7 @@ public class ItineraryService {
 		
 		Itinerary result = itineraryRepository.save(itinerary);
 		
-		return new MessageResponseDTO();
+		return new ResultMessageDTO();
 	}
 	
 	
@@ -158,6 +158,14 @@ public class ItineraryService {
 		return itinerariesDTO;
 	}
 		
+	public ListItineraryResponseDTO findRandomItineraries() {
+		
+		List<Itinerary> itineraries = itineraryRepository.findRandom();
+		ListItineraryResponseDTO itinerariesDTO = toListItineraryResponseDTO(itineraries);
+		
+		return itinerariesDTO;
+	}
+
 	
 	//SEARCHs
 	public ListItineraryResponseDTO searchItineraryByName(String name, int page) {
@@ -171,7 +179,7 @@ public class ItineraryService {
 		
 		
 	//REMOVEs
-	public MessageResponseDTO removeItineraryById(long id) {
+	public ResultMessageDTO removeItineraryById(long id) {
 		Optional<Itinerary> itinerary = itineraryRepository.findById(id);
 		if(!itinerary.isPresent()) {
 			//TODO
@@ -180,7 +188,7 @@ public class ItineraryService {
 		
 		itineraryRepository.delete(itinerary.get());
 		
-		return new MessageResponseDTO();
+		return new ResultMessageDTO();
 	}
 	
 	//----------------------------------------------------------------------
@@ -229,7 +237,7 @@ public class ItineraryService {
 		FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(itinerary.getGpxURL());
 		dto.setGpx(fileSystemResource);
 		
-		dto.setResultMessage(new MessageResponseDTO());
+		dto.setResultMessage(new ResultMessageDTO());
 		
 		return dto;
 	}
@@ -242,7 +250,7 @@ public class ItineraryService {
 		
 		if(itineraries == null) {
 			listItineraryResponseDTO.setListItinerary(null);
-			listItineraryResponseDTO.setResultMessage(new MessageResponseDTO());
+			listItineraryResponseDTO.setResultMessage(new ResultMessageDTO());
 			return listItineraryResponseDTO;
 		}
 		
@@ -252,7 +260,7 @@ public class ItineraryService {
 		}
 		
 		listItineraryResponseDTO.setListItinerary(itinerariesDTO);
-		listItineraryResponseDTO.setResultMessage(new MessageResponseDTO());
+		listItineraryResponseDTO.setResultMessage(new ResultMessageDTO());
 		return listItineraryResponseDTO;
 	}
 	
@@ -313,6 +321,8 @@ public class ItineraryService {
 		return gpxByte;
 	}
 
+
+	
 
 	
 	

@@ -6,6 +6,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -16,9 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
+import com.natour.server.application.dtos.request.AddUserRequestDTO;
 import com.natour.server.application.dtos.request.ChatRequestDTO;
-import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ChatResponseDTO;
+import com.natour.server.application.dtos.response.ListMessageResponseDTO;
+import com.natour.server.application.dtos.response.ResultMessageDTO;
+import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.services.ChatService;
+import com.natour.server.application.services.ResultCodeUtils;
 import com.natour.server.application.services.RouteService;
 import com.natour.server.data.entities.ChatConnection;
 
@@ -26,12 +32,72 @@ import com.natour.server.data.entities.ChatConnection;
 @RequestMapping(value="/chat")
 public class ChatRestController {
 
-	/*
+	
 	
 	@Autowired
 	private ChatService chatService;
 	
 	
+	//GETs
+	@RequestMapping(value="/get/{idChat}/messages", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<ListMessageResponseDTO> getMessagesByIdChat(@PathVariable("idChat") long idChat, int page){
+		System.out.println("TEST: GET user");
+		
+		ListMessageResponseDTO result = chatService.findMessagesByIdChat(idChat, page);
+		ResultMessageDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+			
+		return new ResponseEntity<ListMessageResponseDTO>(result, resultHttpStatus);
+	}	
+	
+	//GETs
+	@RequestMapping(value="/get", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<ChatResponseDTO> getChatByIdsUser(@RequestParam long idUser1, @RequestParam long idUser2){
+		System.out.println("TEST: GET user");
+		
+		ChatResponseDTO result = chatService.findChatByIdsUser(idUser1, idUser2);
+		ResultMessageDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+				
+		return new ResponseEntity<ChatResponseDTO>(result, resultHttpStatus);
+	}	
+	
+	
+	//POSTs
+	@RequestMapping(value="/sendMessage", method=RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> sendMessage(@RequestBody ChatRequestDTO chatRequestDTO){
+		System.out.println("TEST: SendMessage");
+							
+		ResultMessageDTO result = chatService.sendMessage(chatRequestDTO);
+							
+		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
+	}
+	
+	
+	
+	
+	
+	/*
+	@RequestMapping(value="/get/{idChat}/users", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<ListMessageResponseDTO> getUserByIdChat(@PathVariable("idChat") long idChat){
+		System.out.println("TEST: GET user");
+		
+		ListResponseDTO result = chatService.findUsersByIdChat(idChat);
+		ResultMessageDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+			
+		return new ResponseEntity<ListMessageResponseDTO>(result, resultHttpStatus);
+	}
+	*/
+	
+	
+	
+	
+	/*
 	//GETs
 	@RequestMapping(value="/connect", method=RequestMethod.GET)
 	@ResponseBody

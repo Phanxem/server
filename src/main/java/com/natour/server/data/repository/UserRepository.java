@@ -24,6 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long>{
 	//DA TESTARE
 	//ricerca utente
 	List<User> findByUsernameContaining(String username, Pageable pageble);
+
+	List<User> findByChat_id(long idChat);
 	
 	
 	

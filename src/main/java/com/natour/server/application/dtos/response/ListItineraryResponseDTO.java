@@ -4,16 +4,16 @@ import java.util.List;
 
 public class ListItineraryResponseDTO {
 
-	private MessageResponseDTO resultMessage;
+	private ResultMessageDTO resultMessage;
 	private List<ItineraryResponseDTO> listItinerary;
 	
 	
 	
 	
-	public MessageResponseDTO getResultMessage() {
+	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
-	public void setResultMessage(MessageResponseDTO resultMessage) {
+	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
 	public List<ItineraryResponseDTO> getListItinerary() {

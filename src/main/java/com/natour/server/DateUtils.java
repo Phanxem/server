@@ -1,5 +1,6 @@
 package com.natour.server;
 
+import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -46,5 +47,12 @@ public class DateUtils {
         String string = dateFormat.format(date);
 
         return string;
+    }
+    
+    public static Timestamp toTimestamp(String string) throws ParseException {
+    	Calendar calendar = toCalendar(string);
+    	Timestamp timestamp = new Timestamp(calendar.getTimeInMillis());
+    	
+		return timestamp;
     }
 }

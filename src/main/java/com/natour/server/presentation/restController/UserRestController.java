@@ -21,12 +21,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.natour.server.application.dtos.UserDTO;
 import com.natour.server.application.dtos.request.AddUserRequestDTO;
 import com.natour.server.application.dtos.request.UpdateUserOptionalInfoRequestDTO;
 import com.natour.server.application.dtos.response.ImageResponseDTO;
 import com.natour.server.application.dtos.response.ListUserResponseDTO;
-import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.services.ResultCodeUtils;
 import com.natour.server.application.services.UserService;
@@ -59,7 +58,7 @@ public class UserRestController {
 		System.out.println("TEST: GET user");
 
 		UserResponseDTO result = userService.findUserById(idUser);
-		MessageResponseDTO resultMessage = result.getResultMessage();
+		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
 		
 		return new ResponseEntity<UserResponseDTO>(result, resultHttpStatus);
@@ -73,7 +72,7 @@ public class UserRestController {
 
 		ImageResponseDTO result = userService.findUserImageById(idUser);
 
-		MessageResponseDTO resultMessage = result.getResultMessage();
+		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus;
 		if(resultMessage.getCode() != 200) {
 			resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
@@ -97,7 +96,22 @@ public class UserRestController {
                 .body(resource);
 	}
 	
+	
+	@RequestMapping(value="/get", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<UserResponseDTO> getUserByIdP(@RequestParam String identityProvider, @RequestParam String idIdentityProvided){
+		System.out.println("TEST: GET user");
+
+		UserResponseDTO result = userService.findUserByIdp(identityProvider, idIdentityProvided);
+		ResultMessageDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
 		
+		return new ResponseEntity<UserResponseDTO>(result, resultHttpStatus);
+	}	
+	
+	
+	
+	
 	//SEARCH
 	@RequestMapping(value="/search", method=RequestMethod.GET)
 	@ResponseBody
@@ -105,7 +119,7 @@ public class UserRestController {
 		System.out.println("TEST: SEARCH");
 		
 		ListUserResponseDTO result = userService.searchUserByUsername(username, page);
-		MessageResponseDTO resultMessage = result.getResultMessage();
+		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
 		
 		return new ResponseEntity<ListUserResponseDTO>(result, resultHttpStatus);
@@ -120,13 +134,13 @@ public class UserRestController {
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<MessageResponseDTO> addUser(@RequestBody AddUserRequestDTO addUserRequest){
+	public ResponseEntity<ResultMessageDTO> addUser(@RequestBody AddUserRequestDTO addUserRequest){
 		System.out.println("TEST: ADD");
 		
-		MessageResponseDTO result = userService.addUser(addUserRequest);
+		ResultMessageDTO result = userService.addUser(addUserRequest);
 		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
 		
-		return new ResponseEntity<MessageResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 		
 	}
 	
@@ -137,34 +151,43 @@ public class UserRestController {
 	//TODO TEST
 	@RequestMapping(value="/update/{idUser}/image", method=RequestMethod.PUT)
 	@ResponseBody
-	public ResponseEntity<MessageResponseDTO> updateProfileImage(@PathVariable("idUser") long idUser,
+	public ResponseEntity<ResultMessageDTO> updateProfileImage(@PathVariable("idUser") long idUser,
 																 @RequestBody MultipartFile image)
 	{
 		System.out.println("TEST: UPDATE IMAGE");
 		
-		MessageResponseDTO result = userService.updateProfileImage(idUser, image);
+		ResultMessageDTO result = userService.updateProfileImage(idUser, image);
 		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
 		
-		return new ResponseEntity<MessageResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 	}
 	
 	//---
 
 	@RequestMapping(value="/update/{idUser}/optionalInfo", method=RequestMethod.PUT)
 	@ResponseBody
-	public ResponseEntity<MessageResponseDTO> updateOptionalInfo(@PathVariable("idUser") long idUser,
+	public ResponseEntity<ResultMessageDTO> updateOptionalInfo(@PathVariable("idUser") long idUser,
 																 @RequestBody UpdateUserOptionalInfoRequestDTO optionalInfo)
 	{
 		System.out.println("TEST: UPDATE OPTIONAL INFO");
-		MessageResponseDTO result = userService.updateOptionalInfo(idUser, optionalInfo);
+		ResultMessageDTO result = userService.updateOptionalInfo(idUser, optionalInfo);
 		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
 		
-		return new ResponseEntity<MessageResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 		
 	}
 
 	//DELETEs
-	//TODO
-	
+	//GETs
+	@RequestMapping(value="/delete", method=RequestMethod.DELETE)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> deleteUserById(@RequestParam String idIdentityProvided){
+			System.out.println("TEST: DELETE user");
+
+			ResultMessageDTO result = userService.deleteCognitoUser(idIdentityProvided);
+			HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+			
+			return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
+		}	
 
 }

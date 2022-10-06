@@ -2,7 +2,7 @@ package com.natour.server.application.dtos.response;
 
 public class AddressResponseDTO {
 
-	private MessageResponseDTO resultMessage;
+	private ResultMessageDTO resultMessage;
 	
 	private PointResponseDTO point;
 	private String addressLine;
@@ -17,7 +17,7 @@ public class AddressResponseDTO {
 	
 	
 	
-	public MessageResponseDTO getResultMessage() {
+	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
 
@@ -27,7 +27,7 @@ public class AddressResponseDTO {
 
 
 
-	public void setResultMessage(MessageResponseDTO resultMessage) {
+	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
 

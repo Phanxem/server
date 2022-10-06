@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import com.natour.server.application.dtos.request.ReportRequestDTO;
 import com.natour.server.application.dtos.response.ListReportResponseDTO;
-import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.ReportResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.ReportDTOInvalidException;
@@ -42,7 +42,7 @@ public class ReportService {
 	
 	
 	//ADDs
-	public MessageResponseDTO addReport(long idUser, ReportRequestDTO reportRequestDTO) {
+	public ResultMessageDTO addReport(long idUser, ReportRequestDTO reportRequestDTO) {
 		if(idUser < 0) {
 			//TODO
 			throw new UserUsernameNullException();
@@ -63,7 +63,7 @@ public class ReportService {
 		
 		Report result = reportRepository.save(report);
 		
-		return new MessageResponseDTO();
+		return new ResultMessageDTO();
 	}
 
 		
@@ -109,7 +109,7 @@ public class ReportService {
 		
 		
 	//REMOVEs
-	public MessageResponseDTO removeReportById(long id) {
+	public ResultMessageDTO removeReportById(long id) {
 		Optional<Report> report = reportRepository.findById(id);
 		if(!report.isPresent()) {
 			//TODO
@@ -118,7 +118,7 @@ public class ReportService {
 		
 		reportRepository.delete(report.get());
 	
-		return new MessageResponseDTO();
+		return new ResultMessageDTO();
 	}
 	
 	
@@ -140,7 +140,7 @@ public class ReportService {
 		Date date = new Date(report.getDateOfInput().getTime());
 		reportDTO.setDateOfInput(date);
 		
-		reportDTO.setResultMessage(new MessageResponseDTO());
+		reportDTO.setResultMessage(new ResultMessageDTO());
 		
 		return reportDTO;
 	}
@@ -151,7 +151,7 @@ public class ReportService {
 		
 		if(reports == null) {
 			listReportResponseDTO.setListReport(null);
-			listReportResponseDTO.setResultMessage(new MessageResponseDTO());
+			listReportResponseDTO.setResultMessage(new ResultMessageDTO());
 			return listReportResponseDTO;
 		}
 		
@@ -160,7 +160,7 @@ public class ReportService {
 		}
 		
 		listReportResponseDTO.setListReport(reportsDTO);
-		listReportResponseDTO.setResultMessage(new MessageResponseDTO());
+		listReportResponseDTO.setResultMessage(new ResultMessageDTO());
 		return listReportResponseDTO;
 	}
 

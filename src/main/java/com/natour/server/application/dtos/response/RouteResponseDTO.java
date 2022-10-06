@@ -7,7 +7,7 @@ import com.mapbox.services.commons.geojson.LineString;
 
 public class RouteResponseDTO {
 	
-	private MessageResponseDTO resultMessage;
+	private ResultMessageDTO resultMessage;
 	
 	private List<PointResponseDTO> wayPoints;
 	private List<RouteLegResponseDTO> tracks;
@@ -27,11 +27,11 @@ public class RouteResponseDTO {
 	
 	
 	
-	public MessageResponseDTO getResultMessage() {
+	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
 
-	public void setResultMessage(MessageResponseDTO resultMessage) {
+	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
 

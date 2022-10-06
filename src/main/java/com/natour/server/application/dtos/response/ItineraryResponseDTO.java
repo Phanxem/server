@@ -5,7 +5,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 public class ItineraryResponseDTO {
 
-	private MessageResponseDTO resultMessage;
+	private ResultMessageDTO resultMessage;
 	
 	private Long id;
 	private String name;
@@ -20,11 +20,11 @@ public class ItineraryResponseDTO {
 	
 	
 
-	public MessageResponseDTO getResultMessage() {
+	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
 
-	public void setResultMessage(MessageResponseDTO resultMessage) {
+	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
 

@@ -1,22 +1,25 @@
 package com.natour.server.application.dtos.response;
 
-import java.util.List;
-
-public class ListUserResponseDTO {
+public class ChatResponseDTO {
 
 	private ResultMessageDTO resultMessage;
-	private List<UserResponseDTO> listUser;
+	
+	private long id;
+
 	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
+
 	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
-	public List<UserResponseDTO> getListUser() {
-		return listUser;
+
+	public long getId() {
+		return id;
 	}
-	public void setListUser(List<UserResponseDTO> listUser) {
-		this.listUser = listUser;
+
+	public void setId(long id) {
+		this.id = id;
 	}
 	
 	

@@ -2,7 +2,7 @@ package com.natour.server.application.dtos.response;
 
 public class UserResponseDTO {
 
-	private MessageResponseDTO resultMessage;
+	private ResultMessageDTO resultMessage;
 	
 	private long id;
 	private String username;
@@ -16,10 +16,10 @@ public class UserResponseDTO {
 	
 	
 	
-	public MessageResponseDTO getResultMessage() {
+	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
-	public void setResultMessage(MessageResponseDTO resultMessage) {
+	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
 	public long getId() {

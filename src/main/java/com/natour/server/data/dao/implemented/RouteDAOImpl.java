@@ -12,7 +12,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.PointResponseDTO;
 import com.natour.server.application.dtos.response.RouteLegResponseDTO;
 import com.natour.server.application.dtos.response.RouteResponseDTO;
@@ -47,7 +47,7 @@ public class RouteDAOImpl implements RouteDAO{
     	   !jsonObject.has(KEY_ROUTES) ||
     	   !jsonObject.has(KEY_WAYPOINTS) )
     	{
-    		MessageResponseDTO messageResponseDTO = new MessageResponseDTO(-100, "error");
+    		ResultMessageDTO messageResponseDTO = new ResultMessageDTO(-100, "error");
     		routeDTO.setResultMessage(messageResponseDTO);
     		return routeDTO;
     	}
@@ -108,7 +108,7 @@ public class RouteDAOImpl implements RouteDAO{
     	
     	routeDTO.setWayPoints(wayPoints);
     	routeDTO.setTracks(tracks);
-    	routeDTO.setResultMessage(new MessageResponseDTO());
+    	routeDTO.setResultMessage(new ResultMessageDTO());
     	
     	return routeDTO;
     }

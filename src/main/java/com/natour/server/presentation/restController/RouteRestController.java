@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.RouteResponseDTO;
 import com.natour.server.application.services.ResultCodeUtils;
 import com.natour.server.application.services.RouteService;
@@ -29,7 +29,7 @@ public class RouteRestController {
 		System.out.println(coordinates);
 		
 		RouteResponseDTO result = routeService.findRouteByCoordinates(coordinates);
-		MessageResponseDTO resultMessage = result.getResultMessage();
+		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
 		
 		return new ResponseEntity<RouteResponseDTO>(result, resultHttpStatus);

@@ -17,7 +17,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.natour.server.application.dtos.response.AddressResponseDTO;
 import com.natour.server.application.dtos.response.ListAddressResponseDTO;
-import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.PointResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.AddressSearchByPointFailureException;
 import com.natour.server.application.exceptionHandler.serverExceptions.AddressSearchByQueryFailureException;
@@ -59,7 +59,7 @@ public class AddressDAOImpl implements AddressDAO{
             !jsonObjectResult.has(KEY_LONGITUDE) ||
             !jsonObjectResult.has(KEY_ADDRESS))
         {
-    		MessageResponseDTO messageResponseDTO = new MessageResponseDTO(-100, "error");
+    		ResultMessageDTO messageResponseDTO = new ResultMessageDTO(-100, "error");
     		addressDTO.setResultMessage(messageResponseDTO);
     		return addressDTO;
         }
@@ -162,7 +162,7 @@ public class AddressDAOImpl implements AddressDAO{
         
 		ListAddressResponseDTO listAddressResponseDTO = new ListAddressResponseDTO();
 		listAddressResponseDTO.setListAddresses(addresses);
-		listAddressResponseDTO.setResultMessage(new MessageResponseDTO());
+		listAddressResponseDTO.setResultMessage(new ResultMessageDTO());
 		
     	return listAddressResponseDTO;
     }

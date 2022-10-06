@@ -7,10 +7,18 @@ import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 
 import javax.imageio.ImageIO;
@@ -25,12 +33,11 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.natour.server.DateUtils;
 import com.natour.server.FileSystemUtils;
-import com.natour.server.application.dtos.UserDTO;
 import com.natour.server.application.dtos.request.AddUserRequestDTO;
 import com.natour.server.application.dtos.request.UpdateUserOptionalInfoRequestDTO;
 import com.natour.server.application.dtos.response.ImageResponseDTO;
 import com.natour.server.application.dtos.response.ListUserResponseDTO;
-import com.natour.server.application.dtos.response.MessageResponseDTO;
+import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.OptionalInfoUserDTOInvalidException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
@@ -40,7 +47,10 @@ import com.natour.server.application.exceptionHandler.serverExceptions.UserProfi
 import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageUpdateFailureException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameUniqueException;
+import com.natour.server.data.entities.Chat;
+import com.natour.server.data.entities.Message;
 import com.natour.server.data.entities.User;
+import com.natour.server.data.repository.ChatRepository;
 import com.natour.server.data.repository.FileSystemRepository;
 import com.natour.server.data.repository.UserRepository;
 
@@ -52,6 +62,9 @@ public class UserService {
 	private UserRepository userRepository;
 	@Autowired
 	private FileSystemRepository fileSystemRepository;
+	
+	@Autowired
+	private ChatRepository chatRepository;
 
 	
 	private final static String IDENTITY_PROVIDER_COGNITO = "Cognito";
@@ -67,7 +80,7 @@ public class UserService {
 	
 	
 	//ADDs
-	public MessageResponseDTO addUser(AddUserRequestDTO addUserRequestDTO) {
+	public ResultMessageDTO addUser(AddUserRequestDTO addUserRequestDTO) {
 		if(!isValidDTO(addUserRequestDTO)) {
 			//TODO new exception
 			throw new UserUsernameNullException();
@@ -82,13 +95,13 @@ public class UserService {
 		user = new User(addUserRequestDTO.getIdentityProvider(), addUserRequestDTO.getIdIdentityProvided(), addUserRequestDTO.getUsername());
 		User result = userRepository.save(user);
 		
-		return new MessageResponseDTO();
+		return new ResultMessageDTO();
 	}
 	
 	
 	
 	//UPDATEs
-	public MessageResponseDTO updateProfileImage(long idUser,  MultipartFile image) {
+	public ResultMessageDTO updateProfileImage(long idUser,  MultipartFile image) {
 		
 		if(idUser < 0) {
 			//TODO new exception
@@ -125,12 +138,12 @@ public class UserService {
 		
 		User result = userRepository.save(user);
 		
-		return new MessageResponseDTO();
+		return new ResultMessageDTO();
 	}
 	
 	
 	
-	public MessageResponseDTO updateOptionalInfo(long idUser, UpdateUserOptionalInfoRequestDTO optionalInfoUserRequestDTO) {
+	public ResultMessageDTO updateOptionalInfo(long idUser, UpdateUserOptionalInfoRequestDTO optionalInfoUserRequestDTO) {
 		
 		if(idUser < 0) {
 			//TODO
@@ -171,7 +184,7 @@ public class UserService {
 		user.setDateOfBirth(dateOfBirth);
 		
 		User result = userRepository.save(user);
-		return new MessageResponseDTO();
+		return new ResultMessageDTO();
 	}
 	
 	
@@ -188,7 +201,15 @@ public class UserService {
 	}
 	
 
-	
+	public UserResponseDTO findUserByIdp(String identityProvider, String idIdentityProvided) {
+		User user = userRepository.findByIdentityProviderAndIdIdentityProvided(identityProvider, idIdentityProvided);
+		if(user == null) {
+			//TODO
+			throw new UserNotFoundException();
+		}
+		
+		return toUserResponseDTO(user);
+	}
 	
 	public ImageResponseDTO findUserImageById(long idUser) {
 		Optional<User> optionalUser = userRepository.findById(idUser);
@@ -203,17 +224,20 @@ public class UserService {
 			FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(user.getProfileImageURL());
 			if(fileSystemResource != null) {
 				imageResponseDTO.setImage(fileSystemResource);
-				imageResponseDTO.setResultMessage(new MessageResponseDTO());
+				imageResponseDTO.setResultMessage(new ResultMessageDTO());
 				
 				return imageResponseDTO;
 			}
-			imageResponseDTO.setResultMessage(new MessageResponseDTO(-100, "errore1"));
+			imageResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
 			return imageResponseDTO;
 		}
-		imageResponseDTO.setResultMessage(new MessageResponseDTO(-100, "errore1"));
+		imageResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
 		return imageResponseDTO;
 	}
 
+	
+	
+	
 	//SEARCHs
 	
 	public ListUserResponseDTO searchUserByUsername(String username, int page){
@@ -223,19 +247,98 @@ public class UserService {
 		}
 		Pageable pageable = PageRequest.of(page, USER_PER_PAGE);
 		List<User> users = userRepository.findByUsernameContaining(username, pageable);
-				
-		List<UserResponseDTO> usersDTO = toListUserResponseDTO(users);
 		
-		ListUserResponseDTO listUserResponseDTO = new ListUserResponseDTO();
-		
-		listUserResponseDTO.setResultMessage(new MessageResponseDTO());
-		listUserResponseDTO.setListUser(usersDTO);
+		ListUserResponseDTO listUserResponseDTO = toListUserResponseDTO(users);
 		
 		return listUserResponseDTO;
 	}
 	
-	//REMOVEs
 	
+	
+	public ListUserResponseDTO searchUserWithConversation(long idUser, int page){
+		if(idUser < 0) {
+			//TODO
+			throw new UserUsernameNullException();
+		}
+		
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(!optionalUser.isPresent()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
+		User user = optionalUser.get();
+		
+		List<Chat> chats = user.getChats();
+		Map<User,Timestamp> mapUsers = new LinkedHashMap<User,Timestamp>();
+		
+		for(Chat chat: chats) {
+			List<Message> messages = chat.getMessages();
+			Collections.sort(messages);
+			Collections.reverse(messages);
+			
+			Message lastMessage = messages.get(0);
+			
+			List<User> users = chat.getUsers();
+			User otherUser = users.get(0);
+			if(otherUser.getId() == user.getId()) otherUser = users.get(1);
+			
+			mapUsers.put(otherUser, lastMessage.getDateOfInput());
+		}
+		
+		//---
+		
+		List<Map.Entry<User, Timestamp>> entries = new ArrayList<>(mapUsers.entrySet());
+
+	    Collections.sort(entries, new Comparator<Map.Entry<User, Timestamp>>() {
+	        @Override
+	        public int compare(Map.Entry<User, Timestamp> map1, Map.Entry<User, Timestamp> map2) {
+	            Timestamp timestamp1 = map1.getValue();
+	            Timestamp timestamp2 = map2.getValue();
+	        	
+	        	return -(timestamp1.compareTo(timestamp2));
+	        }
+	    });
+
+	    List<User> users = new LinkedList<User>();
+	    for(Map.Entry<User, Timestamp> entry : entries) {
+	        User tempUser = entry.getKey();
+	        users.add(tempUser);
+	    }
+		
+		List<User> pagedUsers = users.subList(page * USER_PER_PAGE, (page + 1) * USER_PER_PAGE);
+		
+		
+		ListUserResponseDTO listUserResponseDTO = toListUserResponseDTO(pagedUsers);
+		
+		return listUserResponseDTO;
+	}
+	
+	
+	public ListUserResponseDTO findUsersByIdChat(long idChat) {
+		Optional<Chat> optionalChat = chatRepository.findById(idChat);
+		if(optionalChat.isEmpty()) {
+			//TODO
+			return null;
+		}
+		//Chat chat = optionalChat.get();
+		
+
+		List<User> users = userRepository.findByChat_id(idChat);
+		
+		return UserService.toListUserResponseDTO(users);
+	}
+	
+	
+	//REMOVEs
+	public ResultMessageDTO deleteCognitoUser(String idIdentityProvided) {
+		
+		//get user from cognito WITH AdminGetUser
+		//check if it's unconfirmed, WITH UserStatus
+		//if unconfirmed, delete user WITH AdminDeleteUser
+		
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 	
 	
@@ -243,11 +346,7 @@ public class UserService {
 	
 	//-----------------------------------------------------------------------------------------------
 
-	
-	
-	
-
-	public UserResponseDTO toUserResponseDTO(User user) {
+	public static UserResponseDTO toUserResponseDTO(User user) {
 		
 		if(user == null) return null;
 		
@@ -265,22 +364,25 @@ public class UserService {
 		}
 		else dto.setDateOfBirth(null);
 		
-		dto.setResultMessage(new MessageResponseDTO());
+		dto.setResultMessage(new ResultMessageDTO());
 		
 		return dto;
 	}
 	
-	
-	public List<UserResponseDTO> toListUserResponseDTO(List<User> users){
+	public static ListUserResponseDTO toListUserResponseDTO(List<User> users){
 		if(users == null) return null;
 		
 		List<UserResponseDTO> dto = new LinkedList<UserResponseDTO>();
 		for(User user : users) {
 			dto.add(toUserResponseDTO(user));
 		}
-		return dto;
+		
+		ListUserResponseDTO listUserResponseDTO = new ListUserResponseDTO();
+		listUserResponseDTO.setListUser(dto);
+		listUserResponseDTO.setResultMessage(new ResultMessageDTO());
+		
+		return listUserResponseDTO;
 	}
-	
 	
 	
 	//VALIDATORs
@@ -364,4 +466,51 @@ public class UserService {
 		
 		return true;
 	}
+
+
+
+
+/*	
+	//utils
+	static <K, V> void orderByValue(LinkedHashMap<K, V> m, final Comparator<? super V> c) {
+	    List<Map.Entry<K, V>> entries = new ArrayList<>(m.entrySet());
+
+	    Collections.sort(entries, new Comparator<Map.Entry<K, V>>() {
+	        @Override
+	        public int compare(Map.Entry<K, V> lhs, Map.Entry<K, V> rhs) {
+	            return c.compare(lhs.getValue(), rhs.getValue());
+	        }
+	    });
+
+	    m.clear();
+	    for(Map.Entry<K, V> e : entries) {
+	        m.put(e.getKey(), e.getValue());
+	    }
+	}
+*/
+	
+	
+	static List<User> orderByValue(Map<User, Timestamp> map) {
+	    List<Map.Entry<User, Timestamp>> entries = new ArrayList<>(map.entrySet());
+
+	    Collections.sort(entries, new Comparator<Map.Entry<User, Timestamp>>() {
+	        @Override
+	        public int compare(Map.Entry<User, Timestamp> map1, Map.Entry<User, Timestamp> map2) {
+	            Timestamp timestamp1 = map1.getValue();
+	            Timestamp timestamp2 = map2.getValue();
+	        	
+	        	return -(timestamp1.compareTo(timestamp2));
+	        }
+	    });
+
+	    List<User> users = new LinkedList<User>();
+	    for(Map.Entry<User, Timestamp> entry : entries) {
+	        User user = entry.getKey();
+	        users.add(user);
+	    }
+	    
+	    return users;
+	}
+
+	
 }
