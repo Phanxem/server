@@ -20,7 +20,9 @@ import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.natour.server.application.dtos.request.AddUserRequestDTO;
 import com.natour.server.application.dtos.request.ChatRequestDTO;
 import com.natour.server.application.dtos.response.ChatResponseDTO;
+import com.natour.server.application.dtos.response.ListChatResponseDTO;
 import com.natour.server.application.dtos.response.ListMessageResponseDTO;
+import com.natour.server.application.dtos.response.ListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.services.ChatService;
@@ -32,16 +34,33 @@ import com.natour.server.data.entities.ChatConnection;
 @RequestMapping(value="/chat")
 public class ChatRestController {
 
-	
-	
 	@Autowired
 	private ChatService chatService;
 	
 	
-	//GETs
+	
+	
+	@RequestMapping(value="/get/user/{idUser}", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<ListChatResponseDTO> searchConversation(@PathVariable("idUser") long idUser, @RequestParam(defaultValue = "0") Integer page){
+		System.out.println("TEST: GET Conversation");
+		
+		ListChatResponseDTO result = chatService.searchByIdUser(idUser, page);
+		ResultMessageDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		
+		return new ResponseEntity<ListChatResponseDTO>(result, resultHttpStatus);
+		
+	}
+	
+	
+	
+	
+	
+	//GETs	
 	@RequestMapping(value="/get/{idChat}/messages", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ListMessageResponseDTO> getMessagesByIdChat(@PathVariable("idChat") long idChat, int page){
+	public ResponseEntity<ListMessageResponseDTO> getMessagesByIdChat(@PathVariable("idChat") long idChat, @RequestParam(defaultValue = "0") Integer page){
 		System.out.println("TEST: GET user");
 		
 		ListMessageResponseDTO result = chatService.findMessagesByIdChat(idChat, page);
@@ -51,8 +70,7 @@ public class ChatRestController {
 		return new ResponseEntity<ListMessageResponseDTO>(result, resultHttpStatus);
 	}	
 	
-	//GETs
-	@RequestMapping(value="/get", method=RequestMethod.GET)
+	@RequestMapping(value="/get/users", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<ChatResponseDTO> getChatByIdsUser(@RequestParam long idUser1, @RequestParam long idUser2){
 		System.out.println("TEST: GET user");
@@ -63,6 +81,26 @@ public class ChatRestController {
 				
 		return new ResponseEntity<ChatResponseDTO>(result, resultHttpStatus);
 	}	
+	
+	@RequestMapping(value="/connect", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> connect(){
+		System.out.println("TEST: Connect");
+			
+		ResultMessageDTO result = chatService.addConnection();
+		
+		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
+	}
+	
+	@RequestMapping(value="/default", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> defaultRoute(){
+		System.out.println("TEST: Default");
+					
+		ResultMessageDTO result = new ResultMessageDTO(999,"Unknown");
+					
+		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.BAD_REQUEST);		
+	}
 	
 	
 	//POSTs
@@ -78,9 +116,31 @@ public class ChatRestController {
 	
 	
 	
+	//PUT
+	@RequestMapping(value="/initConnection", method=RequestMethod.PUT)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> updateConnection(@RequestBody ChatRequestDTO chatRequestDTO){
+		System.out.println("TEST: initConnection");
+								
+		ResultMessageDTO result = chatService.initConnection(chatRequestDTO);
+		
+		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
+	}
 	
 	
-	/*
+	//DELETESs
+	@RequestMapping(value="/disconnect", method=RequestMethod.DELETE)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> disconnectFromChat(@RequestBody ChatRequestDTO chatRequestDTO){
+		System.out.println("TEST: Disconnect");
+				
+		ResultMessageDTO result = chatService.removeConnection(chatRequestDTO);
+				
+		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
+	}
+	
+
+		/*
 	@RequestMapping(value="/get/{idChat}/users", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<ListMessageResponseDTO> getUserByIdChat(@PathVariable("idChat") long idChat){
@@ -94,72 +154,6 @@ public class ChatRestController {
 	}
 	*/
 	
-	
-	
-	
-	/*
-	//GETs
-	@RequestMapping(value="/connect", method=RequestMethod.GET)
-	@ResponseBody
-	public ResponseEntity<MessageDTO> connect(){
-		System.out.println("TEST: Connect");
-			
-		MessageDTO result = chatService.addConnection();
-		
-		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);		
-	}
-	
-	
-	@RequestMapping(value="/default", method=RequestMethod.GET)
-	@ResponseBody
-	public ResponseEntity<MessageDTO> defaultRoute(){
-		System.out.println("TEST: Default");
-					
-		MessageDTO result = new MessageDTO(999,"Unknown");
-					
-		return new ResponseEntity<MessageDTO>(result, HttpStatus.BAD_REQUEST);		
-	}
-	
-	
-	//PUT
-	@RequestMapping(value="/initConnection", method=RequestMethod.PUT)
-	@ResponseBody
-	public ResponseEntity<MessageDTO> updateConnection(@RequestBody ChatRequestDTO chatRequestDTO){
-		System.out.println("TEST: initConnection");
-								
-		MessageDTO result = chatService.initConnection(chatRequestDTO);
-		
-		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);		
-	}
-	
-
-	//POSTs
-	@RequestMapping(value="/sendMessage", method=RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<MessageDTO> sendMessage(@RequestBody ChatRequestDTO chatRequestDTO){
-		System.out.println("TEST: SendMessage");
-						
-		MessageDTO result = chatService.sendMessage(chatRequestDTO);
-						
-		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);		
-	}
-	
-	
-	
-	//DELETESs
-	@RequestMapping(value="/disconnect", method=RequestMethod.DELETE)
-	@ResponseBody
-	public ResponseEntity<MessageDTO> disconnectFromChat(@RequestBody ChatRequestDTO chatRequestDTO){
-		System.out.println("TEST: Disconnect");
-				
-		MessageDTO result = chatService.removeConnection(chatRequestDTO);
-				
-		return new ResponseEntity<MessageDTO>(result, HttpStatus.OK);		
-	}
-	
-
-	
-	*/
 
 	
 }

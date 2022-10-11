@@ -121,6 +121,8 @@ public class RouteDAOImpl implements RouteDAO{
 				   + "?overview=full"
 				   + "&geometries=geojson";
 		
+		System.out.println(url);
+		
 		RestTemplate restTemplate = new RestTemplate();
     	ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 

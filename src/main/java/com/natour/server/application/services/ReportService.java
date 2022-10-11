@@ -1,6 +1,9 @@
 package com.natour.server.application.services;
 
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import com.natour.server.DateUtils;
 import com.natour.server.application.dtos.request.ReportRequestDTO;
 import com.natour.server.application.dtos.response.ListReportResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
@@ -42,23 +46,12 @@ public class ReportService {
 	
 	
 	//ADDs
-	public ResultMessageDTO addReport(long idUser, ReportRequestDTO reportRequestDTO) {
-		if(idUser < 0) {
-			//TODO
-			throw new UserUsernameNullException();
-		}
-		
-		Optional<User> optionalUser = userRepository.findById(idUser);
-		if(optionalUser.isEmpty()) {
-			//TODO
-		}
+	public ResultMessageDTO addReport(ReportRequestDTO reportRequestDTO) {
 		
 		if(!isValidDTO(reportRequestDTO)) {
 			//TODO
 			throw new ReportDTOInvalidException();
 		}
-		
-		reportRequestDTO.setIdUser(idUser);
 		Report report = toReportEntity(reportRequestDTO);
 		
 		Report result = reportRepository.save(report);
@@ -137,8 +130,9 @@ public class ReportService {
 		reportDTO.setIdUser(report.getUser().getId());
 		reportDTO.setIdItinerary(report.getItinerary().getId());
 		
-		Date date = new Date(report.getDateOfInput().getTime());
-		reportDTO.setDateOfInput(date);
+		//Date date = new Date(report.getDateOfInput().getTime());
+		String string = DateUtils.toFullString(report.getDateOfInput());
+		reportDTO.setDateOfInput(string);
 		
 		reportDTO.setResultMessage(new ResultMessageDTO());
 		
@@ -167,18 +161,35 @@ public class ReportService {
 	
 	//DTOs -> Entities
 	private Report toReportEntity(ReportRequestDTO reportRequestDTO) {
-		
+
 		Report report = new Report();
-		report.setId(reportRequestDTO.getId());
+		//report.setId(reportRequestDTO.getId());
 		report.setName(reportRequestDTO.getName());
 		report.setDescription(reportRequestDTO.getDescription());
 		
+		Timestamp dateOfInput = null;
+		try {
+			dateOfInput = DateUtils.toTimestamp(reportRequestDTO.getDateOfInput());
+		}
+		catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		report.setDateOfInput(dateOfInput);
+		
 		Optional<User> user = userRepository.findById(reportRequestDTO.getIdUser());
-		if(!user.isPresent()) throw new UserNotFoundException();
+		if(!user.isPresent()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
 		report.setUser(user.get());
 		
 		Optional<Itinerary> itinerary = itineraryRepository.findById(reportRequestDTO.getIdItinerary());
-		if(!itinerary.isPresent()) throw new ItineraryNotFoundException();
+		if(!itinerary.isPresent()) {
+			//TODO
+			throw new ItineraryNotFoundException();
+		}
 		report.setItinerary(itinerary.get());
 		
 		return report;
@@ -198,6 +209,10 @@ public class ReportService {
 			return false;
 		}
 				
+		//TODO verifica che la data di input non sia successiva alla data attuale
+		//TODO verifica che l'idUser corrisponda ad un User
+		//TODO verifica che l'idItinerary corrisponda ad un Itinerary
+		
 		return true;
 	}
 

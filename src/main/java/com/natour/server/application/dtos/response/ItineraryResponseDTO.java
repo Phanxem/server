@@ -9,7 +9,6 @@ public class ItineraryResponseDTO {
 	
 	private Long id;
 	private String name;
-	private Resource gpx;
 	private Float duration;
 	private Float lenght;
 	private Integer difficulty;
@@ -44,15 +43,6 @@ public class ItineraryResponseDTO {
 		this.name = name;
 	}
 
-
-
-	public Resource getGpx() {
-		return gpx;
-	}
-
-	public void setGpx(Resource gpx) {
-		this.gpx = gpx;
-	}
 
 	public Float getDuration() {
 		return duration;

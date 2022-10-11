@@ -5,7 +5,7 @@ import java.util.Date;
 public class ReportRequestDTO {
 	private Long id;
 	private String name;
-	private Date dateOfInput;
+	private String dateOfInput;
 	private String description;
 	
 	private Long idUser;
@@ -24,10 +24,11 @@ public class ReportRequestDTO {
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Date getDateOfInput() {
+
+	public String getDateOfInput() {
 		return dateOfInput;
 	}
-	public void setDateOfInput(Date dateOfInput) {
+	public void setDateOfInput(String dateOfInput) {
 		this.dateOfInput = dateOfInput;
 	}
 	public String getDescription() {

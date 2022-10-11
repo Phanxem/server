@@ -1,29 +1,22 @@
 package com.natour.server.application.dtos.response;
 
-import org.springframework.core.io.Resource;
+import java.util.List;
 
-public class ImageResponseDTO {
+public class ListChatResponseDTO {
 
 	private ResultMessageDTO resultMessage;
-
-	private Resource image;
-
-	
-
+	private List<Chat2ResponseDTO> listChat;
 	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
-
 	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
-
-	public Resource getImage() {
-		return image;
+	public List<Chat2ResponseDTO> getListChat() {
+		return listChat;
 	}
-
-	public void setImage(Resource image) {
-		this.image = image;
+	public void setListChat(List<Chat2ResponseDTO> listChat) {
+		this.listChat = listChat;
 	}
 	
 	

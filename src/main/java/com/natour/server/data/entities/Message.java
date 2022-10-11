@@ -18,9 +18,9 @@ public class Message implements Comparable<Message>{
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long id;
-	@Column(nullable=false,unique=true)
+	@Column(nullable=false)
 	private String body;
-	@Column(nullable=false,unique=true)
+	@Column(nullable=false)
 	private Timestamp dateOfInput;
 	
 	@ManyToOne

@@ -15,8 +15,6 @@ import com.natour.server.data.entities.Itinerary;
 
 @Repository
 public interface ItineraryRepository extends JpaRepository<Itinerary, Long>{
-
-	final static int ELEMENT_PER_PAGE = 10;
 	
 	//DA TESTARE
 	//ricerca itinerario
@@ -25,11 +23,10 @@ public interface ItineraryRepository extends JpaRepository<Itinerary, Long>{
 	//DA TESTARE
 	List<Itinerary> findByUser_id(long idUser, Pageable pageable);
 	
-	@Query("select * " +
+	@Query("select i " +
 		   "from Itinerary i " +
-		   "order by RAND() " +
-		   "limit " + ELEMENT_PER_PAGE)
-	List<Itinerary> findRandom();
+		   "order by rand() " )
+	List<Itinerary> findRandom(Pageable pageable);
 	
 	
 	

@@ -4,6 +4,8 @@ public class AddUserRequestDTO {
 	private String username;
 	private String identityProvider;
 	private String idIdentityProvided;
+	
+	
 	public String getUsername() {
 		return username;
 	}

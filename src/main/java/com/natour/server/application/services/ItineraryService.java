@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.natour.server.application.dtos.request.ItineraryRequestDTO;
 import com.natour.server.application.dtos.response.ItineraryResponseDTO;
 import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
+import com.natour.server.application.dtos.response.ResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserIdNullException;
 import com.natour.server.application.exceptionHandler.serverExceptions.FileConvertionFailureException;
@@ -59,7 +60,7 @@ public class ItineraryService {
 			throw new ItineraryDTOInvalidException();
 		}
 		
-		Itinerary itinerary = toItineraryEntityWithoutGPXUrl(itineraryRequestDTO);
+		Itinerary itinerary = toItineraryEntity(itineraryRequestDTO);
 		itinerary = itineraryRepository.save(itinerary);
 
 		
@@ -91,7 +92,10 @@ public class ItineraryService {
 			throw new ItineraryNotFoundException();
 		}
 		Itinerary oldItinerary = optionalItinerary.get();
+		User user = oldItinerary.getUser();
 				
+		itineraryRequestDTO.setIdUser(user.getId());
+		
 		if(!isValidDTO(itineraryRequestDTO)) {
 			//TODO
 			throw new ItineraryDTOInvalidException();
@@ -110,7 +114,7 @@ public class ItineraryService {
 			throw new ItineraryGPXFileSaveFailureException(e);
 		}
 		
-		Itinerary itinerary = toItineraryEntityWithoutGPXUrl(itineraryRequestDTO);
+		Itinerary itinerary = toItineraryEntity(itineraryRequestDTO);
 		itinerary.setId(idItinerary);
 		itinerary.setGpxURL(gpxUrl);
 		
@@ -136,7 +140,29 @@ public class ItineraryService {
 		return itineraryResponseDTO;
 	}
 	
-	
+	public ResourceResponseDTO findItineraryGpxById(long idItinerary) {
+		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(idItinerary);
+		if(!optionalItinerary.isPresent()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
+		Itinerary itinerary = optionalItinerary.get();
+		
+		ResourceResponseDTO gpxResponseDTO = new ResourceResponseDTO();
+		if(itinerary.getGpxURL() != null) {
+			FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(itinerary.getGpxURL());
+			if(fileSystemResource != null) {
+				gpxResponseDTO.setResource(fileSystemResource);
+				gpxResponseDTO.setResultMessage(new ResultMessageDTO());
+				
+				return gpxResponseDTO;
+			}
+			gpxResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
+			return gpxResponseDTO;
+		}
+		gpxResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
+		return gpxResponseDTO;
+	}
 	
 	
 	public ListItineraryResponseDTO findItineraryByIdUser(Long idUser, int page) {
@@ -160,7 +186,8 @@ public class ItineraryService {
 		
 	public ListItineraryResponseDTO findRandomItineraries() {
 		
-		List<Itinerary> itineraries = itineraryRepository.findRandom();
+		Pageable pageable = PageRequest.of(0, ITINERARY_PER_PAGE);
+		List<Itinerary> itineraries = itineraryRepository.findRandom(pageable);
 		ListItineraryResponseDTO itinerariesDTO = toListItineraryResponseDTO(itineraries);
 		
 		return itinerariesDTO;
@@ -172,6 +199,8 @@ public class ItineraryService {
 		Pageable pageable = PageRequest.of(page, ITINERARY_PER_PAGE);
 		List<Itinerary> itineraries = itineraryRepository.findByNameContaining(name,pageable);
 		
+		System.out.println("size: " + itineraries.size());
+		
 		ListItineraryResponseDTO itinerariesDTO = toListItineraryResponseDTO(itineraries);
 
 		return itinerariesDTO;
@@ -180,13 +209,22 @@ public class ItineraryService {
 		
 	//REMOVEs
 	public ResultMessageDTO removeItineraryById(long id) {
-		Optional<Itinerary> itinerary = itineraryRepository.findById(id);
-		if(!itinerary.isPresent()) {
+		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(id);
+		if(!optionalItinerary.isPresent()) {
 			//TODO
 			throw new ItineraryNotFoundException();
 		}
+		Itinerary itinerary = optionalItinerary.get();
+		String gpxUrl = itinerary.getGpxURL();
 		
-		itineraryRepository.delete(itinerary.get());
+		itineraryRepository.delete(itinerary);
+		try {
+			fileSystemRepository.delete(gpxUrl);
+		}
+		catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		
 		return new ResultMessageDTO();
 	}
@@ -195,7 +233,7 @@ public class ItineraryService {
 	
 	//MAPPER
 
-	public Itinerary toItineraryEntityWithoutGPXUrl(ItineraryRequestDTO itineraryDTO) {
+	public Itinerary toItineraryEntity(ItineraryRequestDTO itineraryDTO) {
 		
 		Itinerary itinerary = new Itinerary();
 		itinerary.setName(itineraryDTO.getName());
@@ -234,9 +272,6 @@ public class ItineraryService {
 		
 		dto.setIdUser(itinerary.getUser().getId());
 		
-		FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(itinerary.getGpxURL());
-		dto.setGpx(fileSystemResource);
-		
 		dto.setResultMessage(new ResultMessageDTO());
 		
 		return dto;
@@ -244,6 +279,7 @@ public class ItineraryService {
 	
 	
 	public ListItineraryResponseDTO toListItineraryResponseDTO(List<Itinerary> itineraries){
+		
 		ListItineraryResponseDTO listItineraryResponseDTO = new ListItineraryResponseDTO();
 		List<ItineraryResponseDTO> itinerariesDTO = new LinkedList<ItineraryResponseDTO>();
 		
@@ -294,8 +330,9 @@ public class ItineraryService {
 			return false;
 		}
 		
+
 		if(itineraryDTO.getIdUser() < 0) return false;
-		
+			
 		Optional<User> optionalUser = userRepository.findById(itineraryDTO.getIdUser());
 		if(optionalUser.isEmpty()) return false;
 		
@@ -320,6 +357,9 @@ public class ItineraryService {
 		
 		return gpxByte;
 	}
+
+
+	
 
 
 	

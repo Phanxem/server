@@ -38,7 +38,7 @@ public class AddressRestController {
 	@RequestMapping(value="/search", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<ListAddressResponseDTO> searchAddressByQuery(@RequestParam("query") String query){
-		System.out.println("TEST: SEARCH query");
+		System.out.println("TEST: SEARCH query: " + query);
 		
 		ListAddressResponseDTO result = addressService.searchAddressesByQuery(query);
 		return new ResponseEntity<ListAddressResponseDTO>(result, HttpStatus.OK);

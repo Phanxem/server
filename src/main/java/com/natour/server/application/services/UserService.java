@@ -35,7 +35,7 @@ import com.natour.server.DateUtils;
 import com.natour.server.FileSystemUtils;
 import com.natour.server.application.dtos.request.AddUserRequestDTO;
 import com.natour.server.application.dtos.request.UpdateUserOptionalInfoRequestDTO;
-import com.natour.server.application.dtos.response.ImageResponseDTO;
+import com.natour.server.application.dtos.response.ResourceResponseDTO;
 import com.natour.server.application.dtos.response.ListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
@@ -50,7 +50,7 @@ import com.natour.server.application.exceptionHandler.serverExceptions.UserUsern
 import com.natour.server.data.entities.Chat;
 import com.natour.server.data.entities.Message;
 import com.natour.server.data.entities.User;
-import com.natour.server.data.repository.ChatRepository;
+import com.natour.server.data.repository.ChatConnectionRepository;
 import com.natour.server.data.repository.FileSystemRepository;
 import com.natour.server.data.repository.UserRepository;
 
@@ -64,7 +64,7 @@ public class UserService {
 	private FileSystemRepository fileSystemRepository;
 	
 	@Autowired
-	private ChatRepository chatRepository;
+	private ChatConnectionRepository chatRepository;
 
 	
 	private final static String IDENTITY_PROVIDER_COGNITO = "Cognito";
@@ -82,12 +82,15 @@ public class UserService {
 	//ADDs
 	public ResultMessageDTO addUser(AddUserRequestDTO addUserRequestDTO) {
 		if(!isValidDTO(addUserRequestDTO)) {
+			
+			System.out.println("dto not valid");
 			//TODO new exception
 			throw new UserUsernameNullException();
 		}
 		
 		User user = userRepository.findByIdentityProviderAndIdIdentityProvided(addUserRequestDTO.getIdentityProvider(), addUserRequestDTO.getIdIdentityProvided());
 		if(user != null) {
+			System.out.println("user unique constraint violation");
 			//TODO new exception
 			throw new UserUsernameUniqueException();
 		}
@@ -211,7 +214,7 @@ public class UserService {
 		return toUserResponseDTO(user);
 	}
 	
-	public ImageResponseDTO findUserImageById(long idUser) {
+	public ResourceResponseDTO findUserImageById(long idUser) {
 		Optional<User> optionalUser = userRepository.findById(idUser);
 		if(!optionalUser.isPresent()) {
 			//TODO
@@ -219,11 +222,11 @@ public class UserService {
 		}
 		User user = optionalUser.get();
 		
-		ImageResponseDTO imageResponseDTO = new ImageResponseDTO();
+		ResourceResponseDTO imageResponseDTO = new ResourceResponseDTO();
 		if(user.getProfileImageURL() != null) {
 			FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(user.getProfileImageURL());
 			if(fileSystemResource != null) {
-				imageResponseDTO.setImage(fileSystemResource);
+				imageResponseDTO.setResource(fileSystemResource);
 				imageResponseDTO.setResultMessage(new ResultMessageDTO());
 				
 				return imageResponseDTO;
@@ -305,29 +308,31 @@ public class UserService {
 	        users.add(tempUser);
 	    }
 		
-		List<User> pagedUsers = users.subList(page * USER_PER_PAGE, (page + 1) * USER_PER_PAGE);
-		
-		
+	    int numElements = users.size();
+	    int spacesAvailable = (page+1) * USER_PER_PAGE;
+	    
+	    
+	    List<User> pagedUsers = null;
+	    //TUTTI GLI ELEMENTI NELLA PAGINA
+	    if(numElements >= spacesAvailable) {
+	    	pagedUsers = users.subList(page * USER_PER_PAGE, (page + 1) * USER_PER_PAGE);
+	    }
+	    //ALCUNI ELEMENTI NELLA PAGINA
+	    else if(numElements > spacesAvailable - USER_PER_PAGE) {
+	    	pagedUsers = users.subList(page * USER_PER_PAGE, numElements);
+	    }
+	    //NESSUN ELEMENTO NELLA PAGINA
+	    else {
+	    	pagedUsers = new ArrayList<User>();
+	    }
+	    
 		ListUserResponseDTO listUserResponseDTO = toListUserResponseDTO(pagedUsers);
 		
 		return listUserResponseDTO;
 	}
 	
 	
-	public ListUserResponseDTO findUsersByIdChat(long idChat) {
-		Optional<Chat> optionalChat = chatRepository.findById(idChat);
-		if(optionalChat.isEmpty()) {
-			//TODO
-			return null;
-		}
-		//Chat chat = optionalChat.get();
-		
 
-		List<User> users = userRepository.findByChat_id(idChat);
-		
-		return UserService.toListUserResponseDTO(users);
-	}
-	
 	
 	//REMOVEs
 	public ResultMessageDTO deleteCognitoUser(String idIdentityProvided) {
@@ -418,9 +423,10 @@ public class UserService {
 		String identityProvider = dto.getIdentityProvider();
 		if(identityProvider == null || 
 		   identityProvider.isBlank() ||
-		   !identityProvider.equals(IDENTITY_PROVIDER_COGNITO) ||
-		   !identityProvider.equals(IDENTITY_PROVIDER_FACEBOOK) ||
-		   !identityProvider.equals(IDENTITY_PROVIDER_GOOGLE))
+		   (!identityProvider.equals(IDENTITY_PROVIDER_COGNITO) &&
+			!identityProvider.equals(IDENTITY_PROVIDER_FACEBOOK) &&
+			!identityProvider.equals(IDENTITY_PROVIDER_GOOGLE)
+		   ))
 		{
 			return false;
 		}
@@ -511,6 +517,10 @@ public class UserService {
 	    
 	    return users;
 	}
+
+
+
+	
 
 	
 }
