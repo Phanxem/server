@@ -32,10 +32,9 @@ import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagement
 import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagementApiClientBuilder;
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionRequest;
 import com.google.gson.JsonObject;
-import com.natour.server.DateUtils;
 import com.natour.server.application.dtos.request.ChatRequestDTO;
-import com.natour.server.application.dtos.response.Chat2ResponseDTO;
 import com.natour.server.application.dtos.response.ChatResponseDTO;
+import com.natour.server.application.dtos.response.IdChatResponseDTO;
 import com.natour.server.application.dtos.response.ListChatResponseDTO;
 import com.natour.server.application.dtos.response.ListMessageResponseDTO;
 import com.natour.server.application.dtos.response.ListUserResponseDTO;
@@ -44,15 +43,15 @@ import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
-import com.natour.server.data.entities.Chat;
-import com.natour.server.data.entities.ChatConnection;
-import com.natour.server.data.entities.Message;
-import com.natour.server.data.entities.User;
-import com.natour.server.data.repository.ChatConnectionRepository;
-import com.natour.server.data.repository.ChatRepository;
-import com.natour.server.data.repository.ChatConnectionRepository;
-import com.natour.server.data.repository.MessageRepository;
-import com.natour.server.data.repository.UserRepository;
+import com.natour.server.application.services.utils.DateUtils;
+import com.natour.server.data.entities.dynamoDB.ChatConnection;
+import com.natour.server.data.entities.rds.Chat;
+import com.natour.server.data.entities.rds.Message;
+import com.natour.server.data.entities.rds.User;
+import com.natour.server.data.repository.rds.ChatRepository;
+import com.natour.server.data.repository.rds.MessageRepository;
+import com.natour.server.data.repository.rds.UserRepository;
+import com.natour.server.data.repository.s3.ChatConnectionRepository;
 import com.natour.server.presentation.restController.ChatRestController;
 
 @Service
@@ -108,7 +107,7 @@ public class ChatService {
 		User user = optionalUser.get();
 		
 		List<Chat> chats = user.getChats();
-		Map<Chat2ResponseDTO,Timestamp> mapChats = new LinkedHashMap<Chat2ResponseDTO,Timestamp>();
+		Map<ChatResponseDTO,Timestamp> mapChats = new LinkedHashMap<ChatResponseDTO,Timestamp>();
 		
 		for(Chat chat: chats) {
 			List<Message> messages = chat.getMessages();
@@ -121,7 +120,7 @@ public class ChatService {
 			User otherUser = users.get(0);
 			if(otherUser.getId() == user.getId()) otherUser = users.get(1);
 			
-			Chat2ResponseDTO chatResponseDTO = new Chat2ResponseDTO();
+			ChatResponseDTO chatResponseDTO = new ChatResponseDTO();
 			chatResponseDTO.setId(chat.getId());
 			chatResponseDTO.setIdUser(otherUser.getId());
 			chatResponseDTO.setLastMessage(lastMessage.getBody());
@@ -132,11 +131,11 @@ public class ChatService {
 		
 		//---
 		
-		List<Map.Entry<Chat2ResponseDTO, Timestamp>> entries = new ArrayList<>(mapChats.entrySet());
+		List<Map.Entry<ChatResponseDTO, Timestamp>> entries = new ArrayList<>(mapChats.entrySet());
 
-	    Collections.sort(entries, new Comparator<Map.Entry<Chat2ResponseDTO, Timestamp>>() {
+	    Collections.sort(entries, new Comparator<Map.Entry<ChatResponseDTO, Timestamp>>() {
 	        @Override
-	        public int compare(Map.Entry<Chat2ResponseDTO, Timestamp> map1, Map.Entry<Chat2ResponseDTO, Timestamp> map2) {
+	        public int compare(Map.Entry<ChatResponseDTO, Timestamp> map1, Map.Entry<ChatResponseDTO, Timestamp> map2) {
 	            Timestamp timestamp1 = map1.getValue();
 	            Timestamp timestamp2 = map2.getValue();
 	        	
@@ -144,9 +143,9 @@ public class ChatService {
 	        }
 	    });
 
-	    List<Chat2ResponseDTO> listChat = new LinkedList<Chat2ResponseDTO>();
-	    for(Map.Entry<Chat2ResponseDTO, Timestamp> entry : entries) {
-	    	Chat2ResponseDTO tempChat = entry.getKey();
+	    List<ChatResponseDTO> listChat = new LinkedList<ChatResponseDTO>();
+	    for(Map.Entry<ChatResponseDTO, Timestamp> entry : entries) {
+	    	ChatResponseDTO tempChat = entry.getKey();
 	        listChat.add(tempChat);
 	    }
 		
@@ -154,7 +153,7 @@ public class ChatService {
 	    int spacesAvailable = (page+1) * CHAT_PER_PAGE;
 	    
 	    
-	    List<Chat2ResponseDTO> pagedChats = null;
+	    List<ChatResponseDTO> pagedChats = null;
 	    //TUTTI GLI ELEMENTI NELLA PAGINA
 	    if(numElements >= spacesAvailable) {
 	    	pagedChats = listChat.subList(page * CHAT_PER_PAGE, (page + 1) * CHAT_PER_PAGE);
@@ -165,7 +164,7 @@ public class ChatService {
 	    }
 	    //NESSUN ELEMENTO NELLA PAGINA
 	    else {
-	    	pagedChats = new ArrayList<Chat2ResponseDTO>();
+	    	pagedChats = new ArrayList<ChatResponseDTO>();
 	    }
 	    
 		ListChatResponseDTO listChatResponseDTO = new ListChatResponseDTO();
@@ -175,7 +174,7 @@ public class ChatService {
 		return listChatResponseDTO;
 	}
 	
-	public ChatResponseDTO findChatByIdsUser(long idUser1, long idUser2) {
+	public IdChatResponseDTO findChatByIdsUser(long idUser1, long idUser2) {
 		
 		if(idUser1 < 0 || idUser2 < 0) {
 			//TODO 
@@ -213,8 +212,7 @@ public class ChatService {
 	
 	
 	
-	
-	public ResultMessageDTO addConnection() {
+	public ResultMessageDTO addConnection(ChatRequestDTO chatRequestDTO) {
 		/*
 		 * if(!isValid(chatRequestDTO))
 		 * add idConnect on DynamoDB Table
@@ -394,10 +392,10 @@ public ListMessageResponseDTO toListMessageResponseDTO(List<Message> messages) {
 	return listMessageResponseDTO;
 }
 
-public ChatResponseDTO toChatResponseDTO(Chat chat) {
+public IdChatResponseDTO toChatResponseDTO(Chat chat) {
 	if(chat == null) return null;
 	
-	ChatResponseDTO dto = new ChatResponseDTO();
+	IdChatResponseDTO dto = new IdChatResponseDTO();
 	dto.setId(chat.getId());
 	dto.setResultMessage(new ResultMessageDTO());	
 	

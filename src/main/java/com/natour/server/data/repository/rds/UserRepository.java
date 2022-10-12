@@ -1,4 +1,4 @@
-package com.natour.server.data.repository;
+package com.natour.server.data.repository.rds;
 
 
 import org.springframework.data.domain.Pageable;
@@ -10,10 +10,10 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.natour.server.data.entities.rds.User;
+
 import java.sql.Timestamp;
 import java.util.List;
-
-import com.natour.server.data.entities.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long>{	

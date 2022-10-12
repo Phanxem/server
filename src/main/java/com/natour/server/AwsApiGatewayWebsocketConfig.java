@@ -9,24 +9,31 @@ import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagement
 import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagementApiClientBuilder;
 
 @Configuration
-public class AmazonSDKConfig {
+public class AwsApiGatewayWebsocketConfig {
 
+	
+	/*
+	
+    @Value("${amazon.dynamodb.endpoint}")
+    private String endpoint;
+    
+    @Value("${amazon.dynamodb.region}")
+    private String region;
+
+*/ 
+	
 	/*
 	
     @Bean
-    public AmazonApiGatewayManagementApi settingAPIGWConnection(){
-        AmazonApiGatewayManagementApiClientBuilder builder = AmazonApiGatewayManagementApiClientBuilder.standard();
-        String endpointUri = "https://hren0i7ir6.execute-api.eu-west-1.amazonaws.com/production";
-
-        AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(
-                endpointUri, "eu-west-1"
-        );
-
-        AmazonApiGatewayManagementApi agma = builder
+    public AmazonApiGatewayManagementApi amazonApiGatewayWebsocket(){
+    	AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
+        
+        AmazonApiGatewayManagementApi amazonApiGatewayManagementApi = AmazonApiGatewayManagementApiClientBuilder.standard()
                 .withEndpointConfiguration(endpointConfiguration)
                 .withCredentials(DefaultAWSCredentialsProviderChain.getInstance())
                 .build();
-        return agma;
+                
+        return amazonApiGatewayManagementApi;
     }
     */
 }

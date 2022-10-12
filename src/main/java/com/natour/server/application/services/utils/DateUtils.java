@@ -1,4 +1,4 @@
-package com.natour.server;
+package com.natour.server.application.services.utils;
 
 import java.sql.Timestamp;
 import java.text.DateFormat;

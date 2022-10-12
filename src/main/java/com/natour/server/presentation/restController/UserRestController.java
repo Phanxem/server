@@ -200,6 +200,21 @@ public class UserRestController {
 		
 	}
 
+/*	
+	@RequestMapping(value="/update/{idUser}/linkTo/Facebook", method=RequestMethod.PUT)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> linkToFacebook(@PathVariable("idUser") long idUser)
+	{
+		System.out.println("TEST: LINK TO FACEBOOK");
+		ResultMessageDTO result = userService.linkToFacebook(idUser);
+		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
+		
+	}
+	*/
+	
+	
 	//DELETEs
 	//GETs
 	@RequestMapping(value="/delete", method=RequestMethod.DELETE)

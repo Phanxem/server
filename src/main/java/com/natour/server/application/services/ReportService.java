@@ -14,7 +14,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.natour.server.DateUtils;
 import com.natour.server.application.dtos.request.ReportRequestDTO;
 import com.natour.server.application.dtos.response.ListReportResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
@@ -25,12 +24,13 @@ import com.natour.server.application.exceptionHandler.serverExceptions.Itinerary
 import com.natour.server.application.exceptionHandler.serverExceptions.ReportNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
-import com.natour.server.data.entities.Itinerary;
-import com.natour.server.data.entities.Report;
-import com.natour.server.data.entities.User;
-import com.natour.server.data.repository.ItineraryRepository;
-import com.natour.server.data.repository.ReportRepository;
-import com.natour.server.data.repository.UserRepository;
+import com.natour.server.application.services.utils.DateUtils;
+import com.natour.server.data.entities.rds.Itinerary;
+import com.natour.server.data.entities.rds.Report;
+import com.natour.server.data.entities.rds.User;
+import com.natour.server.data.repository.rds.ItineraryRepository;
+import com.natour.server.data.repository.rds.ReportRepository;
+import com.natour.server.data.repository.rds.UserRepository;
 
 @Service
 public class ReportService {

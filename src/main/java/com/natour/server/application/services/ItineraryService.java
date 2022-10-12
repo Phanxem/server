@@ -30,11 +30,11 @@ import com.natour.server.application.exceptionHandler.serverExceptions.Itinerary
 import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
-import com.natour.server.data.entities.Itinerary;
-import com.natour.server.data.entities.User;
-import com.natour.server.data.repository.FileSystemRepository;
-import com.natour.server.data.repository.ItineraryRepository;
-import com.natour.server.data.repository.UserRepository;
+import com.natour.server.data.entities.rds.Itinerary;
+import com.natour.server.data.entities.rds.User;
+import com.natour.server.data.repository.rds.ItineraryRepository;
+import com.natour.server.data.repository.rds.UserRepository;
+import com.natour.server.data.repository.s3.FileSystemRepository;
 
 import io.jenetics.jpx.GPX;
 

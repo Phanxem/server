@@ -1,4 +1,4 @@
-package com.natour.server.data.repository;
+package com.natour.server.data.repository.s3;
 
 import java.io.IOException;
 import java.nio.file.Files;

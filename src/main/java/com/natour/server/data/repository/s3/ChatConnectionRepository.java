@@ -1,4 +1,4 @@
-package com.natour.server.data.repository;
+package com.natour.server.data.repository.s3;
 
 import java.util.List;
 
@@ -11,8 +11,8 @@ import org.springframework.stereotype.Repository;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
-import com.natour.server.data.entities.Chat;
-import com.natour.server.data.entities.ChatConnection;
+import com.natour.server.data.entities.dynamoDB.ChatConnection;
+import com.natour.server.data.entities.rds.Chat;
 
 @Repository
 public class ChatConnectionRepository {

@@ -1,4 +1,4 @@
-package com.natour.server.data.entities;
+package com.natour.server.data.entities.rds;
 
 import java.sql.Timestamp;
 

@@ -24,6 +24,7 @@ import java.util.Optional;
 import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 import org.springframework.data.domain.PageRequest;
@@ -31,8 +32,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.natour.server.DateUtils;
-import com.natour.server.FileSystemUtils;
+import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminDeleteUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.natour.server.application.dtos.request.AddUserRequestDTO;
 import com.natour.server.application.dtos.request.UpdateUserOptionalInfoRequestDTO;
 import com.natour.server.application.dtos.response.ResourceResponseDTO;
@@ -47,12 +51,13 @@ import com.natour.server.application.exceptionHandler.serverExceptions.UserProfi
 import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageUpdateFailureException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameUniqueException;
-import com.natour.server.data.entities.Chat;
-import com.natour.server.data.entities.Message;
-import com.natour.server.data.entities.User;
-import com.natour.server.data.repository.ChatConnectionRepository;
-import com.natour.server.data.repository.FileSystemRepository;
-import com.natour.server.data.repository.UserRepository;
+import com.natour.server.application.services.utils.DateUtils;
+import com.natour.server.data.entities.rds.Chat;
+import com.natour.server.data.entities.rds.Message;
+import com.natour.server.data.entities.rds.User;
+import com.natour.server.data.repository.rds.UserRepository;
+import com.natour.server.data.repository.s3.ChatConnectionRepository;
+import com.natour.server.data.repository.s3.FileSystemRepository;
 
 
 @Service
@@ -66,10 +71,18 @@ public class UserService {
 	@Autowired
 	private ChatConnectionRepository chatRepository;
 
+	//DA TESTARE
+	@Autowired
+	private AWSCognitoIdentityProvider awsCognitoIdentityProvider;
+	
+	@Value("${amazon.cognito.userPoolId}")
+    private String userPoolId;
 	
 	private final static String IDENTITY_PROVIDER_COGNITO = "Cognito";
 	private final static String IDENTITY_PROVIDER_FACEBOOK = "Facebook";
 	private final static String IDENTITY_PROVIDER_GOOGLE = "Google";
+	
+	private final static String COGNITO_SUBJECT ="Cognito_Subject";
 	
 	private final static int IMAGE_MIN_HEIGHT_PX = 300;
 	private final static int IMAGE_MIN_WIDTH_PX = 300;
@@ -190,7 +203,42 @@ public class UserService {
 		return new ResultMessageDTO();
 	}
 	
-	
+	/*
+	public ResultMessageDTO linkToFacebook(long idUser, String idFacebook) {
+		if(idUser < 0) {
+			//TODO
+			throw new UserUsernameNullException();
+		}	
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(optionalUser.isEmpty()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
+		User user = optionalUser.get();
+		
+		if (user.getIdentityProvider() != IDENTITY_PROVIDER_COGNITO) {
+			//TODO
+			System.out.println("Errore no cognito");
+			return null;
+		}
+
+		AdminLinkProviderForUserRequest adminLinkProviderForUserRequest = new AdminLinkProviderForUserRequest();
+		
+		ProviderUserIdentifierType destinationUser = new ProviderUserIdentifierType();
+		ProviderUserIdentifierType sourceUser = new ProviderUserIdentifierType();
+		
+		destinationUser.setProviderAttributeValue(user.getIdIdentityProvided());
+		destinationUser.setProviderName(IDENTITY_PROVIDER_COGNITO);
+		
+		sourceUser.setProviderAttributeName(COGNITO_SUBJECT);
+		sourceUser.setProviderName(IDENTITY_PROVIDER_FACEBOOK);
+		sourceUser.setProviderAttributeValue(idFacebook);
+		
+		
+		//se si effettua il link
+		return null;
+	}
+	*/
 	
 	//FINDs
 	public UserResponseDTO findUserById(long idUser) {		
@@ -337,12 +385,51 @@ public class UserService {
 	//REMOVEs
 	public ResultMessageDTO deleteCognitoUser(String idIdentityProvided) {
 		
-		//get user from cognito WITH AdminGetUser
-		//check if it's unconfirmed, WITH UserStatus
-		//if unconfirmed, delete user WITH AdminDeleteUser
+		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
 		
-		// TODO Auto-generated method stub
-		return null;
+		AdminGetUserRequest adminGetUserRequest = new AdminGetUserRequest();
+		adminGetUserRequest.setUsername(idIdentityProvided);
+		adminGetUserRequest.setUserPoolId(userPoolId);
+		
+		AdminGetUserResult adminGetUserResult = null;
+		try {
+			adminGetUserResult = awsCognitoIdentityProvider.adminGetUser(adminGetUserRequest);
+		}
+		catch(Exception e) {
+			System.out.println("error get user FROM COGNITO");
+			//TODO
+			return resultMessageDTO;
+		}
+		
+		
+		
+		System.out.println("get userStatus");
+		//String unconfirmed = "UNCONFIRMED";
+		String unconfirmed = "FORCE_CHANGE_PASSWORD";
+		
+		String userStatus = adminGetUserResult.getUserStatus();
+		if(!userStatus.equals(unconfirmed)) {
+			System.out.println("error not unconfirmed");
+			//TODO
+			return resultMessageDTO;
+		}
+		
+		
+		AdminDeleteUserRequest adminDeleteUserRequest = new AdminDeleteUserRequest();
+		adminDeleteUserRequest.setUsername(idIdentityProvided);
+		adminDeleteUserRequest.setUserPoolId(userPoolId);
+		
+		AdminDeleteUserResult adminDeleteUserResult = null;
+		try {
+			adminDeleteUserResult = awsCognitoIdentityProvider.adminDeleteUser(adminDeleteUserRequest);
+		}
+		catch(Exception e) {
+			System.out.println("error delete user FROM COGNITO");
+			//TODO
+			return resultMessageDTO;
+		}
+		
+		return resultMessageDTO;
 	}
 
 	
@@ -517,6 +604,10 @@ public class UserService {
 	    
 	    return users;
 	}
+
+
+
+
 
 
 

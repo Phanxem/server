@@ -1,4 +1,6 @@
-package com.natour.server.data.entities;
+package com.natour.server.data.entities.rds;
+
+import java.sql.Timestamp;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -9,7 +11,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 
 @Entity
-public class Itinerary {
+public class Report {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
@@ -17,22 +19,20 @@ public class Itinerary {
 	@Column(nullable=false)
 	private String name;
 	@Column(nullable=false)
-	private String gpxURL;
-	@Column(nullable=false)
-	private Float duration;
-	@Column(nullable=false)
-	private Float lenght;
-	@Column(nullable=false)
-	private Integer difficulty;
+	private Timestamp dateOfInput;
 	private String description;
+	
 	
 	@ManyToOne
     @JoinColumn(name="idUser", nullable=false)
     private User user;
 	
+	@ManyToOne
+    @JoinColumn(name="idItinerary", nullable=false)
+    private Itinerary itinerary;
 	
-	public Itinerary() {}
 	
+	public Report() {}
 	
 	public long getId() {
 		return id;
@@ -46,47 +46,12 @@ public class Itinerary {
 	public void setName(String name) {
 		this.name = name;
 	}
-	
-	public String getGpxURL() {
-		return gpxURL;
+	public Timestamp getDateOfInput() {
+		return dateOfInput;
 	}
-
-
-	public void setGpxURL(String gpxURL) {
-		this.gpxURL = gpxURL;
+	public void setDateOfInput(Timestamp dateOfInput) {
+		this.dateOfInput = dateOfInput;
 	}
-	
-
-	public Float getDuration() {
-		return duration;
-	}
-
-
-	public void setDuration(Float duration) {
-		this.duration = duration;
-	}
-
-
-	public Float getLenght() {
-		return lenght;
-	}
-
-
-	public void setLenght(Float lenght) {
-		this.lenght = lenght;
-	}
-
-
-	public Integer getDifficulty() {
-		return difficulty;
-	}
-
-
-	public void setDifficulty(Integer difficulty) {
-		this.difficulty = difficulty;
-	}
-
-
 	public String getDescription() {
 		return description;
 	}
@@ -94,16 +59,21 @@ public class Itinerary {
 		this.description = description;
 	}
 
-
 	public User getUser() {
 		return user;
 	}
 
-
 	public void setUser(User user) {
 		this.user = user;
 	}
-	
+
+	public Itinerary getItinerary() {
+		return itinerary;
+	}
+
+	public void setItinerary(Itinerary itinerary) {
+		this.itinerary = itinerary;
+	}
 	
 	
 	

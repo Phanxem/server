@@ -1,4 +1,4 @@
-package com.natour.server.data.repository;
+package com.natour.server.data.repository.rds;
 
 import java.util.List;
 
@@ -7,8 +7,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 
-import com.natour.server.data.entities.Message;
-import com.natour.server.data.entities.Report;
+import com.natour.server.data.entities.rds.Message;
+import com.natour.server.data.entities.rds.Report;
 
 @Repository
 public interface MessageRepository extends JpaRepository<Message, Long>{

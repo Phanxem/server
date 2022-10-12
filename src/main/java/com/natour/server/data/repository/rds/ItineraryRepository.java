@@ -1,4 +1,4 @@
-package com.natour.server.data.repository;
+package com.natour.server.data.repository.rds;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.natour.server.data.entities.Itinerary;
+import com.natour.server.data.entities.rds.Itinerary;
 
 @Repository
 public interface ItineraryRepository extends JpaRepository<Itinerary, Long>{

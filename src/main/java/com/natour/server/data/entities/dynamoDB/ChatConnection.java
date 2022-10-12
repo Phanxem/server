@@ -1,13 +1,18 @@
-package com.natour.server.data.entities;
+package com.natour.server.data.entities.dynamoDB;
+
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName = "ChatConnection")
+@Entity
 public class ChatConnection {
 	
 	@DynamoDBHashKey
+	@Id
 	private String idConnection;
 	@DynamoDBAttribute
 	private String idUser;
