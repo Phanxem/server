@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 
 @SpringBootApplication
-@EntityScan({"com.natour.server.data.entities.dynamoDB", "com.natour.server.data.entities.rds" })
+@EntityScan("com.natour.server.data.entities.rds")
 public class ServerApplication {
 	
 	public static void main(String[] args) {

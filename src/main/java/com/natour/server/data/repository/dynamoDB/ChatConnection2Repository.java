@@ -8,6 +8,6 @@ import org.springframework.stereotype.Repository;
 import com.natour.server.data.entities.dynamoDB.ChatConnection;
 
 @EnableScan
-public interface ChatConnection2Repository extends JpaRepository<ChatConnection, Long> {
+public interface ChatConnection2Repository extends CrudRepository<ChatConnection, String> {
 
 }

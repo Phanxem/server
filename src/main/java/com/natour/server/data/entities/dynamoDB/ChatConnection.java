@@ -8,11 +8,9 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName = "ChatConnection")
-@Entity
 public class ChatConnection {
 	
 	@DynamoDBHashKey
-	@Id
 	private String idConnection;
 	@DynamoDBAttribute
 	private String idUser;

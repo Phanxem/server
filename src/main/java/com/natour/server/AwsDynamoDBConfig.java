@@ -56,6 +56,12 @@ public class AwsDynamoDBConfig {
     	return amazonDynamoDB;
     }
     
+    @Bean
+    public DynamoDBMapper dynamoDBMapper() {
+    	DynamoDBMapper dynamoDBMapper = new DynamoDBMapper(amazonDynamoDB(), DynamoDBMapperConfig.DEFAULT);
+    	return dynamoDBMapper;
+    }
+    
     /*
     
     public AWSCredentialsProvider amazonAWSCredentialsProvider() {
