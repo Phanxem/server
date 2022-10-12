@@ -213,11 +213,29 @@ public class ChatService {
 	
 	
 	public ResultMessageDTO addConnection(ChatRequestDTO chatRequestDTO) {
+		
+		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
+		
+		if(!isValid(chatRequestDTO)) {
+			//TODO
+			System.out.println("errore dto non valido");
+			return null;
+		}
+		
 		/*
 		 * if(!isValid(chatRequestDTO))
 		 * add idConnect on DynamoDB Table
 		 */
-		return null;
+		//try {
+			chatConnectionRepository.add(chatRequestDTO.getConnectionId());
+		/*}
+		catch(Exception e) {
+			//TODO
+			System.out.println("errore sconosciuto");
+			return null;
+		}
+		*/	
+		return resultMessageDTO;
 	}
 	
 	public ResultMessageDTO initConnection(ChatRequestDTO chatRequestDTO) {
@@ -562,17 +580,30 @@ public IdChatResponseDTO toChatResponseDTO(Chat chat) {
 
 	public boolean isValid(ChatRequestDTO chatRequestDTO) {
 
+		System.out.println("0");
 		if(chatRequestDTO == null) return false;
 
+		System.out.println("0");
 		String connectionId = chatRequestDTO.getConnectionId();
 		if(connectionId == null || connectionId.isEmpty()) return false;
 
+		System.out.println("0");
 		Map<String, String> payload = chatRequestDTO.getPayload();
-		if(payload == null || payload.isEmpty()) return false;
+		if(payload == null || payload.isEmpty()) return true;
 		
+		System.out.println("0");
 		if(!payload.containsKey(KEY_ACTION)) return false;
 
+		System.out.println("0");
 		String action = payload.get(KEY_ACTION);
+		
+		if(action.equals(VALUE_ACTION_INIT_CONNECTION)) {
+			if(payload.size() != 2) return false;
+			if(!payload.containsKey(KEY_ID_USER)) return false;
+			String username = payload.get(KEY_ID_USER);
+			if(username == null || username.isEmpty()) return false;
+
+		}
 		if(action.equals(VALUE_ACTION_INIT_CONNECTION)) {
 			if(payload.size() != 2) return false;
 			if(!payload.containsKey(KEY_ID_USER)) return false;

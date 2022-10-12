@@ -28,8 +28,7 @@ import antlr.StringUtils;
 public class AwsDynamoDBConfig {
 
 
-    @Value("${amazon.dynamodb.endpoint}")
-    private String endpoint;
+    
     
     @Value("${amazon.dynamodb.region}")
     private String region;
@@ -42,6 +41,9 @@ public class AwsDynamoDBConfig {
 
     @Bean
     public AmazonDynamoDB amazonDynamoDB() {
+    	
+    	String endpoint = "dynamodb." + region +".amazonaws.com";
+    	
     	AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
     	
     	BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey,secretKey);

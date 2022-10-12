@@ -38,11 +38,6 @@ public class ChatRestController {
 	private ChatService chatService;
 	
 	
-	
-
-	
-	
-	
 	//GETs	
 	@RequestMapping(value="/get/{idChat}/messages", method=RequestMethod.GET)
 	@ResponseBody
@@ -67,6 +62,8 @@ public class ChatRestController {
 				
 		return new ResponseEntity<IdChatResponseDTO>(result, resultHttpStatus);
 	}	
+	
+	
 	
 	//TODO
 	@RequestMapping(value="/connect", method=RequestMethod.POST)
