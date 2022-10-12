@@ -48,10 +48,10 @@ import com.natour.server.data.entities.dynamoDB.ChatConnection;
 import com.natour.server.data.entities.rds.Chat;
 import com.natour.server.data.entities.rds.Message;
 import com.natour.server.data.entities.rds.User;
+import com.natour.server.data.repository.dynamoDB.ChatConnectionRepository;
 import com.natour.server.data.repository.rds.ChatRepository;
 import com.natour.server.data.repository.rds.MessageRepository;
 import com.natour.server.data.repository.rds.UserRepository;
-import com.natour.server.data.repository.s3.ChatConnectionRepository;
 import com.natour.server.presentation.restController.ChatRestController;
 
 @Service
@@ -265,8 +265,8 @@ public class ChatService {
 		
 		
 		
-		
-		long idUserSource = chatConnectionRepository.findIdUserByIdConnection(idConnection);
+		ChatConnection chatConnection = chatConnectionRepository.findById(idConnection);
+		long idUserSource = Long.valueOf(chatConnection.getIdUser());
 		
 		
 		//TODO verifica che gli id degli utenti sono diversi

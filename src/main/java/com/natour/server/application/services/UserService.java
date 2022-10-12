@@ -55,8 +55,8 @@ import com.natour.server.application.services.utils.DateUtils;
 import com.natour.server.data.entities.rds.Chat;
 import com.natour.server.data.entities.rds.Message;
 import com.natour.server.data.entities.rds.User;
+import com.natour.server.data.repository.dynamoDB.ChatConnectionRepository;
 import com.natour.server.data.repository.rds.UserRepository;
-import com.natour.server.data.repository.s3.ChatConnectionRepository;
 import com.natour.server.data.repository.s3.FileSystemRepository;
 
 
