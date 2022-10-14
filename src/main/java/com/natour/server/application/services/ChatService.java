@@ -46,6 +46,8 @@ import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
 import com.natour.server.application.services.utils.DateUtils;
+import com.natour.server.data.dao.implemented.SendMessageDAOImpl;
+import com.natour.server.data.dao.interfaces.SendMessageDAO;
 import com.natour.server.data.entities.dynamoDB.ChatConnection;
 import com.natour.server.data.entities.rds.Chat;
 import com.natour.server.data.entities.rds.Message;
@@ -81,7 +83,22 @@ public class ChatService {
 	private UserRepository userRepository;
 	
 	@Autowired
-	private AmazonApiGatewayManagementApi amazonApiGatewayManagementApi;
+	private SendMessageDAO sendMessageDAO;
+	
+	
+	
+	
+	
+	
+	
+	public ResultMessageDTO test(String idUser) {
+		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
+		
+		ChatConnection chatConnection = chatConnectionRepository.findByIdUser(idUser);
+		
+		return resultMessageDTO;
+	}
+	
 	
 
 	public ListMessageResponseDTO findMessagesByIdChat(long idChat, int page) {
@@ -332,6 +349,11 @@ public class ChatService {
 		
 		System.out.println("|" + chatConnection.getIdConnection() + "| |"+chatConnection.getIdUser()+"|" );
 		
+		if(chatConnection.getIdUser() == null) {
+			System.out.println("utente non inizializzato");
+			
+			return null;
+		}
 		long idUserSource = Long.valueOf(chatConnection.getIdUser());
 		
 		if(idUserSource == idUserDestination) {
@@ -381,8 +403,8 @@ public class ChatService {
 			userSource.setChats(chats1);
 			userDestination.setChats(chats2);
 			
-			userRepository.save(userSource);
-			userRepository.save(userDestination);
+			//userRepository.save(userSource);
+			//userRepository.save(userDestination);
 		}
 		else chat = intersection.get(0);
 		
@@ -394,7 +416,7 @@ public class ChatService {
 		message.setBody(payloadMessage);
 		message.setDateOfInput(inputTime);
 		
-		messageRepository.save(message);
+		//messageRepository.save(message);
 		
 		ChatConnection destinationUserConnection = null;
 		try {
@@ -409,21 +431,26 @@ public class ChatService {
 		//l'utente non è attualmente connessio
 		if(destinationUserConnection == null) return resultMessageDTO;
 		
+		
 		String idConnectionDestination = destinationUserConnection.getIdConnection();
+		
+		
+		ResultMessageDTO sendMessage_resultMessageDTO = sendMessageDAO.sendMessage(idConnectionDestination, payloadMessage);
+		
+		
+		
+		/*
 		String stringMessage = "{\"message\":\"" + message + "\", \"status\":\"finished\"}";
 		
+		chatConnectionRepository.resendMessage(idConnectionDestination, message);
 		
 		
-		Thread thread = new Thread() {
-			public void run(){
-				System.out.println("Thread Running");
-				
 				ByteBuffer byteBufferMessage = ByteBuffer.wrap(stringMessage.getBytes());
 					
 				System.out.println("idUserDestination: " + idConnectionDestination);
 					
 				PostToConnectionRequest postToConnectionRequest = new PostToConnectionRequest();
-				postToConnectionRequest.setConnectionId("Z8xdgd2ODoECISA=");
+				postToConnectionRequest.setConnectionId(idConnectionDestination);
 				postToConnectionRequest.setData(byteBufferMessage);
 					
 				PostToConnectionResult postToConnectionResult = null;
@@ -434,13 +461,11 @@ public class ChatService {
 					//TODO
 					System.out.println("errore sconosciuto");
 					e.printStackTrace();
-					return;
+					return null;
 				}
-			      
-			}
-		};
+		*/
 		
-		thread.start();
+
 		
 		
 		
@@ -469,9 +494,11 @@ public class ChatService {
 		}
 		*/
 		
-		return resultMessageDTO;
+		return sendMessage_resultMessageDTO;
 	}
 	
+
+
 	public ResultMessageDTO removeConnection(ChatRequestDTO chatRequestDTO) {
 		
 		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();

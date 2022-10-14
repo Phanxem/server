@@ -37,6 +37,20 @@ public class ChatRestController {
 	@Autowired
 	private ChatService chatService;
 	
+
+		@RequestMapping(value="/get/test", method=RequestMethod.GET)
+		@ResponseBody
+		public ResponseEntity<ResultMessageDTO> getTest(@RequestParam String idUser){
+			System.out.println("TEST: test");
+			
+
+			ResultMessageDTO resultMessage = chatService.test(idUser);
+			HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+				
+			return new ResponseEntity<ResultMessageDTO>(resultMessage, resultHttpStatus);
+		}	
+	
+	
 	
 	//GETs	
 	@RequestMapping(value="/get/{idChat}/messages", method=RequestMethod.GET)

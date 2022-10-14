@@ -31,7 +31,7 @@ public class AwsApiGatewayWebsocketConfig {
     public AmazonApiGatewayManagementApi amazonApiGatewayManagementApi(){
     	AwsClientBuilder.EndpointConfiguration endpointConfiguration = new AwsClientBuilder.EndpointConfiguration(endpoint, region);
         
-    	 BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey,secretKey);
+    	BasicAWSCredentials credentials = new BasicAWSCredentials(accessKey,secretKey);
     	
         AmazonApiGatewayManagementApi amazonApiGatewayManagementApi = AmazonApiGatewayManagementApiClientBuilder.standard()
                 .withEndpointConfiguration(endpointConfiguration)

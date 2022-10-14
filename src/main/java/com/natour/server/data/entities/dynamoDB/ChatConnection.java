@@ -5,6 +5,7 @@ import javax.persistence.Id;
 
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBAttribute;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBHashKey;
+import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBIndexHashKey;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBTable;
 
 @DynamoDBTable(tableName = "ChatConnection")
@@ -12,7 +13,7 @@ public class ChatConnection {
 	
 	@DynamoDBHashKey
 	private String idConnection;
-	@DynamoDBAttribute
+	@DynamoDBIndexHashKey(globalSecondaryIndexName = "idUser-index")
 	private String idUser;
 	
 	public ChatConnection() {}

@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagementApi;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBQueryExpression;
@@ -22,6 +23,7 @@ import com.amazonaws.services.dynamodbv2.model.GetItemRequest;
 import com.amazonaws.services.dynamodbv2.model.GetItemResult;
 import com.natour.server.data.entities.dynamoDB.ChatConnection;
 import com.natour.server.data.entities.rds.Chat;
+import com.natour.server.data.entities.rds.Message;
 
 @Repository
 public class ChatConnectionRepository {
@@ -31,6 +33,7 @@ public class ChatConnectionRepository {
 	
 	@Autowired
 	private DynamoDBMapper dynamoDBMapper;
+	
 	
 	private static final String TABLE_NAME = "ChatConnection";
 	
@@ -64,6 +67,30 @@ public class ChatConnectionRepository {
 
 	public ChatConnection findByIdUser(String idUser) {
 	
+		//ChatConnection result = dynamoDBMapper.load(ChatConnection.class,id);
+		
+		Map<String, AttributeValue> expressionAttributeValue = new HashMap<String, AttributeValue>();
+	    expressionAttributeValue.put(":v1", new AttributeValue().withS(idUser));
+	    
+	    DynamoDBQueryExpression<ChatConnection> queryExpression = new DynamoDBQueryExpression<ChatConnection>()
+	    	    .withIndexName(KEY_ID_USER + "-index")
+	    	    .withConsistentRead(false)
+	    	    .withKeyConditionExpression("idUser = :v1")
+	    	    .withExpressionAttributeValues(expressionAttributeValue);
+
+	    List<ChatConnection> list =  dynamoDBMapper.query(ChatConnection.class, queryExpression);
+	    
+	    for(ChatConnection el : list) {
+	    	System.out.println("IdConnection: " + el.getIdConnection() + " | " + "IdUser: " + el.getIdUser() + "\n");
+	    }
+	    
+	    if(list == null || list.isEmpty()) return null;
+	    
+	    ChatConnection result = list.get(0);
+		return result;
+				
+				
+				
 		/*
 		HashMap<String,AttributeValue> keyToGet = new HashMap<>();
 		
@@ -104,7 +131,7 @@ public class ChatConnectionRepository {
 		
 		
 		
-		
+		/*
 		Map<String, AttributeValue> expressionAttributeValue = new HashMap<String, AttributeValue>();
 	    expressionAttributeValue.put(":v1", new AttributeValue().withS(idUser));
 	    
@@ -120,6 +147,9 @@ public class ChatConnectionRepository {
 	    
 	    ChatConnection result = list.get(0);
 		return result;
+		*/
+	    
+	    
 	}
 
 
@@ -127,6 +157,9 @@ public class ChatConnectionRepository {
 		ChatConnection result = dynamoDBMapper.load(ChatConnection.class,id);
 		dynamoDBMapper.delete(result);
 	}
+
+
+
 	
 	
 	
