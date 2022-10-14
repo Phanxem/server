@@ -37,6 +37,9 @@ import com.amazonaws.services.cognitoidp.model.AdminDeleteUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminDeleteUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
+import com.amazonaws.services.cognitoidp.model.AdminLinkProviderForUserRequest;
+import com.amazonaws.services.cognitoidp.model.AdminLinkProviderForUserResult;
+import com.amazonaws.services.cognitoidp.model.ProviderUserIdentifierType;
 import com.natour.server.application.dtos.request.AddUserRequestDTO;
 import com.natour.server.application.dtos.request.UpdateUserOptionalInfoRequestDTO;
 import com.natour.server.application.dtos.response.ResourceResponseDTO;
@@ -52,6 +55,7 @@ import com.natour.server.application.exceptionHandler.serverExceptions.UserProfi
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameUniqueException;
 import com.natour.server.application.services.utils.DateUtils;
+import com.natour.server.data.entities.dynamoDB.ChatConnection;
 import com.natour.server.data.entities.rds.Chat;
 import com.natour.server.data.entities.rds.Message;
 import com.natour.server.data.entities.rds.User;
@@ -69,7 +73,7 @@ public class UserService {
 	private FileSystemRepository fileSystemRepository;
 	
 	@Autowired
-	private ChatConnectionRepository chatRepository;
+	private ChatConnectionRepository chatConnectionRepository;
 
 	//DA TESTARE
 	@Autowired
@@ -205,6 +209,8 @@ public class UserService {
 	
 	/*
 	public ResultMessageDTO linkToFacebook(long idUser, String idFacebook) {
+		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
+		
 		if(idUser < 0) {
 			//TODO
 			throw new UserUsernameNullException();
@@ -222,6 +228,8 @@ public class UserService {
 			return null;
 		}
 
+		
+		
 		AdminLinkProviderForUserRequest adminLinkProviderForUserRequest = new AdminLinkProviderForUserRequest();
 		
 		ProviderUserIdentifierType destinationUser = new ProviderUserIdentifierType();
@@ -234,9 +242,19 @@ public class UserService {
 		sourceUser.setProviderName(IDENTITY_PROVIDER_FACEBOOK);
 		sourceUser.setProviderAttributeValue(idFacebook);
 		
+		AdminLinkProviderForUserResult adminLinkProviderForUserResult =  null;
 		
-		//se si effettua il link
-		return null;
+		try {
+			adminLinkProviderForUserResult = awsCognitoIdentityProvider.adminLinkProviderForUser(adminLinkProviderForUserRequest);
+		}
+		catch(Exception e) {
+			//TODO
+			System.out.println("Errore sconosciuto");
+			return null;
+		}
+		
+
+		return resultMessageDTO;
 	}
 	*/
 	
@@ -287,7 +305,27 @@ public class UserService {
 	}
 
 	
-	
+	public UserResponseDTO findUserByIdConnection(String idConnection) {
+		ChatConnection chatConnection = chatConnectionRepository.findById(idConnection);
+		
+		long idUser = Long.valueOf(chatConnection.getIdUser());
+		
+		if(idUser < 0) {
+			//TODO
+			throw new UserNotFoundException();
+		}
+		
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(!optionalUser.isPresent()) {
+			//TODO
+			throw new UserNotFoundException();
+		}
+		
+		User user = optionalUser.get();
+		
+		
+		return toUserResponseDTO(user);
+	}
 	
 	//SEARCHs
 	
@@ -604,6 +642,11 @@ public class UserService {
 	    
 	    return users;
 	}
+
+
+
+	
+	
 
 
 

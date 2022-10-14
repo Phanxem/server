@@ -4,14 +4,14 @@ import java.util.Map;
 
 public class ChatRequestDTO {
 
-	private String connectionId;
+	private String idConnection;
 	private Map<String,String> payload;
 	
-	public String getConnectionId() {
-		return connectionId;
+	public String getIdConnection() {
+		return idConnection;
 	}
-	public void setConnectionId(String connectionId) {
-		this.connectionId = connectionId;
+	public void setIdConnection(String connectionId) {
+		this.idConnection = connectionId;
 	}
 	public Map<String, String> getPayload() {
 		return payload;

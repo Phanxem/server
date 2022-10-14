@@ -64,19 +64,6 @@ public class ChatRestController {
 	}	
 	
 	
-	
-	//TODO
-	@RequestMapping(value="/connect", method=RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<ResultMessageDTO> connect(@RequestBody ChatRequestDTO chatRequestDTO){
-		System.out.println("TEST: Connect");
-			
-		ResultMessageDTO result = chatService.addConnection(chatRequestDTO);
-		
-		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
-	}
-	
-	//TODO
 	@RequestMapping(value="/default", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> defaultRoute(){
@@ -105,7 +92,17 @@ public class ChatRestController {
 	
 	
 	//POSTs
-	//TODO
+	@RequestMapping(value="/connect", method=RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> connect(@RequestBody ChatRequestDTO chatRequestDTO){
+		System.out.println("TEST: Connect");
+			
+		ResultMessageDTO result = chatService.addConnection(chatRequestDTO);
+		
+		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
+	}
+	
+
 	@RequestMapping(value="/sendMessage", method=RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> sendMessage(@RequestBody ChatRequestDTO chatRequestDTO){
@@ -116,10 +113,8 @@ public class ChatRestController {
 		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
 	}
 	
-	
-	
+
 	//PUT
-	//TODO
 	@RequestMapping(value="/initConnection", method=RequestMethod.PUT)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> updateConnection(@RequestBody ChatRequestDTO chatRequestDTO){

@@ -112,10 +112,10 @@ public class UserRestController {
 	
 	@RequestMapping(value="/get/connection/{idConnection}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<UserResponseDTO> getUserByIdConnection(@PathVariable("idConnection") long idConnection){
-		System.out.println("TEST: GET user");
+	public ResponseEntity<UserResponseDTO> getUserByIdConnection(@PathVariable("idConnection") String idConnection){
+		System.out.println("TEST: GET user connection");
 
-		UserResponseDTO result = userService.findUserById(idConnection);
+		UserResponseDTO result = userService.findUserByIdConnection(idConnection);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
 		
@@ -200,7 +200,7 @@ public class UserRestController {
 		
 	}
 
-/*	
+/*
 	@RequestMapping(value="/update/{idUser}/linkTo/Facebook", method=RequestMethod.PUT)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> linkToFacebook(@PathVariable("idUser") long idUser)
@@ -216,7 +216,6 @@ public class UserRestController {
 	
 	
 	//DELETEs
-	//GETs
 	@RequestMapping(value="/delete", method=RequestMethod.DELETE)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> deleteUserById(@RequestParam String idIdentityProvided){

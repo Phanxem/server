@@ -26,10 +26,7 @@ import antlr.StringUtils;
 @EnableDynamoDBRepositories
 (basePackages = "com.natour.server.data.repository.dynamoDB") 
 public class AwsDynamoDBConfig {
-
-
-    
-    
+	
     @Value("${amazon.dynamodb.region}")
     private String region;
 

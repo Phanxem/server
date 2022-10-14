@@ -1,6 +1,7 @@
 package com.natour.server.application.services;
 
 
+import java.nio.ByteBuffer;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -31,6 +32,7 @@ import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagement
 import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagementApiClient;
 import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagementApiClientBuilder;
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionRequest;
+import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionResult;
 import com.google.gson.JsonObject;
 import com.natour.server.application.dtos.request.ChatRequestDTO;
 import com.natour.server.application.dtos.response.ChatResponseDTO;
@@ -77,6 +79,9 @@ public class ChatService {
 	private MessageRepository messageRepository;
 	@Autowired
 	private UserRepository userRepository;
+	
+	@Autowired
+	private AmazonApiGatewayManagementApi amazonApiGatewayManagementApi;
 	
 
 	public ListMessageResponseDTO findMessagesByIdChat(long idChat, int page) {
@@ -222,46 +227,71 @@ public class ChatService {
 			return null;
 		}
 		
-		/*
-		 * if(!isValid(chatRequestDTO))
-		 * add idConnect on DynamoDB Table
-		 */
-		//try {
-			chatConnectionRepository.add(chatRequestDTO.getConnectionId());
-		/*}
+		try {
+			chatConnectionRepository.add(chatRequestDTO.getIdConnection());
+		}
 		catch(Exception e) {
 			//TODO
 			System.out.println("errore sconosciuto");
 			return null;
 		}
-		*/	
+			
 		return resultMessageDTO;
 	}
 	
+	
 	public ResultMessageDTO initConnection(ChatRequestDTO chatRequestDTO) {
-		/*
-		 * if(!isValid(chatRequestDTO))
-		 * il body del dto è costituito da
-		 * 		("action","initConnection")
-		 * 		("idUser","user")
-		 * modificare l'elemento con l'idConnection specificato nel dto, aggiungendo l'idUser 
-		 */
-		return null;
+		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
+		
+		if(!isValid(chatRequestDTO)) {
+			//TODO
+			System.out.println("errore dto non valido");
+			return null;
+		}
+		
+		if(!actionIsInit(chatRequestDTO)) {
+			//TODO
+			System.out.println("errore action non è init");
+			return null;
+		}
+		
+		String idConnection = chatRequestDTO.getIdConnection();
+		Map<String, String> payload = chatRequestDTO.getPayload();
+		
+		String idUser = payload.get(KEY_ID_USER);
+		
+		try {
+			chatConnectionRepository.updateWithIdUser(idConnection, idUser);
+		}
+		catch(Exception e) {
+			//TODO
+			System.out.println("errore sconosciuto");
+			return null;
+		}
+
+		return resultMessageDTO;
 	}
 	
+	
+	
+	
 	public ResultMessageDTO sendMessage(ChatRequestDTO chatRequestDTO) {
-		/*
-		 * if(!isValid(chatRequestDTO))
-		 * il body del dto è costituito da
-		 * 		("action","initConnection")
-		 * 		("idUser","user")
-		 * 		("message","adasdasdsa")
-		 * 		("inputTime","12/12/12...")
-		 * modificare l'elemento con l'idConnection specificato nel dto, aggiungendo l'idUser 
-		 */
+	
+		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
 		
+		if(!isValid(chatRequestDTO)) {
+			//TODO
+			System.out.println("errore dto non valido");
+			return null;
+		}
 		
-		String idConnection = chatRequestDTO.getConnectionId();
+		if(!actionIsSendMessage(chatRequestDTO)) {
+			//TODO
+			System.out.println("errore action non è send message");
+			return null;
+		}
+		
+		String idConnection = chatRequestDTO.getIdConnection();
 		Map<String,String> payload = chatRequestDTO.getPayload();
 		
 		String stringIdUser = payload.get(KEY_ID_USER);
@@ -277,22 +307,47 @@ public class ChatService {
 			inputTime = DateUtils.toTimestamp(stringInputTime);
 		} catch (ParseException e) {
 			// TODO
+			System.out.println("errore data non valida");
 			e.printStackTrace();
 			return null;
 		}
 		
 		
+		ChatConnection chatConnection = null;
 		
-		ChatConnection chatConnection = chatConnectionRepository.findById(idConnection);
+		try {
+			chatConnection = chatConnectionRepository.findById(idConnection);
+		}
+		catch(Exception e) {
+			System.out.println("utente non trovato");
+			e.printStackTrace();
+			return null;
+		}
+		
+		if(chatConnection == null) {
+			System.out.println("utente non trovato");
+			
+			return null;
+		}
+		
+		System.out.println("|" + chatConnection.getIdConnection() + "| |"+chatConnection.getIdUser()+"|" );
+		
 		long idUserSource = Long.valueOf(chatConnection.getIdUser());
 		
+		if(idUserSource == idUserDestination) {
+			//TODO
+			System.out.println("Errore: idSorgente e idDestinazione sono uguali");
+			return null;
+			
+		}
 		
-		//TODO verifica che gli id degli utenti sono diversi
 		
+		System.out.println("source: " + idUserSource + ", destination: " + idUserDestination);
 		Optional<User> optionalUserSource = userRepository.findById(idUserSource);
 		Optional<User> optionalUserDestination = userRepository.findById(idUserDestination);
+		
 		if(optionalUserSource.isEmpty() || optionalUserDestination.isEmpty()) {
-			//TODO
+			System.out.println("un o più utenti non trovati");
 			return null;
 		}
 		User userSource = optionalUserSource.get();
@@ -341,19 +396,103 @@ public class ChatService {
 		
 		messageRepository.save(message);
 		
+		ChatConnection destinationUserConnection = null;
+		try {
+			destinationUserConnection = chatConnectionRepository.findByIdUser(stringIdUser);
+		}
+		catch(Exception e) {
+			//TODO
+			System.out.println("errore sconosciuto");
+			return null;
+		}
+		
+		//l'utente non è attualmente connessio
+		if(destinationUserConnection == null) return resultMessageDTO;
+		
+		String idConnectionDestination = destinationUserConnection.getIdConnection();
+		String stringMessage = "{\"message\":\"" + message + "\", \"status\":\"finished\"}";
+		
+		
+		
+		Thread thread = new Thread() {
+			public void run(){
+				System.out.println("Thread Running");
+				
+				ByteBuffer byteBufferMessage = ByteBuffer.wrap(stringMessage.getBytes());
+					
+				System.out.println("idUserDestination: " + idConnectionDestination);
+					
+				PostToConnectionRequest postToConnectionRequest = new PostToConnectionRequest();
+				postToConnectionRequest.setConnectionId("Z8xdgd2ODoECISA=");
+				postToConnectionRequest.setData(byteBufferMessage);
+					
+				PostToConnectionResult postToConnectionResult = null;
+				try {
+					postToConnectionResult = amazonApiGatewayManagementApi.postToConnection(postToConnectionRequest);
+				}
+				catch(Exception e) {
+					//TODO
+					System.out.println("errore sconosciuto");
+					e.printStackTrace();
+					return;
+				}
+			      
+			}
+		};
+		
+		thread.start();
+		
 		
 		
 		/*
-		TODO
-		inviare il messaggio via socket
-		 */
 		
-		return new ResultMessageDTO();
+		 
+		String idConnectionDestination = destinationUserConnection.getIdConnection();
+		String stringMessage = "{\"message\":\"" + message + "\", \"status\":\"finished\"}";
+		ByteBuffer byteBufferMessage = ByteBuffer.wrap(stringMessage.getBytes());
+		
+		System.out.println("idUserDestination: " + idConnectionDestination);
+		
+		PostToConnectionRequest postToConnectionRequest = new PostToConnectionRequest();
+		postToConnectionRequest.setConnectionId(idConnectionDestination);
+		postToConnectionRequest.setData(byteBufferMessage);
+		
+		PostToConnectionResult postToConnectionResult = null;
+		try {
+			postToConnectionResult = amazonApiGatewayManagementApi.postToConnection(postToConnectionRequest);
+		}
+		catch(Exception e) {
+			//TODO
+			System.out.println("errore sconosciuto");
+			e.printStackTrace();
+			return null;
+		}
+		*/
+		
+		return resultMessageDTO;
 	}
 	
 	public ResultMessageDTO removeConnection(ChatRequestDTO chatRequestDTO) {
-		// recuperare del dto l'idConnection e rimuovere il rispettivol elemento da DynamoDB
-		return null;
+		
+		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
+		
+		if(!isValid(chatRequestDTO)) {
+			//TODO
+			System.out.println("errore dto non valido");
+			return null;
+		}
+		
+		try {
+			chatConnectionRepository.delete(chatRequestDTO.getIdConnection());
+		}
+		catch(Exception e) {
+			//TODO
+			System.out.println("errore sconosciuto");
+			e.printStackTrace();
+			return null;
+		}
+			
+		return resultMessageDTO;
 	}
 	
 	
@@ -579,57 +718,68 @@ public IdChatResponseDTO toChatResponseDTO(Chat chat) {
 	
 
 	public boolean isValid(ChatRequestDTO chatRequestDTO) {
-
-		System.out.println("0");
 		if(chatRequestDTO == null) return false;
 
-		System.out.println("0");
-		String connectionId = chatRequestDTO.getConnectionId();
+		String connectionId = chatRequestDTO.getIdConnection();
 		if(connectionId == null || connectionId.isEmpty()) return false;
 
-		System.out.println("0");
+
 		Map<String, String> payload = chatRequestDTO.getPayload();
-		if(payload == null || payload.isEmpty()) return true;
+		if(payload == null) return true;
 		
-		System.out.println("0");
 		if(!payload.containsKey(KEY_ACTION)) return false;
 
-		System.out.println("0");
-		String action = payload.get(KEY_ACTION);
-		
-		if(action.equals(VALUE_ACTION_INIT_CONNECTION)) {
-			if(payload.size() != 2) return false;
-			if(!payload.containsKey(KEY_ID_USER)) return false;
-			String username = payload.get(KEY_ID_USER);
-			if(username == null || username.isEmpty()) return false;
-
-		}
-		if(action.equals(VALUE_ACTION_INIT_CONNECTION)) {
-			if(payload.size() != 2) return false;
-			if(!payload.containsKey(KEY_ID_USER)) return false;
-			String username = payload.get(KEY_ID_USER);
-			if(username == null || username.isEmpty()) return false;
-
-		}
-		else if(action.equals(VALUE_ACTION_SEND_MESSAGE)) {
-			if(payload.size() != 3) return false;
-			if(!payload.containsKey(KEY_ID_USER)) return false;
-			String username = payload.get(KEY_ID_USER);
-			if(username == null || username.isEmpty()) return false;
-
-			if(!payload.containsKey(KEY_MESSAGE)) return false;
-			String message = payload.get(KEY_MESSAGE);
-			if(username == null || username.isEmpty()) return false;
-
-		}
-		else if(action.equals(VALUE_ACTION_DISCONNECT)) {
-			if(payload.size() != 1) return false;
-
-		}
-		else return false;
-		
 		return true;
 	}
 
+	
+	
+	public boolean actionIsInit(ChatRequestDTO chatRequestDTO) {
+
+		Map<String, String> payload = chatRequestDTO.getPayload();
+		if(payload == null)return false;
+
+		if(payload.isEmpty()) return false; 
+
+		if(!payload.containsKey(KEY_ACTION)) return false;
+
+		String action = payload.get(KEY_ACTION);
+
+		if(action.equals(VALUE_ACTION_INIT_CONNECTION)) {
+			if(payload.size() != 2) return false;
+			if(!payload.containsKey(KEY_ID_USER)) return false;
+			String idUser = payload.get(KEY_ID_USER);
+			if(idUser == null || idUser.isEmpty()) return false;
+		}
+		
+		return true;
+	}
+	
+	public boolean actionIsSendMessage(ChatRequestDTO chatRequestDTO) {
+		Map<String, String> payload = chatRequestDTO.getPayload();
+		if(payload == null || payload.isEmpty()) return false;
+		
+		if(!payload.containsKey(KEY_ACTION)) return false;
+
+		String action = payload.get(KEY_ACTION);
+		
+		if(action.equals(VALUE_ACTION_SEND_MESSAGE)) {
+			if(payload.size() != 4) return false;
+			
+			if(!payload.containsKey(KEY_ID_USER)) return false;
+			String idUser = payload.get(KEY_ID_USER);
+			if(idUser == null || idUser.isEmpty()) return false;
+
+			if(!payload.containsKey(KEY_MESSAGE)) return false;			
+			String message = payload.get(KEY_MESSAGE);
+			if(message == null || message.isEmpty()) return false;
+		
+			if(!payload.containsKey(KEY_INPUT_TIME)) return false;
+			String inputTime = payload.get(KEY_INPUT_TIME);
+			if(inputTime == null || inputTime.isBlank()) return false;
+		}
+		
+		return true;
+	}
 
 }
