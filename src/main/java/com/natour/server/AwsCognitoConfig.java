@@ -8,6 +8,8 @@ import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.BasicAWSCredentials;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProvider;
 import com.amazonaws.services.cognitoidp.AWSCognitoIdentityProviderClientBuilder;
+import com.natour.server.data.dao.implemented.CognitoUserDAOImpl;
+import com.natour.server.data.dao.implemented.ImageDAOImpl;
 
 @Configuration
 public class AwsCognitoConfig {
@@ -43,5 +45,10 @@ public class AwsCognitoConfig {
 	    	
 		 return awsCognitoIdentityProvider;
 	 }
+	 
+		@Bean
+		public CognitoUserDAOImpl cognitoUserDAOImpl() {
+			return new CognitoUserDAOImpl();
+		}
 
 }

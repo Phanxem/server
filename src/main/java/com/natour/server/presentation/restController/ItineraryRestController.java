@@ -27,7 +27,7 @@ import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
 import com.natour.server.application.dtos.response.ResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.services.ItineraryService;
-import com.natour.server.application.services.ResultCodeUtils;
+import com.natour.server.application.services.utils.ResultCodeUtils;
 
 
 
@@ -70,13 +70,15 @@ public class ItineraryRestController {
 		
 		Resource resource = result.getResource();
 		String contentType = null;
-        try {
+        /*
+		try {
 			contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
 		}
         catch (IOException e) {
 			//TODO
 			return new ResponseEntity<Resource>((Resource) null, HttpStatus.NOT_FOUND);
-		}
+		}*/
+		
         if(contentType == null) contentType = "application/octet-stream";
         
 		return ResponseEntity.ok()

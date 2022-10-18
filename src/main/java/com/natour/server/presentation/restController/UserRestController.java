@@ -27,8 +27,8 @@ import com.natour.server.application.dtos.response.ResourceResponseDTO;
 import com.natour.server.application.dtos.response.ListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
-import com.natour.server.application.services.ResultCodeUtils;
 import com.natour.server.application.services.UserService;
+import com.natour.server.application.services.utils.ResultCodeUtils;
 
 
 @RestController
@@ -81,13 +81,15 @@ public class UserRestController {
 		
 		Resource resource = result.getResource();
 		String contentType = null;
-        try {
+        /*
+		try {
 			contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
 		}
         catch (IOException e) {
 			//TODO
 			return new ResponseEntity<Resource>((Resource) null, HttpStatus.NOT_FOUND);
 		}
+        */
         if(contentType == null) contentType = "application/octet-stream";
         
 		return ResponseEntity.ok()

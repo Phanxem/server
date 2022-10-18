@@ -22,6 +22,7 @@ import com.natour.server.application.dtos.response.ItineraryResponseDTO;
 import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
 import com.natour.server.application.dtos.response.ResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
+import com.natour.server.application.dtos.response.StringResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserIdNullException;
 import com.natour.server.application.exceptionHandler.serverExceptions.FileConvertionFailureException;
 import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryDTOInvalidException;
@@ -30,6 +31,7 @@ import com.natour.server.application.exceptionHandler.serverExceptions.Itinerary
 import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
+import com.natour.server.data.dao.interfaces.GpxDAO;
 import com.natour.server.data.entities.rds.Itinerary;
 import com.natour.server.data.entities.rds.User;
 import com.natour.server.data.repository.rds.ItineraryRepository;
@@ -47,13 +49,14 @@ public class ItineraryService {
 	private ItineraryRepository itineraryRepository;
 	@Autowired
 	private UserRepository userRepository;
+	//@Autowired
+	//private FileSystemRepository fileSystemRepository;
+	
 	@Autowired
-	private FileSystemRepository fileSystemRepository;
+	private GpxDAO gpxDAO;
 	
 	//ADDs
 	public ResultMessageDTO addItinerary(ItineraryRequestDTO itineraryRequestDTO) {
-		
-		
 		
 		if(!isValidDTO(itineraryRequestDTO)) {
 			//TODO
@@ -66,6 +69,27 @@ public class ItineraryService {
 		
 		String gpxName = "gpx-" + itinerary.getId();
 		MultipartFile gpx = itineraryRequestDTO.getGpx();
+		
+		byte[] gpxBytes = null;
+		try {
+			gpxBytes = gpx.getBytes();
+		}
+		catch (IOException e) {
+			// TODO
+			e.printStackTrace();
+			return null;
+		}
+		
+		StringResponseDTO stringResponseDTO = gpxDAO.put(String.valueOf(itinerary.getId()), gpxBytes);
+		ResultMessageDTO resultMessageDTO = stringResponseDTO.getResultMessage();
+		if(resultMessageDTO.getCode() != 200) {
+			//TODO
+			return resultMessageDTO;
+		}
+		
+		String gpxUrl = stringResponseDTO.getString();
+		
+		/*
 		String gpxUrl;	
 		try {
 			gpxUrl = fileSystemRepository.save(gpxName, gpx.getBytes());
@@ -75,6 +99,9 @@ public class ItineraryService {
 			itineraryRepository.delete(itinerary);
 			throw new ItineraryGPXFileSaveFailureException(e);
 		}
+		*/
+		
+		
 		itinerary.setGpxURL(gpxUrl);
 		
 		Itinerary result = itineraryRepository.save(itinerary);
@@ -102,7 +129,28 @@ public class ItineraryService {
 		}
 		
 	
-		MultipartFile gpx = itineraryRequestDTO.getGpx();		
+		MultipartFile gpx = itineraryRequestDTO.getGpx();	
+		
+		byte[] gpxBytes = null;
+		try {
+			gpxBytes = gpx.getBytes();
+		}
+		catch (IOException e) {
+			// TODO
+			e.printStackTrace();
+			return null;
+		}
+		
+		StringResponseDTO stringResponseDTO = gpxDAO.put(String.valueOf(idItinerary), gpxBytes);
+		ResultMessageDTO resultMessageDTO = stringResponseDTO.getResultMessage();
+		if(resultMessageDTO.getCode() != 200) {
+			//TODO
+			return resultMessageDTO;
+		}
+		
+		String gpxUrl = stringResponseDTO.getString();
+		
+		/*
 		String gpxUrl;	
 		try {
 			//TODO testare
@@ -113,10 +161,16 @@ public class ItineraryService {
 			//TODO
 			throw new ItineraryGPXFileSaveFailureException(e);
 		}
+		*/
+		
+		
+		
 		
 		Itinerary itinerary = toItineraryEntity(itineraryRequestDTO);
 		itinerary.setId(idItinerary);
 		itinerary.setGpxURL(gpxUrl);
+		
+		gpxDAO.delete(oldItinerary.getGpxURL());
 		
 		Itinerary result = itineraryRepository.save(itinerary);
 		
@@ -149,19 +203,28 @@ public class ItineraryService {
 		Itinerary itinerary = optionalItinerary.get();
 		
 		ResourceResponseDTO gpxResponseDTO = new ResourceResponseDTO();
-		if(itinerary.getGpxURL() != null) {
-			FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(itinerary.getGpxURL());
-			if(fileSystemResource != null) {
-				gpxResponseDTO.setResource(fileSystemResource);
-				gpxResponseDTO.setResultMessage(new ResultMessageDTO());
-				
-				return gpxResponseDTO;
-			}
+		
+		if(itinerary.getGpxURL() == null) {
 			gpxResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
 			return gpxResponseDTO;
 		}
-		gpxResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
+		
+		gpxResponseDTO = gpxDAO.getByName(itinerary.getGpxURL());
+		
+/*
+		FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(itinerary.getGpxURL());
+		if(fileSystemResource != null) {
+			gpxResponseDTO.setResource(fileSystemResource);
+			gpxResponseDTO.setResultMessage(new ResultMessageDTO());
+				
+			return gpxResponseDTO;
+		}
+	*/		
+			
+			
 		return gpxResponseDTO;
+		
+		
 	}
 	
 	
@@ -218,6 +281,9 @@ public class ItineraryService {
 		String gpxUrl = itinerary.getGpxURL();
 		
 		itineraryRepository.delete(itinerary);
+		gpxDAO.delete(gpxUrl);
+		
+		/*
 		try {
 			fileSystemRepository.delete(gpxUrl);
 		}
@@ -225,6 +291,7 @@ public class ItineraryService {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		*/
 		
 		return new ResultMessageDTO();
 	}

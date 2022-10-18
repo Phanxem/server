@@ -1,4 +1,4 @@
-package com.natour.server.application.services;
+package com.natour.server.application.services.utils;
 
 import org.springframework.http.HttpStatus;
 

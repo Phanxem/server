@@ -11,8 +11,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.RouteResponseDTO;
-import com.natour.server.application.services.ResultCodeUtils;
 import com.natour.server.application.services.RouteService;
+import com.natour.server.application.services.utils.ResultCodeUtils;
 
 @RestController
 @RequestMapping(value="/route")

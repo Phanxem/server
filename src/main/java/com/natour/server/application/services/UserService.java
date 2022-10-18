@@ -45,6 +45,7 @@ import com.natour.server.application.dtos.request.UpdateUserOptionalInfoRequestD
 import com.natour.server.application.dtos.response.ResourceResponseDTO;
 import com.natour.server.application.dtos.response.ListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
+import com.natour.server.application.dtos.response.StringResponseDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.exceptionHandler.serverExceptions.OptionalInfoUserDTOInvalidException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
@@ -55,6 +56,8 @@ import com.natour.server.application.exceptionHandler.serverExceptions.UserProfi
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
 import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameUniqueException;
 import com.natour.server.application.services.utils.DateUtils;
+import com.natour.server.data.dao.interfaces.CognitoUserDAO;
+import com.natour.server.data.dao.interfaces.ImageDAO;
 import com.natour.server.data.entities.dynamoDB.ChatConnection;
 import com.natour.server.data.entities.rds.Chat;
 import com.natour.server.data.entities.rds.Message;
@@ -69,18 +72,18 @@ public class UserService {
 	
 	@Autowired
 	private UserRepository userRepository;
-	@Autowired
-	private FileSystemRepository fileSystemRepository;
+	//@Autowired
+	//private FileSystemRepository fileSystemRepository;
 	
 	@Autowired
 	private ChatConnectionRepository chatConnectionRepository;
 
-	//DA TESTARE
 	@Autowired
-	private AWSCognitoIdentityProvider awsCognitoIdentityProvider;
+	private CognitoUserDAO cognitoUserDAO;
+
+	@Autowired
+	private ImageDAO imageDAO;
 	
-	@Value("${amazon.cognito.userPoolId}")
-    private String userPoolId;
 	
 	private final static String IDENTITY_PROVIDER_COGNITO = "Cognito";
 	private final static String IDENTITY_PROVIDER_FACEBOOK = "Facebook";
@@ -141,6 +144,25 @@ public class UserService {
 			throw new UserProfileImageNullException();
 		}
 		
+		byte[] imageBytes = null;
+		try {
+			imageBytes = image.getBytes();
+		}
+		catch (IOException e) {
+			// TODO 
+			e.printStackTrace();
+		}
+		
+		StringResponseDTO stringResponseDTO = imageDAO.put(String.valueOf(user.getId()), imageBytes);
+		ResultMessageDTO resultMessageDTO = stringResponseDTO.getResultMessage();
+		if(resultMessageDTO.getCode() != 200) {
+			//TODO
+			return resultMessageDTO;
+		}
+		
+		String imageUrl = stringResponseDTO.getString();
+		
+		/*
 		String imageUrl;
 		try {
 			imageUrl = fileSystemRepository.save("profileImage-" + user.getId(), image.getBytes());
@@ -149,9 +171,11 @@ public class UserService {
 			//TODO
 			throw new UserProfileImageSaveFailureException(e);
 		}
+		*/
+		
 		
 		if(user.getProfileImageURL() != null) {
-			//TODO rimuovi l'immagine dal fileSystem
+			imageDAO.delete(user.getProfileImageURL());
 		}
 		
 		user.setProfileImageURL(imageUrl);
@@ -289,19 +313,30 @@ public class UserService {
 		User user = optionalUser.get();
 		
 		ResourceResponseDTO imageResponseDTO = new ResourceResponseDTO();
-		if(user.getProfileImageURL() != null) {
-			FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(user.getProfileImageURL());
-			if(fileSystemResource != null) {
-				imageResponseDTO.setResource(fileSystemResource);
-				imageResponseDTO.setResultMessage(new ResultMessageDTO());
-				
-				return imageResponseDTO;
-			}
+		
+		if(user.getProfileImageURL() == null) {
 			imageResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
 			return imageResponseDTO;
 		}
+		
+
+			
+		imageResponseDTO = imageDAO.getByName(user.getProfileImageURL());
+			
+		/*
+		FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(user.getProfileImageURL());
+		if(fileSystemResource != null) {
+			imageResponseDTO.setResource(fileSystemResource);
+			imageResponseDTO.setResultMessage(new ResultMessageDTO());
+				
+			return imageResponseDTO;
+		}
+			
 		imageResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
+		*/
+		
 		return imageResponseDTO;
+		//TODO
 	}
 
 	
@@ -423,49 +458,7 @@ public class UserService {
 	//REMOVEs
 	public ResultMessageDTO deleteCognitoUser(String idIdentityProvided) {
 		
-		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
-		
-		AdminGetUserRequest adminGetUserRequest = new AdminGetUserRequest();
-		adminGetUserRequest.setUsername(idIdentityProvided);
-		adminGetUserRequest.setUserPoolId(userPoolId);
-		
-		AdminGetUserResult adminGetUserResult = null;
-		try {
-			adminGetUserResult = awsCognitoIdentityProvider.adminGetUser(adminGetUserRequest);
-		}
-		catch(Exception e) {
-			System.out.println("error get user FROM COGNITO");
-			//TODO
-			return resultMessageDTO;
-		}
-		
-		
-		
-		System.out.println("get userStatus");
-		//String unconfirmed = "UNCONFIRMED";
-		String unconfirmed = "FORCE_CHANGE_PASSWORD";
-		
-		String userStatus = adminGetUserResult.getUserStatus();
-		if(!userStatus.equals(unconfirmed)) {
-			System.out.println("error not unconfirmed");
-			//TODO
-			return resultMessageDTO;
-		}
-		
-		
-		AdminDeleteUserRequest adminDeleteUserRequest = new AdminDeleteUserRequest();
-		adminDeleteUserRequest.setUsername(idIdentityProvided);
-		adminDeleteUserRequest.setUserPoolId(userPoolId);
-		
-		AdminDeleteUserResult adminDeleteUserResult = null;
-		try {
-			adminDeleteUserResult = awsCognitoIdentityProvider.adminDeleteUser(adminDeleteUserRequest);
-		}
-		catch(Exception e) {
-			System.out.println("error delete user FROM COGNITO");
-			//TODO
-			return resultMessageDTO;
-		}
+		ResultMessageDTO resultMessageDTO = cognitoUserDAO.deleteCognitoUser(idIdentityProvided);
 		
 		return resultMessageDTO;
 	}

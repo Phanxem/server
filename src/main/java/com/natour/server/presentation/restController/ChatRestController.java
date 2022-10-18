@@ -26,8 +26,8 @@ import com.natour.server.application.dtos.response.ListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.services.ChatService;
-import com.natour.server.application.services.ResultCodeUtils;
 import com.natour.server.application.services.RouteService;
+import com.natour.server.application.services.utils.ResultCodeUtils;
 import com.natour.server.data.entities.dynamoDB.ChatConnection;
 
 @RestController

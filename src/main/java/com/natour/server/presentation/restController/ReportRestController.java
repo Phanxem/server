@@ -18,7 +18,7 @@ import com.natour.server.application.dtos.response.ListReportResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.ReportResponseDTO;
 import com.natour.server.application.services.ReportService;
-import com.natour.server.application.services.ResultCodeUtils;
+import com.natour.server.application.services.utils.ResultCodeUtils;
 
 
 
