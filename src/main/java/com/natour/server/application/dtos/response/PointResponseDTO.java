@@ -1,6 +1,9 @@
 package com.natour.server.application.dtos.response;
 
 public class PointResponseDTO {
+	
+	private ResultMessageDTO resultMessage;
+	
 	private double lon;
 	private double lat;
 	
@@ -22,6 +25,14 @@ public class PointResponseDTO {
 	}
 	public void setLat(double lat) {
 		this.lat = lat;
+	}
+
+	public ResultMessageDTO getResultMessage() {
+		return resultMessage;
+	}
+
+	public void setResultMessage(ResultMessageDTO resultMessage) {
+		this.resultMessage = resultMessage;
 	}
 	
 	

@@ -21,6 +21,7 @@ import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.natour.server.application.dtos.response.ResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.StringResponseDTO;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.interfaces.ImageDAO;
 
 @Component
@@ -41,8 +42,8 @@ public class ImageDAOImpl implements ImageDAO{
 			s3object = amazonS3.getObject(BUCKET_NAME,name);
 		}
 		catch(Exception e) {
-			//TODO
-			return null;
+			resourceResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_FAILURE);
+			return resourceResponseDTO;
 		}
 				
 		S3ObjectInputStream inputStream = s3object.getObjectContent();
@@ -69,10 +70,8 @@ public class ImageDAOImpl implements ImageDAO{
 			fileWriter = new FileWriter(file, false);
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
-			System.out.println("0");
-			e.printStackTrace();
-			return null;
+			stringResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_FAILURE);
+			return stringResponseDTO;
 		}
 		
 		FileOutputStream fileOutputStream;
@@ -83,16 +82,12 @@ public class ImageDAOImpl implements ImageDAO{
 			fileOutputStream.close();	
 		}
 		catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("1");
-			return null;
+			stringResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
+			return stringResponseDTO;
 		}
 		catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			System.out.println("2");
-			return null;
+			stringResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_FAILURE);
+			return stringResponseDTO;
 		}
 		
 		PutObjectRequest putObjectRequest = new PutObjectRequest(BUCKET_NAME, completeName, file);
@@ -101,10 +96,8 @@ public class ImageDAOImpl implements ImageDAO{
 			amazonS3.putObject(putObjectRequest);
 		}
 		catch(Exception e) {
-			System.out.println("3");
-			e.printStackTrace();
-			//TODO
-			return null;
+			stringResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_FAILURE);
+			return stringResponseDTO;
 		}
         
 		stringResponseDTO.setString(completeName);
@@ -122,11 +115,10 @@ public class ImageDAOImpl implements ImageDAO{
 			amazonS3.deleteObject(BUCKET_NAME,name);
 		}
 		catch(Exception e) {
-			//TODO
-			return null;
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
 			
-		return resultMessageDTO;
+		return ResultMessageUtils.SUCCESS_MESSAGE;
 	}
 	
 	

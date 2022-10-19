@@ -28,7 +28,7 @@ import com.natour.server.application.dtos.response.ListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.services.UserService;
-import com.natour.server.application.services.utils.ResultCodeUtils;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 
 
 @RestController
@@ -59,7 +59,7 @@ public class UserRestController {
 
 		UserResponseDTO result = userService.findUserById(idUser);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<UserResponseDTO>(result, resultHttpStatus);
 	}	
@@ -75,7 +75,7 @@ public class UserRestController {
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus;
 		if(resultMessage.getCode() != 200) {
-			resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+			resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 			return new ResponseEntity<Resource>((Resource) null, resultHttpStatus);
 		}
 		
@@ -106,7 +106,7 @@ public class UserRestController {
 
 		UserResponseDTO result = userService.findUserByIdp(identityProvider, idIdentityProvided);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<UserResponseDTO>(result, resultHttpStatus);
 	}	
@@ -119,7 +119,7 @@ public class UserRestController {
 
 		UserResponseDTO result = userService.findUserByIdConnection(idConnection);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<UserResponseDTO>(result, resultHttpStatus);
 	}
@@ -134,7 +134,7 @@ public class UserRestController {
 		
 		ListUserResponseDTO result = userService.searchUserByUsername(username, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<ListUserResponseDTO>(result, resultHttpStatus);
 		
@@ -147,7 +147,7 @@ public class UserRestController {
 		
 		ListUserResponseDTO result = userService.searchUserWithConversation(idUser, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<ListUserResponseDTO>(result, resultHttpStatus);
 		
@@ -163,7 +163,7 @@ public class UserRestController {
 		System.out.println("TEST: ADD");
 		
 		ResultMessageDTO result = userService.addUser(addUserRequest);
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 		
@@ -182,7 +182,7 @@ public class UserRestController {
 		System.out.println("TEST: UPDATE IMAGE");
 		
 		ResultMessageDTO result = userService.updateProfileImage(idUser, image);
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 	}
@@ -196,7 +196,7 @@ public class UserRestController {
 	{
 		System.out.println("TEST: UPDATE OPTIONAL INFO");
 		ResultMessageDTO result = userService.updateOptionalInfo(idUser, optionalInfo);
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 		
@@ -224,7 +224,7 @@ public class UserRestController {
 			System.out.println("TEST: DELETE user");
 
 			ResultMessageDTO result = userService.deleteCognitoUser(idIdentityProvided);
-			HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+			HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 			
 			return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 		}	

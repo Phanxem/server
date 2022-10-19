@@ -27,7 +27,7 @@ import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
 import com.natour.server.application.dtos.response.ResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.services.ItineraryService;
-import com.natour.server.application.services.utils.ResultCodeUtils;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 
 
 
@@ -47,7 +47,7 @@ public class ItineraryRestController {
 		
 		ItineraryResponseDTO result = itineraryService.findItineraryById(idItinerary);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<ItineraryResponseDTO>(result, resultHttpStatus);
 		
@@ -64,7 +64,7 @@ public class ItineraryRestController {
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus;
 		if(resultMessage.getCode() != 200) {
-			resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+			resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 			return new ResponseEntity<Resource>((Resource) null, resultHttpStatus);
 		}
 		
@@ -97,7 +97,7 @@ public class ItineraryRestController {
 		
 		ListItineraryResponseDTO result = itineraryService.findRandomItineraries();
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<ListItineraryResponseDTO>(result, resultHttpStatus);
 	}
@@ -109,7 +109,7 @@ public class ItineraryRestController {
 		
 		ListItineraryResponseDTO result = itineraryService.findItineraryByIdUser(idUser, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<ListItineraryResponseDTO>(result, resultHttpStatus);
 	}
@@ -125,7 +125,7 @@ public class ItineraryRestController {
 		
 		ListItineraryResponseDTO result = itineraryService.searchItineraryByName(name, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<ListItineraryResponseDTO>(result, resultHttpStatus);
 	}
@@ -139,7 +139,7 @@ public class ItineraryRestController {
 		System.out.println("TEST: ADD");
 		
 		ResultMessageDTO result = itineraryService.addItinerary(itineraryRequestDTO);
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 		
@@ -156,7 +156,7 @@ public class ItineraryRestController {
 		System.out.println("TEST: UPDATE ITINERARY");
 		
 		ResultMessageDTO result = itineraryService.updateItineraray(idItinerary, itineraryDTO);
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 		
@@ -169,7 +169,7 @@ public class ItineraryRestController {
 		System.out.println("TEST: DELETE id");
 		
 		ResultMessageDTO result = itineraryService.removeItineraryById(idItinerary);
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 		

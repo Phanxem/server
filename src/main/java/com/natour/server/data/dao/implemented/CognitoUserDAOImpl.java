@@ -9,6 +9,7 @@ import com.amazonaws.services.cognitoidp.model.AdminDeleteUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.interfaces.CognitoUserDAO;
 
 public class CognitoUserDAOImpl implements CognitoUserDAO{
@@ -19,11 +20,9 @@ public class CognitoUserDAOImpl implements CognitoUserDAO{
 	@Value("${amazon.cognito.userPoolId}")
     private String userPoolId;
 	
+	
 	@Override
 	public ResultMessageDTO deleteCognitoUser(String idIdentityProvided) {
-		
-		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
-		
 		AdminGetUserRequest adminGetUserRequest = new AdminGetUserRequest();
 		adminGetUserRequest.setUsername(idIdentityProvided);
 		adminGetUserRequest.setUserPoolId(userPoolId);
@@ -33,22 +32,16 @@ public class CognitoUserDAOImpl implements CognitoUserDAO{
 			adminGetUserResult = awsCognitoIdentityProvider.adminGetUser(adminGetUserRequest);
 		}
 		catch(Exception e) {
-			System.out.println("error get user FROM COGNITO");
-			//TODO
-			return resultMessageDTO;
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
 		
 		
-		
-		System.out.println("get userStatus");
 		//String unconfirmed = "UNCONFIRMED";
 		String unconfirmed = "FORCE_CHANGE_PASSWORD";
 		
 		String userStatus = adminGetUserResult.getUserStatus();
 		if(!userStatus.equals(unconfirmed)) {
-			System.out.println("error not unconfirmed");
-			//TODO
-			return resultMessageDTO;
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
 		
 		
@@ -61,12 +54,10 @@ public class CognitoUserDAOImpl implements CognitoUserDAO{
 			adminDeleteUserResult = awsCognitoIdentityProvider.adminDeleteUser(adminDeleteUserRequest);
 		}
 		catch(Exception e) {
-			System.out.println("error delete user FROM COGNITO");
-			//TODO
-			return resultMessageDTO;
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
 		
-		return resultMessageDTO;
+		return ResultMessageUtils.SUCCESS_MESSAGE;
 	}
 
 }

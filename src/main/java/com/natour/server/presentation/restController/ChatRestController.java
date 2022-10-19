@@ -27,7 +27,7 @@ import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
 import com.natour.server.application.services.ChatService;
 import com.natour.server.application.services.RouteService;
-import com.natour.server.application.services.utils.ResultCodeUtils;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.entities.dynamoDB.ChatConnection;
 
 @RestController
@@ -45,7 +45,7 @@ public class ChatRestController {
 			
 
 			ResultMessageDTO resultMessage = chatService.test(idUser);
-			HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+			HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 				
 			return new ResponseEntity<ResultMessageDTO>(resultMessage, resultHttpStatus);
 		}	
@@ -60,7 +60,7 @@ public class ChatRestController {
 		
 		ListMessageResponseDTO result = chatService.findMessagesByIdChat(idChat, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 			
 		return new ResponseEntity<ListMessageResponseDTO>(result, resultHttpStatus);
 	}	
@@ -72,7 +72,7 @@ public class ChatRestController {
 		
 		IdChatResponseDTO result = chatService.findChatByIdsUser(idUser1, idUser2);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 				
 		return new ResponseEntity<IdChatResponseDTO>(result, resultHttpStatus);
 	}	
@@ -83,9 +83,9 @@ public class ChatRestController {
 	public ResponseEntity<ResultMessageDTO> defaultRoute(){
 		System.out.println("TEST: Default");
 					
-		ResultMessageDTO result = new ResultMessageDTO(999,"Unknown");
+		
 					
-		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.BAD_REQUEST);		
+		return new ResponseEntity<ResultMessageDTO>(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST, HttpStatus.BAD_REQUEST);		
 	}
 	
 	
@@ -97,7 +97,7 @@ public class ChatRestController {
 		
 		ListChatResponseDTO result = chatService.searchByIdUser(idUser, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<ListChatResponseDTO>(result, resultHttpStatus);
 		
@@ -112,8 +112,9 @@ public class ChatRestController {
 		System.out.println("TEST: Connect");
 			
 		ResultMessageDTO result = chatService.addConnection(chatRequestDTO);
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
-		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
 	}
 	
 
@@ -123,8 +124,9 @@ public class ChatRestController {
 		System.out.println("TEST: SendMessage");
 							
 		ResultMessageDTO result = chatService.sendMessage(chatRequestDTO);
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 							
-		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
 	}
 	
 
@@ -135,8 +137,9 @@ public class ChatRestController {
 		System.out.println("TEST: initConnection");
 								
 		ResultMessageDTO result = chatService.initConnection(chatRequestDTO);
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
-		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
 	}
 	
 	

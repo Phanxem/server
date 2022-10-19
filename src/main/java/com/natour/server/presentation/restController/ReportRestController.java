@@ -18,7 +18,7 @@ import com.natour.server.application.dtos.response.ListReportResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.ReportResponseDTO;
 import com.natour.server.application.services.ReportService;
-import com.natour.server.application.services.utils.ResultCodeUtils;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 
 
 
@@ -38,7 +38,7 @@ public class ReportRestController {
 		
 		ReportResponseDTO result = reportService.findReportById(idReport);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<ReportResponseDTO>(result, resultHttpStatus);
 	}
@@ -52,7 +52,7 @@ public class ReportRestController {
 		
 		ListReportResponseDTO result = reportService.findReportByIdItinerary(idItinerary, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<ListReportResponseDTO>(result, resultHttpStatus);
 	}
@@ -66,7 +66,7 @@ public class ReportRestController {
 		System.out.println("TEST: ADD");
 		
 		ResultMessageDTO result = reportService.addReport(reportDTO);
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 	}
@@ -80,7 +80,7 @@ public class ReportRestController {
 		System.out.println("TEST: DELETE id");
 		
 		ResultMessageDTO result = reportService.removeReportById(idReport);
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(result.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 	}

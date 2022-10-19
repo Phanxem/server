@@ -8,8 +8,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class DateUtils {
-    public static final String DATE_SIMPLE_PATTERN = "dd/MM/yyyy";
-    public static final String DATE_FULL_PATTERN = "yyyy-MM-dd hh:mm:ss";
+    private static final String DATE_SIMPLE_PATTERN = "dd/MM/yyyy";
+    private static final String DATE_FULL_PATTERN = "yyyy-MM-dd hh:mm:ss";
 
     public static Calendar toCalendar(String string) throws ParseException {
         
@@ -23,14 +23,9 @@ public class DateUtils {
         }
         catch (ParseException e) { }
         
-        try {
-        	simpleDateFormat = new SimpleDateFormat(DATE_FULL_PATTERN);
-            date = simpleDateFormat.parse(string);
-        }
-        catch (ParseException e) {
-            e.printStackTrace();
-        }
-
+        simpleDateFormat = new SimpleDateFormat(DATE_FULL_PATTERN);
+        date = simpleDateFormat.parse(string);
+        
         calendar.setTime(date);
 
         return calendar;

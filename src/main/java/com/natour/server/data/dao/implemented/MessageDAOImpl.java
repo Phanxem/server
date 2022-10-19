@@ -17,23 +17,17 @@ import com.amazonaws.services.apigatewaymanagementapi.model.GetConnectionResult;
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionRequest;
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionResult;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
-import com.natour.server.data.dao.interfaces.SendMessageDAO;
+import com.natour.server.application.services.utils.ResultMessageUtils;
+import com.natour.server.data.dao.interfaces.MessageDAO;
 
 @Component
-public class SendMessageDAOImpl implements SendMessageDAO{
-	
-
-	
+public class MessageDAOImpl implements MessageDAO{
 	
 	@Autowired
 	private AmazonApiGatewayManagementApi amazonApiGatewayManagementApi;
 
-
-	
-	
 	@Override
 	public ResultMessageDTO sendMessage(String idConnection, String message) {
-		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
 		
 		String stringMessage = "{\"message\":\"" + message + "\" }";
 		ByteBuffer byteBufferMessage = ByteBuffer.wrap(stringMessage.getBytes());
@@ -51,16 +45,9 @@ public class SendMessageDAOImpl implements SendMessageDAO{
 			postToConnectionResult = amazonApiGatewayManagementApi.postToConnection(postToConnectionRequest);
 		}
 		catch(Exception e) {
-			System.out.println("errore postToConnection");
-			return null;
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
-			
-			
-			
-			
-			
-		return resultMessageDTO;
+		
+		return ResultMessageUtils.SUCCESS_MESSAGE;
 	}
-	
-	
 }

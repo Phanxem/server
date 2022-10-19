@@ -19,8 +19,7 @@ import com.natour.server.application.dtos.response.AddressResponseDTO;
 import com.natour.server.application.dtos.response.ListAddressResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.PointResponseDTO;
-import com.natour.server.application.exceptionHandler.serverExceptions.AddressSearchByPointFailureException;
-import com.natour.server.application.exceptionHandler.serverExceptions.AddressSearchByQueryFailureException;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.interfaces.AddressDAO;
 
 import okhttp3.Call;
@@ -52,15 +51,15 @@ public class AddressDAOImpl implements AddressDAO{
     
     private AddressResponseDTO buildAddressDTO(JsonObject jsonObjectResult) {
     	
-    	 AddressResponseDTO addressDTO = new AddressResponseDTO();
-         PointResponseDTO pointDTO = new PointResponseDTO();
-    	
+    	AddressResponseDTO addressDTO = new AddressResponseDTO();
+        PointResponseDTO pointDTO = new PointResponseDTO();
+        ResultMessageDTO messageResponseDTO = new ResultMessageDTO();
+        
     	if (!jsonObjectResult.has(KEY_LATITUDE) ||
             !jsonObjectResult.has(KEY_LONGITUDE) ||
             !jsonObjectResult.has(KEY_ADDRESS))
         {
-    		ResultMessageDTO messageResponseDTO = new ResultMessageDTO(-100, "error");
-    		addressDTO.setResultMessage(messageResponseDTO);
+    		addressDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
     		return addressDTO;
         }
     
@@ -108,6 +107,8 @@ public class AddressDAOImpl implements AddressDAO{
     
     
     public AddressResponseDTO findAddressByPoint(PointResponseDTO point) {
+    	AddressResponseDTO result = null;
+    	
     	String url = NOMINATIM_SERVICE_URL + OPERATON_REVERSE
                 + "?format=json"
                 //+ "&accept-language=" + Locale.getDefault().getLanguage()
@@ -116,7 +117,6 @@ public class AddressDAOImpl implements AddressDAO{
 				+ "&lat=" + point.getLat();
     	
     	
-
     	RestTemplate restTemplate = new RestTemplate();
     	ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
 
@@ -124,12 +124,14 @@ public class AddressDAOImpl implements AddressDAO{
     	JsonElement jsonElementResult = JsonParser.parseString(jsonStringResult);
         JsonObject jsonObjectResult = jsonElementResult.getAsJsonObject();
         
-        AddressResponseDTO result = buildAddressDTO(jsonObjectResult);
+        result = buildAddressDTO(jsonObjectResult);
 
     	return result;
     }
     
     public ListAddressResponseDTO findAddressesByQuery(String query) {
+    	ListAddressResponseDTO listAddressResponseDTO = new ListAddressResponseDTO();
+    	
     	String url = null;
         try {
             url = NOMINATIM_SERVICE_URL + OPERATION_SEARCH
@@ -141,9 +143,10 @@ public class AddressDAOImpl implements AddressDAO{
                     + "&q=" + URLEncoder.encode(query,"UTF-8");
         }
         catch (UnsupportedEncodingException e) {
-        	//TODO
-        	throw new AddressSearchByQueryFailureException(e);
+        	listAddressResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
+        	return listAddressResponseDTO;
         }
+        
         
         RestTemplate restTemplate = new RestTemplate();
     	ResponseEntity<String> response = restTemplate.getForEntity(url, String.class);
@@ -160,7 +163,7 @@ public class AddressDAOImpl implements AddressDAO{
             if(address != null) addresses.add(address);
         }
         
-		ListAddressResponseDTO listAddressResponseDTO = new ListAddressResponseDTO();
+		
 		listAddressResponseDTO.setListAddresses(addresses);
 		listAddressResponseDTO.setResultMessage(new ResultMessageDTO());
 		

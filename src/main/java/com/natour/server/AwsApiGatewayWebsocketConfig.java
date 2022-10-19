@@ -10,6 +10,7 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.client.builder.AwsClientBuilder;
 import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagementApi;
 import com.amazonaws.services.apigatewaymanagementapi.AmazonApiGatewayManagementApiClientBuilder;
+import com.natour.server.data.dao.implemented.MessageDAOImpl;
 
 @Configuration
 public class AwsApiGatewayWebsocketConfig {
@@ -40,5 +41,10 @@ public class AwsApiGatewayWebsocketConfig {
                 
         return amazonApiGatewayManagementApi;
     }
+    
+    @Bean
+	MessageDAOImpl messageDAOImpl() {
+		return new MessageDAOImpl();
+	}
     
 }

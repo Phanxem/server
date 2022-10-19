@@ -23,14 +23,7 @@ import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
 import com.natour.server.application.dtos.response.ResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.StringResponseDTO;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserIdNullException;
-import com.natour.server.application.exceptionHandler.serverExceptions.FileConvertionFailureException;
-import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryDTOInvalidException;
-import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryGPXFileSaveFailureException;
-import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryGPXFileUpdateFailureException;
-import com.natour.server.application.exceptionHandler.serverExceptions.ItineraryNotFoundException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.interfaces.GpxDAO;
 import com.natour.server.data.entities.rds.Itinerary;
 import com.natour.server.data.entities.rds.User;
@@ -59,15 +52,15 @@ public class ItineraryService {
 	public ResultMessageDTO addItinerary(ItineraryRequestDTO itineraryRequestDTO) {
 		
 		if(!isValidDTO(itineraryRequestDTO)) {
-			//TODO
-			throw new ItineraryDTOInvalidException();
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
 		Itinerary itinerary = toItineraryEntity(itineraryRequestDTO);
-		itinerary = itineraryRepository.save(itinerary);
-
+		if(itinerary == null) {
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
+		}
 		
-		String gpxName = "gpx-" + itinerary.getId();
+		
 		MultipartFile gpx = itineraryRequestDTO.getGpx();
 		
 		byte[] gpxBytes = null;
@@ -75,17 +68,19 @@ public class ItineraryService {
 			gpxBytes = gpx.getBytes();
 		}
 		catch (IOException e) {
-			// TODO
-			e.printStackTrace();
-			return null;
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
+		
+		
+		itinerary = itineraryRepository.save(itinerary);
 		
 		StringResponseDTO stringResponseDTO = gpxDAO.put(String.valueOf(itinerary.getId()), gpxBytes);
 		ResultMessageDTO resultMessageDTO = stringResponseDTO.getResultMessage();
-		if(resultMessageDTO.getCode() != 200) {
-			//TODO
-			return resultMessageDTO;
+		if(!ResultMessageUtils.isSuccess(resultMessageDTO)) {
+			itineraryRepository.delete(itinerary);
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
+		
 		
 		String gpxUrl = stringResponseDTO.getString();
 		
@@ -103,10 +98,9 @@ public class ItineraryService {
 		
 		
 		itinerary.setGpxURL(gpxUrl);
+		itinerary = itineraryRepository.save(itinerary);
 		
-		Itinerary result = itineraryRepository.save(itinerary);
-		
-		return new ResultMessageDTO();
+		return ResultMessageUtils.SUCCESS_MESSAGE;
 	}
 
 	
@@ -115,8 +109,7 @@ public class ItineraryService {
 		
 		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(idItinerary);
 		if(!optionalItinerary.isPresent()) {
-			//TODO
-			throw new ItineraryNotFoundException();
+			return ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND;
 		}
 		Itinerary oldItinerary = optionalItinerary.get();
 		User user = oldItinerary.getUser();
@@ -124,8 +117,7 @@ public class ItineraryService {
 		itineraryRequestDTO.setIdUser(user.getId());
 		
 		if(!isValidDTO(itineraryRequestDTO)) {
-			//TODO
-			throw new ItineraryDTOInvalidException();
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
 	
@@ -136,16 +128,13 @@ public class ItineraryService {
 			gpxBytes = gpx.getBytes();
 		}
 		catch (IOException e) {
-			// TODO
-			e.printStackTrace();
-			return null;
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
 		
 		StringResponseDTO stringResponseDTO = gpxDAO.put(String.valueOf(idItinerary), gpxBytes);
 		ResultMessageDTO resultMessageDTO = stringResponseDTO.getResultMessage();
-		if(resultMessageDTO.getCode() != 200) {
-			//TODO
-			return resultMessageDTO;
+		if(!ResultMessageUtils.isSuccess(resultMessageDTO)) {
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
 		
 		String gpxUrl = stringResponseDTO.getString();
@@ -167,14 +156,18 @@ public class ItineraryService {
 		
 		
 		Itinerary itinerary = toItineraryEntity(itineraryRequestDTO);
+		if(itinerary == null) {
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
+		}
+		
 		itinerary.setId(idItinerary);
 		itinerary.setGpxURL(gpxUrl);
 		
 		gpxDAO.delete(oldItinerary.getGpxURL());
 		
-		Itinerary result = itineraryRepository.save(itinerary);
+		itinerary = itineraryRepository.save(itinerary);
 		
-		return new ResultMessageDTO();
+		return ResultMessageUtils.SUCCESS_MESSAGE;
 	}
 	
 	
@@ -182,30 +175,32 @@ public class ItineraryService {
 	
 	//FINDs
 	public ItineraryResponseDTO findItineraryById(long id) {
+		ItineraryResponseDTO itineraryResponseDTO = new ItineraryResponseDTO();
+		
 		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(id);
 		if(!optionalItinerary.isPresent()) {
-			//TODO
-			throw new ItineraryNotFoundException(); 
+			itineraryResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
+			return itineraryResponseDTO;
 		}
 		Itinerary itinerary = optionalItinerary.get();
 		
-		ItineraryResponseDTO itineraryResponseDTO = toItineraryResponseDTO(itinerary);
+		itineraryResponseDTO = toItineraryResponseDTO(itinerary);
 		
 		return itineraryResponseDTO;
 	}
 	
 	public ResourceResponseDTO findItineraryGpxById(long idItinerary) {
+		ResourceResponseDTO gpxResponseDTO = new ResourceResponseDTO();
+		
 		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(idItinerary);
 		if(!optionalItinerary.isPresent()) {
-			//TODO
-			throw new UserNotFoundException();
+			gpxResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
+			return gpxResponseDTO;
 		}
 		Itinerary itinerary = optionalItinerary.get();
 		
-		ResourceResponseDTO gpxResponseDTO = new ResourceResponseDTO();
-		
 		if(itinerary.getGpxURL() == null) {
-			gpxResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
+			gpxResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_FAILURE);
 			return gpxResponseDTO;
 		}
 		
@@ -223,37 +218,37 @@ public class ItineraryService {
 			
 			
 		return gpxResponseDTO;
-		
-		
 	}
 	
 	
 	public ListItineraryResponseDTO findItineraryByIdUser(Long idUser, int page) {
+		ListItineraryResponseDTO listItineraryResponseDTO = new ListItineraryResponseDTO();
+		
 		if(idUser == null || idUser < 0) {
-			//TODO
-			throw new UserIdNullException();
+			listItineraryResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
+			return listItineraryResponseDTO;
 		}
 		
 		Optional<User> optionalUser = userRepository.findById(idUser);
 		if(!optionalUser.isPresent()) {
-			//TODO
-			throw new UserNotFoundException();
+			listItineraryResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
+			return listItineraryResponseDTO;
 		}
 		
 		Pageable pageable = PageRequest.of(page, ITINERARY_PER_PAGE);
 		List<Itinerary> itineraries = itineraryRepository.findByUser_id(idUser, pageable);
-		ListItineraryResponseDTO itinerariesDTO = toListItineraryResponseDTO(itineraries);
 		
-		return itinerariesDTO;
+		listItineraryResponseDTO = toListItineraryResponseDTO(itineraries);
+		return listItineraryResponseDTO;
 	}
 		
 	public ListItineraryResponseDTO findRandomItineraries() {
 		
 		Pageable pageable = PageRequest.of(0, ITINERARY_PER_PAGE);
 		List<Itinerary> itineraries = itineraryRepository.findRandom(pageable);
-		ListItineraryResponseDTO itinerariesDTO = toListItineraryResponseDTO(itineraries);
+		ListItineraryResponseDTO listItineraryResponseDTO = toListItineraryResponseDTO(itineraries);
 		
-		return itinerariesDTO;
+		return listItineraryResponseDTO;
 	}
 
 	
@@ -264,9 +259,9 @@ public class ItineraryService {
 		
 		System.out.println("size: " + itineraries.size());
 		
-		ListItineraryResponseDTO itinerariesDTO = toListItineraryResponseDTO(itineraries);
+		ListItineraryResponseDTO listItineraryResponseDTO = toListItineraryResponseDTO(itineraries);
 
-		return itinerariesDTO;
+		return listItineraryResponseDTO;
 	}
 		
 		
@@ -274,8 +269,7 @@ public class ItineraryService {
 	public ResultMessageDTO removeItineraryById(long id) {
 		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(id);
 		if(!optionalItinerary.isPresent()) {
-			//TODO
-			throw new ItineraryNotFoundException();
+			return ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND;
 		}
 		Itinerary itinerary = optionalItinerary.get();
 		String gpxUrl = itinerary.getGpxURL();
@@ -293,7 +287,7 @@ public class ItineraryService {
 		}
 		*/
 		
-		return new ResultMessageDTO();
+		return ResultMessageUtils.SUCCESS_MESSAGE;
 	}
 	
 	//----------------------------------------------------------------------
@@ -310,7 +304,9 @@ public class ItineraryService {
 		itinerary.setLenght(itineraryDTO.getLenght());
 		
 		Optional<User> user = userRepository.findById(itineraryDTO.getIdUser());
-		if(!user.isPresent()) throw new UserNotFoundException();
+		if(!user.isPresent()) {
+			return null;
+		}
 		itinerary.setUser(user.get());
 		
 		itinerary.setGpxURL("");
@@ -369,14 +365,11 @@ public class ItineraryService {
 	
 	
 	
-	//VALIDATORs
-	
+	//VALIDATORs	
 	public boolean isValidDTO(ItineraryRequestDTO itineraryDTO) {
 		
 		if(itineraryDTO == null) return false;
 				
-		if(itineraryDTO.getName() == null) System.out.println("errore nome");
-		
 		if(itineraryDTO.getName() == null ||
 		   itineraryDTO.getDifficulty() == null ||
 		   itineraryDTO.getDifficulty() < 0 ||
@@ -393,7 +386,6 @@ public class ItineraryService {
 			if(itineraryDTO.getGpx().getBytes().length == 0) return false;
 		}
 		catch (IOException e) {
-			e.printStackTrace();
 			return false;
 		}
 		
@@ -407,23 +399,7 @@ public class ItineraryService {
 	}
 
 
-	//CONVERTERs
-	
-	public byte[] toArrayByte(GPX gpx, String fileName) {
-		File file = new File(fileName + ".gpx");
-		byte[] gpxByte;
-		
-		//TODO DA TESTARE (DELICATO)
-		try {
-			GPX.writer().write(gpx, file);
-			gpxByte = Files.readAllBytes(file.toPath());
-		}
-		catch (IOException e) {
-			throw new FileConvertionFailureException();
-		}
-		
-		return gpxByte;
-	}
+
 
 
 	

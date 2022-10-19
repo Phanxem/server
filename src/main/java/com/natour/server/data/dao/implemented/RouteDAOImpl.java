@@ -16,8 +16,7 @@ import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.PointResponseDTO;
 import com.natour.server.application.dtos.response.RouteLegResponseDTO;
 import com.natour.server.application.dtos.response.RouteResponseDTO;
-import com.natour.server.application.exceptionHandler.serverExceptions.TODORouteException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.interfaces.RouteDAO;
 
 
@@ -42,13 +41,13 @@ public class RouteDAOImpl implements RouteDAO{
 
     	RouteResponseDTO routeDTO = new RouteResponseDTO();
     	
+    	
     	if(!jsonObject.has(KEY_CODE) ||
     	   !jsonObject.get(KEY_CODE).getAsString().equals(OK_CODE) ||
     	   !jsonObject.has(KEY_ROUTES) ||
     	   !jsonObject.has(KEY_WAYPOINTS) )
     	{
-    		ResultMessageDTO messageResponseDTO = new ResultMessageDTO(-100, "error");
-    		routeDTO.setResultMessage(messageResponseDTO);
+    		routeDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
     		return routeDTO;
     	}
 
@@ -136,10 +135,7 @@ public class RouteDAOImpl implements RouteDAO{
         
         
         RouteResponseDTO result = buildRouteDTO(jsonObjectResult);
-        
-        if(result == null) throw new TODORouteException();
-        
-        
+
 		return result;
 	}
 	

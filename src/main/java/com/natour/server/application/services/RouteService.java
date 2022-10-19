@@ -5,8 +5,8 @@ package com.natour.server.application.services;
 import org.springframework.stereotype.Service;
 
 import com.natour.server.application.dtos.response.RouteResponseDTO;
-import com.natour.server.application.exceptionHandler.serverExceptions.RouteCoordinatesInvalidException;
 import com.natour.server.application.services.utils.CoordinatesUtils;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.implemented.RouteDAOImpl;
 import com.natour.server.data.dao.interfaces.RouteDAO;
 
@@ -18,15 +18,17 @@ public class RouteService {
 		
 	//FINDs
 	public RouteResponseDTO findRouteByCoordinates(String coordinates) {		
-			
+		RouteResponseDTO routeResponseDTO = new RouteResponseDTO();	
+		
+		
 		if(!CoordinatesUtils.areRouteCoordinatesValid(coordinates)) {
-			//TODO
-			throw new RouteCoordinatesInvalidException();
+			routeResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
+			return routeResponseDTO;
 		}
 			
-		RouteResponseDTO result = routeDAO.findRouteByCoordinates(coordinates);
+		routeResponseDTO = routeDAO.findRouteByCoordinates(coordinates);
 		
-		return result;
+		return routeResponseDTO;
 	}
 		
 		

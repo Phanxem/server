@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.RouteResponseDTO;
 import com.natour.server.application.services.RouteService;
-import com.natour.server.application.services.utils.ResultCodeUtils;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 
 @RestController
 @RequestMapping(value="/route")
@@ -30,7 +30,7 @@ public class RouteRestController {
 		
 		RouteResponseDTO result = routeService.findRouteByCoordinates(coordinates);
 		ResultMessageDTO resultMessage = result.getResultMessage();
-		HttpStatus resultHttpStatus = ResultCodeUtils.toHttpStatus(resultMessage.getCode());
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<RouteResponseDTO>(result, resultHttpStatus);
 	}	

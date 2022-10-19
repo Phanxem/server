@@ -47,15 +47,8 @@ import com.natour.server.application.dtos.response.ListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.StringResponseDTO;
 import com.natour.server.application.dtos.response.UserResponseDTO;
-import com.natour.server.application.exceptionHandler.serverExceptions.OptionalInfoUserDTOInvalidException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserNotFoundException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserOptionalInfoUpdateFailureException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageNullException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageSaveFailureException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserProfileImageUpdateFailureException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameNullException;
-import com.natour.server.application.exceptionHandler.serverExceptions.UserUsernameUniqueException;
 import com.natour.server.application.services.utils.DateUtils;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.interfaces.CognitoUserDAO;
 import com.natour.server.data.dao.interfaces.ImageDAO;
 import com.natour.server.data.entities.dynamoDB.ChatConnection;
@@ -100,25 +93,20 @@ public class UserService {
 	
 	
 	//ADDs
-	public ResultMessageDTO addUser(AddUserRequestDTO addUserRequestDTO) {
+	public ResultMessageDTO addUser(AddUserRequestDTO addUserRequestDTO) {	
 		if(!isValidDTO(addUserRequestDTO)) {
-			
-			System.out.println("dto not valid");
-			//TODO new exception
-			throw new UserUsernameNullException();
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
 		User user = userRepository.findByIdentityProviderAndIdIdentityProvided(addUserRequestDTO.getIdentityProvider(), addUserRequestDTO.getIdIdentityProvided());
 		if(user != null) {
-			System.out.println("user unique constraint violation");
-			//TODO new exception
-			throw new UserUsernameUniqueException();
+			return ResultMessageUtils.ERROR_MESSAGE_UNIQUE_VIOLATION;
 		}
 		
 		user = new User(addUserRequestDTO.getIdentityProvider(), addUserRequestDTO.getIdIdentityProvided(), addUserRequestDTO.getUsername());
 		User result = userRepository.save(user);
 		
-		return new ResultMessageDTO();
+		return ResultMessageUtils.SUCCESS_MESSAGE;
 	}
 	
 	
@@ -127,21 +115,17 @@ public class UserService {
 	public ResultMessageDTO updateProfileImage(long idUser,  MultipartFile image) {
 		
 		if(idUser < 0) {
-			//TODO new exception
-			throw new UserUsernameNullException();
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
 		Optional<User> optionalUser = userRepository.findById(idUser);
 		if(optionalUser.isEmpty()) {
-			//TODO
-			throw new UserNotFoundException();
+			return ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND;
 		}
 		User user = optionalUser.get();
 		
-		
 		if(!isValidImage(image)) {
-			//TODO
-			throw new UserProfileImageNullException();
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
 		byte[] imageBytes = null;
@@ -149,15 +133,13 @@ public class UserService {
 			imageBytes = image.getBytes();
 		}
 		catch (IOException e) {
-			// TODO 
-			e.printStackTrace();
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
 		
 		StringResponseDTO stringResponseDTO = imageDAO.put(String.valueOf(user.getId()), imageBytes);
 		ResultMessageDTO resultMessageDTO = stringResponseDTO.getResultMessage();
-		if(resultMessageDTO.getCode() != 200) {
-			//TODO
-			return resultMessageDTO;
+		if(!ResultMessageUtils.isSuccess(resultMessageDTO)) {
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
 		
 		String imageUrl = stringResponseDTO.getString();
@@ -182,7 +164,7 @@ public class UserService {
 		
 		User result = userRepository.save(user);
 		
-		return new ResultMessageDTO();
+		return ResultMessageUtils.SUCCESS_MESSAGE;
 	}
 	
 	
@@ -190,19 +172,16 @@ public class UserService {
 	public ResultMessageDTO updateOptionalInfo(long idUser, UpdateUserOptionalInfoRequestDTO optionalInfoUserRequestDTO) {
 		
 		if(idUser < 0) {
-			//TODO
-			throw new UserUsernameNullException();
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
 		if(!isValidDTO(optionalInfoUserRequestDTO)) {
-			//TODO
-			throw new OptionalInfoUserDTOInvalidException();
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
 		Optional<User> optionalUser = userRepository.findById(idUser);
 		if(optionalUser.isEmpty()) {
-			//TODO
-			throw new UserNotFoundException();
+			return ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND;
 		}
 		User user = optionalUser.get();
 		
@@ -218,8 +197,7 @@ public class UserService {
 				calendar = DateUtils.toCalendar(stringDateOfBirth);
 			}
 			catch (ParseException e) {
-				// TODO
-				e.printStackTrace();
+				return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 			}
 			dateOfBirth = new Timestamp(calendar.getTimeInMillis());
 		}
@@ -228,99 +206,58 @@ public class UserService {
 		user.setDateOfBirth(dateOfBirth);
 		
 		User result = userRepository.save(user);
-		return new ResultMessageDTO();
+		return ResultMessageUtils.SUCCESS_MESSAGE;
 	}
 	
-	/*
-	public ResultMessageDTO linkToFacebook(long idUser, String idFacebook) {
-		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
-		
-		if(idUser < 0) {
-			//TODO
-			throw new UserUsernameNullException();
-		}	
-		Optional<User> optionalUser = userRepository.findById(idUser);
-		if(optionalUser.isEmpty()) {
-			//TODO
-			throw new UserNotFoundException();
-		}
-		User user = optionalUser.get();
-		
-		if (user.getIdentityProvider() != IDENTITY_PROVIDER_COGNITO) {
-			//TODO
-			System.out.println("Errore no cognito");
-			return null;
-		}
-
-		
-		
-		AdminLinkProviderForUserRequest adminLinkProviderForUserRequest = new AdminLinkProviderForUserRequest();
-		
-		ProviderUserIdentifierType destinationUser = new ProviderUserIdentifierType();
-		ProviderUserIdentifierType sourceUser = new ProviderUserIdentifierType();
-		
-		destinationUser.setProviderAttributeValue(user.getIdIdentityProvided());
-		destinationUser.setProviderName(IDENTITY_PROVIDER_COGNITO);
-		
-		sourceUser.setProviderAttributeName(COGNITO_SUBJECT);
-		sourceUser.setProviderName(IDENTITY_PROVIDER_FACEBOOK);
-		sourceUser.setProviderAttributeValue(idFacebook);
-		
-		AdminLinkProviderForUserResult adminLinkProviderForUserResult =  null;
-		
-		try {
-			adminLinkProviderForUserResult = awsCognitoIdentityProvider.adminLinkProviderForUser(adminLinkProviderForUserRequest);
-		}
-		catch(Exception e) {
-			//TODO
-			System.out.println("Errore sconosciuto");
-			return null;
-		}
-		
-
-		return resultMessageDTO;
-	}
-	*/
 	
 	//FINDs
 	public UserResponseDTO findUserById(long idUser) {		
-		Optional<User> user = userRepository.findById(idUser);
-		if(!user.isPresent()) {
-			//TODO
-			throw new UserNotFoundException();
-		}
+		UserResponseDTO userResponseDTO = new UserResponseDTO();
 		
-		return toUserResponseDTO(user.get());
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(!optionalUser.isPresent()) {
+			userResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_FAILURE);
+			return userResponseDTO;
+		}
+		User user = optionalUser.get();
+		
+		userResponseDTO =  toUserResponseDTO(user);
+		
+		return userResponseDTO;
 	}
 	
 
 	public UserResponseDTO findUserByIdp(String identityProvider, String idIdentityProvided) {
+		UserResponseDTO userResponseDTO = new UserResponseDTO();
+		
 		User user = userRepository.findByIdentityProviderAndIdIdentityProvided(identityProvider, idIdentityProvided);
 		if(user == null) {
-			//TODO
-			throw new UserNotFoundException();
+			userResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
+			return userResponseDTO;
 		}
 		
-		return toUserResponseDTO(user);
+		userResponseDTO =  toUserResponseDTO(user);
+		
+		return userResponseDTO;
 	}
 	
 	public ResourceResponseDTO findUserImageById(long idUser) {
+		ResourceResponseDTO imageResponseDTO = new ResourceResponseDTO();
+		
 		Optional<User> optionalUser = userRepository.findById(idUser);
 		if(!optionalUser.isPresent()) {
-			//TODO
-			throw new UserNotFoundException();
+			imageResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
+			return imageResponseDTO;
 		}
 		User user = optionalUser.get();
 		
-		ResourceResponseDTO imageResponseDTO = new ResourceResponseDTO();
-		
+
 		if(user.getProfileImageURL() == null) {
-			imageResponseDTO.setResultMessage(new ResultMessageDTO(-100, "errore1"));
+			imageResponseDTO.setResource(null);
+			imageResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 			return imageResponseDTO;
 		}
 		
-
-			
 		imageResponseDTO = imageDAO.getByName(user.getProfileImageURL());
 			
 		/*
@@ -336,59 +273,63 @@ public class UserService {
 		*/
 		
 		return imageResponseDTO;
-		//TODO
 	}
 
 	
 	public UserResponseDTO findUserByIdConnection(String idConnection) {
+		UserResponseDTO userResponseDTO = new UserResponseDTO();
+		
 		ChatConnection chatConnection = chatConnectionRepository.findById(idConnection);
 		
 		long idUser = Long.valueOf(chatConnection.getIdUser());
 		
 		if(idUser < 0) {
-			//TODO
-			throw new UserNotFoundException();
+			userResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
+			return userResponseDTO;
 		}
 		
 		Optional<User> optionalUser = userRepository.findById(idUser);
 		if(!optionalUser.isPresent()) {
-			//TODO
-			throw new UserNotFoundException();
+			userResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
+			return userResponseDTO;
 		}
 		
 		User user = optionalUser.get();
 		
+		userResponseDTO = toUserResponseDTO(user);
 		
-		return toUserResponseDTO(user);
+		return userResponseDTO;
 	}
 	
-	//SEARCHs
+	//GETs
 	
 	public ListUserResponseDTO searchUserByUsername(String username, int page){
+		ListUserResponseDTO listUserResponseDTO = new ListUserResponseDTO();
+		
 		if(username == null) {
-			//TODO
-			throw new UserUsernameNullException();
+			listUserResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
+			return listUserResponseDTO;
 		}
 		Pageable pageable = PageRequest.of(page, USER_PER_PAGE);
 		List<User> users = userRepository.findByUsernameContaining(username, pageable);
 		
-		ListUserResponseDTO listUserResponseDTO = toListUserResponseDTO(users);
+		listUserResponseDTO = toListUserResponseDTO(users);
 		
 		return listUserResponseDTO;
 	}
 	
-	
-	
 	public ListUserResponseDTO searchUserWithConversation(long idUser, int page){
+		ListUserResponseDTO listUserResponseDTO = new ListUserResponseDTO();
+		
 		if(idUser < 0) {
-			//TODO
-			throw new UserUsernameNullException();
+			listUserResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
+			return listUserResponseDTO;
 		}
 		
 		Optional<User> optionalUser = userRepository.findById(idUser);
 		if(!optionalUser.isPresent()) {
-			//TODO
-			throw new UserNotFoundException();
+			listUserResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
+			return listUserResponseDTO;
 		}
 		User user = optionalUser.get();
 		
@@ -447,13 +388,11 @@ public class UserService {
 	    	pagedUsers = new ArrayList<User>();
 	    }
 	    
-		ListUserResponseDTO listUserResponseDTO = toListUserResponseDTO(pagedUsers);
+	    listUserResponseDTO = toListUserResponseDTO(pagedUsers);
 		
 		return listUserResponseDTO;
 	}
 	
-	
-
 	
 	//REMOVEs
 	public ResultMessageDTO deleteCognitoUser(String idIdentityProvided) {
@@ -590,29 +529,6 @@ public class UserService {
 		
 		return true;
 	}
-
-
-
-
-/*	
-	//utils
-	static <K, V> void orderByValue(LinkedHashMap<K, V> m, final Comparator<? super V> c) {
-	    List<Map.Entry<K, V>> entries = new ArrayList<>(m.entrySet());
-
-	    Collections.sort(entries, new Comparator<Map.Entry<K, V>>() {
-	        @Override
-	        public int compare(Map.Entry<K, V> lhs, Map.Entry<K, V> rhs) {
-	            return c.compare(lhs.getValue(), rhs.getValue());
-	        }
-	    });
-
-	    m.clear();
-	    for(Map.Entry<K, V> e : entries) {
-	        m.put(e.getKey(), e.getValue());
-	    }
-	}
-*/
-	
 	
 	static List<User> orderByValue(Map<User, Timestamp> map) {
 	    List<Map.Entry<User, Timestamp>> entries = new ArrayList<>(map.entrySet());
