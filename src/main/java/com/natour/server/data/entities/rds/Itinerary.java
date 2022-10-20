@@ -17,7 +17,7 @@ public class Itinerary {
 	@Column(nullable=false)
 	private String name;
 	@Column(nullable=false)
-	private String gpxURL;
+	private String gpxKey;
 	@Column(nullable=false)
 	private Float duration;
 	@Column(nullable=false)
@@ -47,13 +47,13 @@ public class Itinerary {
 		this.name = name;
 	}
 	
-	public String getGpxURL() {
-		return gpxURL;
+	public String getGpxKey() {
+		return gpxKey;
 	}
 
 
-	public void setGpxURL(String gpxURL) {
-		this.gpxURL = gpxURL;
+	public void setGpxKey(String gpxKey) {
+		this.gpxKey = gpxKey;
 	}
 	
 

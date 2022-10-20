@@ -17,14 +17,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
-import com.natour.server.application.dtos.request.AddUserRequestDTO;
+import com.natour.server.application.dtos.request.SaveUserRequestDTO;
 import com.natour.server.application.dtos.request.ChatRequestDTO;
 import com.natour.server.application.dtos.response.IdChatResponseDTO;
-import com.natour.server.application.dtos.response.ListChatResponseDTO;
-import com.natour.server.application.dtos.response.ListMessageResponseDTO;
-import com.natour.server.application.dtos.response.ListUserResponseDTO;
+import com.natour.server.application.dtos.response.GetListChatResponseDTO;
+import com.natour.server.application.dtos.response.GetListChatMessageResponseDTO;
+import com.natour.server.application.dtos.response.GetListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
-import com.natour.server.application.dtos.response.UserResponseDTO;
+import com.natour.server.application.dtos.response.GetUserResponseDTO;
 import com.natour.server.application.services.ChatService;
 import com.natour.server.application.services.RouteService;
 import com.natour.server.application.services.utils.ResultMessageUtils;
@@ -55,14 +55,14 @@ public class ChatRestController {
 	//GETs	
 	@RequestMapping(value="/get/{idChat}/messages", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ListMessageResponseDTO> getMessagesByIdChat(@PathVariable("idChat") long idChat, @RequestParam(defaultValue = "0") Integer page){
+	public ResponseEntity<GetListChatMessageResponseDTO> getMessagesByIdChat(@PathVariable("idChat") long idChat, @RequestParam(defaultValue = "0") Integer page){
 		System.out.println("TEST: GET user");
 		
-		ListMessageResponseDTO result = chatService.findMessagesByIdChat(idChat, page);
+		GetListChatMessageResponseDTO result = chatService.findMessagesByIdChat(idChat, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 			
-		return new ResponseEntity<ListMessageResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetListChatMessageResponseDTO>(result, resultHttpStatus);
 	}	
 	
 	@RequestMapping(value="/get/users", method=RequestMethod.GET)
@@ -76,6 +76,22 @@ public class ChatRestController {
 				
 		return new ResponseEntity<IdChatResponseDTO>(result, resultHttpStatus);
 	}	
+	
+	
+	
+	
+	@RequestMapping(value="/get/messages", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<GetListChatMessageResponseDTO> getMessagesByIdsUser(@RequestParam long idUser1, @RequestParam long idUser2, @RequestParam(defaultValue = "0") Integer page){
+		System.out.println("TEST: GET user");
+		
+		GetListChatMessageResponseDTO result = chatService.findMessagesByIdsUser(idUser1, idUser2, page);
+		ResultMessageDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
+			
+		return new ResponseEntity<GetListChatMessageResponseDTO>(result, resultHttpStatus);
+	}
+	
 	
 	
 	@RequestMapping(value="/default", method=RequestMethod.GET)
@@ -92,14 +108,14 @@ public class ChatRestController {
 	//SEARCHs
 	@RequestMapping(value="/get/user/{idUser}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ListChatResponseDTO> searchConversation(@PathVariable("idUser") long idUser, @RequestParam(defaultValue = "0") Integer page){
+	public ResponseEntity<GetListChatResponseDTO> searchConversation(@PathVariable("idUser") long idUser, @RequestParam(defaultValue = "0") Integer page){
 		System.out.println("TEST: GET Conversation");
 		
-		ListChatResponseDTO result = chatService.searchByIdUser(idUser, page);
+		GetListChatResponseDTO result = chatService.searchByIdUser(idUser, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<ListChatResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetListChatResponseDTO>(result, resultHttpStatus);
 		
 	}
 	
@@ -142,6 +158,7 @@ public class ChatRestController {
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
 	}
 	
+	//todo readAllMessage
 	
 	//DELETESs
 	//TODO

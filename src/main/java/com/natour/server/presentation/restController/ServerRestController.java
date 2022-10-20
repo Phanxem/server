@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.natour.server.application.dtos.response.ResultMessageDTO;
+import com.natour.server.application.services.utils.ResultMessageUtils;
 
 @RestController
 @RequestMapping(value="/server")
@@ -19,8 +20,6 @@ public class ServerRestController {
 		public ResponseEntity<ResultMessageDTO> test(){
 			System.out.println("TEST: test");
 			
-			ResultMessageDTO resultMessage = new ResultMessageDTO();
-			resultMessage.setMessage("Il server è attualmente in funzione");
-			return new ResponseEntity<ResultMessageDTO>(resultMessage, HttpStatus.OK);
+			return new ResponseEntity<ResultMessageDTO>(ResultMessageUtils.SUCCESS_MESSAGE, HttpStatus.OK);
 		}	
 }

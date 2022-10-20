@@ -17,7 +17,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.natour.server.application.dtos.response.ResourceResponseDTO;
+import com.natour.server.application.dtos.response.GetResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.StringResponseDTO;
 import com.natour.server.application.services.utils.ResultMessageUtils;
@@ -32,8 +32,8 @@ public class GpxDAOImpl implements GpxDAO{
 	private AmazonS3 amazonS3;
 	
 	@Override
-	public ResourceResponseDTO getByName(String name) {
-		ResourceResponseDTO resourceResponseDTO = new ResourceResponseDTO();
+	public GetResourceResponseDTO getByName(String name) {
+		GetResourceResponseDTO resourceResponseDTO = new GetResourceResponseDTO();
 		
 		S3Object s3object = null;
 		try {
@@ -48,7 +48,7 @@ public class GpxDAOImpl implements GpxDAO{
 		Resource resource = new InputStreamResource(inputStream);
 		
 		resourceResponseDTO.setResource(resource);
-		resourceResponseDTO.setResultMessage(new ResultMessageDTO());
+		resourceResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return resourceResponseDTO;
 	}
@@ -97,7 +97,7 @@ public class GpxDAOImpl implements GpxDAO{
 		}
         
 		stringResponseDTO.setString(completeName);
-		stringResponseDTO.setResultMessage(new ResultMessageDTO());
+		stringResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return stringResponseDTO;
 	}

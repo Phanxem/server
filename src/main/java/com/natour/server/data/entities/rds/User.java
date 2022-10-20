@@ -28,12 +28,9 @@ public class User {
 	
 	@Column(nullable=false,unique=true)
 	private String username;
-	private String profileImageURL;
+	private String profileImageKey;
 	private String placeOfResidence;
 	private Timestamp dateOfBirth;
-	
-	private boolean isFacebookLinked;
-	private boolean isGoogleLinked;
 	
 	@OneToMany(mappedBy = "user")
     private List<Itinerary> itineraries;
@@ -87,12 +84,12 @@ public class User {
 		this.username = username;
 	}
 
-	public String getProfileImageURL() {
-		return profileImageURL;
+	public String getProfileImageKey() {
+		return profileImageKey;
 	}
 
-	public void setProfileImageURL(String profileImageURL) {
-		this.profileImageURL = profileImageURL;
+	public void setProfileImageKey(String profileImageKey) {
+		this.profileImageKey = profileImageKey;
 	}
 
 
@@ -129,22 +126,7 @@ public class User {
 		this.itineraries = itineraries;
 	}
 
-	public boolean isFacebookLinked() {
-		return isFacebookLinked;
-	}
 
-	public void setFacebookLinked(boolean isFacebookLinked) {
-		this.isFacebookLinked = isFacebookLinked;
-	}
-
-	public boolean isGoogleLinked() {
-		return isGoogleLinked;
-	}
-
-	public void setGoogleLinked(boolean isGoogleLinked) {
-		this.isGoogleLinked = isGoogleLinked;
-	}
-	
 	
 	
 }

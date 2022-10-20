@@ -22,6 +22,8 @@ public class Message implements Comparable<Message>{
 	private String body;
 	@Column(nullable=false)
 	private Timestamp dateOfInput;
+	@Column(nullable=false)
+	private boolean toRead;
 	
 	@ManyToOne
     @JoinColumn(name="idUser", nullable=false)
@@ -31,6 +33,8 @@ public class Message implements Comparable<Message>{
     @JoinColumn(name = "idChat", referencedColumnName = "id")
     private Chat chat;
 
+	
+	
 	public long getId() {
 		return id;
 	}
@@ -69,6 +73,16 @@ public class Message implements Comparable<Message>{
 
 	public void setChat(Chat chat) {
 		this.chat = chat;
+	}
+
+	
+	
+	public boolean isToRead() {
+		return toRead;
+	}
+
+	public void setToRead(boolean toRead) {
+		this.toRead = toRead;
 	}
 
 	@Override

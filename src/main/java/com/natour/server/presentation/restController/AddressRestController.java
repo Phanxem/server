@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.natour.server.application.dtos.response.AddressResponseDTO;
-import com.natour.server.application.dtos.response.ListAddressResponseDTO;
+import com.natour.server.application.dtos.response.GetAddressResponseDTO;
+import com.natour.server.application.dtos.response.GetListAddressResponseDTO;
 import com.natour.server.application.services.AddressService;
 
 @RestController
@@ -26,22 +26,22 @@ public class AddressRestController {
 	//GETs
 	@RequestMapping(value="/get/{coordinates}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<AddressResponseDTO> getAddressByCoordinates(@PathVariable("coordinates") String coordinates){
+	public ResponseEntity<GetAddressResponseDTO> getAddressByCoordinates(@PathVariable("coordinates") String coordinates){
 		System.out.println("TEST: GET coordinates");
 		
-		AddressResponseDTO result = addressService.findAddressByCoordinates(coordinates);
-		return new ResponseEntity<AddressResponseDTO>(result, HttpStatus.OK);
+		GetAddressResponseDTO result = addressService.findAddressByCoordinates(coordinates);
+		return new ResponseEntity<GetAddressResponseDTO>(result, HttpStatus.OK);
 	}
 	
 			
 	//SEARCH
 	@RequestMapping(value="/search", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ListAddressResponseDTO> searchAddressByQuery(@RequestParam("query") String query){
+	public ResponseEntity<GetListAddressResponseDTO> searchAddressByQuery(@RequestParam("query") String query){
 		System.out.println("TEST: SEARCH query: " + query);
 		
-		ListAddressResponseDTO result = addressService.searchAddressesByQuery(query);
-		return new ResponseEntity<ListAddressResponseDTO>(result, HttpStatus.OK);
+		GetListAddressResponseDTO result = addressService.searchAddressesByQuery(query);
+		return new ResponseEntity<GetListAddressResponseDTO>(result, HttpStatus.OK);
 		
 	}
 		

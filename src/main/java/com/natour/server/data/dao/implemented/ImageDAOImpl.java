@@ -18,7 +18,7 @@ import com.amazonaws.services.s3.model.CannedAccessControlList;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
-import com.natour.server.application.dtos.response.ResourceResponseDTO;
+import com.natour.server.application.dtos.response.GetResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.StringResponseDTO;
 import com.natour.server.application.services.utils.ResultMessageUtils;
@@ -33,9 +33,9 @@ public class ImageDAOImpl implements ImageDAO{
 	private AmazonS3 amazonS3;
 
 	@Override
-	public ResourceResponseDTO getByName(String name) {
+	public GetResourceResponseDTO getByName(String name) {
 		
-		ResourceResponseDTO resourceResponseDTO = new ResourceResponseDTO();
+		GetResourceResponseDTO resourceResponseDTO = new GetResourceResponseDTO();
 		
 		S3Object s3object = null;
 		try {
@@ -50,7 +50,7 @@ public class ImageDAOImpl implements ImageDAO{
 		Resource resource = new InputStreamResource(inputStream);
 		
 		resourceResponseDTO.setResource(resource);
-		resourceResponseDTO.setResultMessage(new ResultMessageDTO());
+		resourceResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return resourceResponseDTO;
 	}
@@ -101,16 +101,13 @@ public class ImageDAOImpl implements ImageDAO{
 		}
         
 		stringResponseDTO.setString(completeName);
-		stringResponseDTO.setResultMessage(new ResultMessageDTO());
+		stringResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return stringResponseDTO;
 	}
 
 	@Override
-	public ResultMessageDTO delete(String name) {
-	
-		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
-		
+	public ResultMessageDTO delete(String name) {	
 		try {
 			amazonS3.deleteObject(BUCKET_NAME,name);
 		}

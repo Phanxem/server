@@ -14,10 +14,10 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.natour.server.application.dtos.request.ReportRequestDTO;
-import com.natour.server.application.dtos.response.ListReportResponseDTO;
+import com.natour.server.application.dtos.request.SaveReportRequestDTO;
+import com.natour.server.application.dtos.response.GetListReportResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
-import com.natour.server.application.dtos.response.ReportResponseDTO;
+import com.natour.server.application.dtos.response.GetReportResponseDTO;
 import com.natour.server.application.services.utils.DateUtils;
 import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.entities.rds.Itinerary;
@@ -41,7 +41,7 @@ public class ReportService {
 	
 	
 	//ADDs
-	public ResultMessageDTO addReport(ReportRequestDTO reportRequestDTO) {
+	public ResultMessageDTO addReport(SaveReportRequestDTO reportRequestDTO) {
 		
 		if(!isValidDTO(reportRequestDTO)) {
 			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
@@ -64,8 +64,8 @@ public class ReportService {
 		
 		
 	//FINDs
-	public ReportResponseDTO findReportById(long id) {
-		ReportResponseDTO reportResponseDTO = new ReportResponseDTO();
+	public GetReportResponseDTO findReportById(long id) {
+		GetReportResponseDTO reportResponseDTO = new GetReportResponseDTO();
 		
 		Optional<Report> optionalReport = reportRepository.findById(id);
 		if(!optionalReport.isPresent()) {
@@ -80,8 +80,8 @@ public class ReportService {
 	}
 	
 	
-	public ListReportResponseDTO findReportByIdItinerary(Long idItinerary, int page) {
-		ListReportResponseDTO listReportResponseDTO = new ListReportResponseDTO();
+	public GetListReportResponseDTO findReportByIdItinerary(Long idItinerary, int page) {
+		GetListReportResponseDTO listReportResponseDTO = new GetListReportResponseDTO();
 		
 		if(idItinerary == null || idItinerary < 0) {
 			listReportResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
@@ -120,10 +120,10 @@ public class ReportService {
 	
 	
 	//MAPPERs
-	public ReportResponseDTO toReportResponseDTO(Report report) {
+	public GetReportResponseDTO toReportResponseDTO(Report report) {
 		if(report == null) return null;
 		
-		ReportResponseDTO reportDTO = new ReportResponseDTO();
+		GetReportResponseDTO reportDTO = new GetReportResponseDTO();
 		reportDTO.setId(report.getId());
 		reportDTO.setName(report.getName());
 		reportDTO.setDescription(report.getDescription());
@@ -135,18 +135,18 @@ public class ReportService {
 		String string = DateUtils.toFullString(report.getDateOfInput());
 		reportDTO.setDateOfInput(string);
 		
-		reportDTO.setResultMessage(new ResultMessageDTO());
+		reportDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return reportDTO;
 	}
 	
-	public ListReportResponseDTO toListReportResponseDTO(List<Report> reports){
-		ListReportResponseDTO listReportResponseDTO = new ListReportResponseDTO();
-		List<ReportResponseDTO> reportsDTO = new LinkedList<ReportResponseDTO>();
+	public GetListReportResponseDTO toListReportResponseDTO(List<Report> reports){
+		GetListReportResponseDTO listReportResponseDTO = new GetListReportResponseDTO();
+		List<GetReportResponseDTO> reportsDTO = new LinkedList<GetReportResponseDTO>();
 		
 		if(reports == null) {
 			listReportResponseDTO.setListReport(null);
-			listReportResponseDTO.setResultMessage(new ResultMessageDTO());
+			listReportResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 			return listReportResponseDTO;
 		}
 		
@@ -155,12 +155,12 @@ public class ReportService {
 		}
 		
 		listReportResponseDTO.setListReport(reportsDTO);
-		listReportResponseDTO.setResultMessage(new ResultMessageDTO());
+		listReportResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		return listReportResponseDTO;
 	}
 
 	
-	private Report toReportEntity(ReportRequestDTO reportRequestDTO) {
+	private Report toReportEntity(SaveReportRequestDTO reportRequestDTO) {
 
 		Report report = new Report();
 		report.setName(reportRequestDTO.getName());
@@ -193,7 +193,7 @@ public class ReportService {
 
 	
 	//VALIDATORs
-	boolean isValidDTO(ReportRequestDTO reportRequestDTO) {
+	boolean isValidDTO(SaveReportRequestDTO reportRequestDTO) {
 			
 		if(reportRequestDTO == null) return false;
 			

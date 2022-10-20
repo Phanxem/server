@@ -1,6 +1,6 @@
 package com.natour.server.application.dtos.request;
 
-public class AddUserRequestDTO {
+public class SaveUserRequestDTO {
 	private String username;
 	private String identityProvider;
 	private String idIdentityProvided;

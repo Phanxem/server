@@ -40,13 +40,13 @@ import com.amazonaws.services.cognitoidp.model.AdminGetUserResult;
 import com.amazonaws.services.cognitoidp.model.AdminLinkProviderForUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminLinkProviderForUserResult;
 import com.amazonaws.services.cognitoidp.model.ProviderUserIdentifierType;
-import com.natour.server.application.dtos.request.AddUserRequestDTO;
-import com.natour.server.application.dtos.request.UpdateUserOptionalInfoRequestDTO;
-import com.natour.server.application.dtos.response.ResourceResponseDTO;
-import com.natour.server.application.dtos.response.ListUserResponseDTO;
+import com.natour.server.application.dtos.request.SaveUserRequestDTO;
+import com.natour.server.application.dtos.request.SaveUserOptionalInfoRequestDTO;
+import com.natour.server.application.dtos.response.GetResourceResponseDTO;
+import com.natour.server.application.dtos.response.GetListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.StringResponseDTO;
-import com.natour.server.application.dtos.response.UserResponseDTO;
+import com.natour.server.application.dtos.response.GetUserResponseDTO;
 import com.natour.server.application.services.utils.DateUtils;
 import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.interfaces.CognitoUserDAO;
@@ -93,7 +93,7 @@ public class UserService {
 	
 	
 	//ADDs
-	public ResultMessageDTO addUser(AddUserRequestDTO addUserRequestDTO) {	
+	public ResultMessageDTO addUser(SaveUserRequestDTO addUserRequestDTO) {	
 		if(!isValidDTO(addUserRequestDTO)) {
 			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
@@ -156,11 +156,11 @@ public class UserService {
 		*/
 		
 		
-		if(user.getProfileImageURL() != null) {
-			imageDAO.delete(user.getProfileImageURL());
+		if(user.getProfileImageKey() != null) {
+			imageDAO.delete(user.getProfileImageKey());
 		}
 		
-		user.setProfileImageURL(imageUrl);
+		user.setProfileImageKey(imageUrl);
 		
 		User result = userRepository.save(user);
 		
@@ -169,7 +169,7 @@ public class UserService {
 	
 	
 	
-	public ResultMessageDTO updateOptionalInfo(long idUser, UpdateUserOptionalInfoRequestDTO optionalInfoUserRequestDTO) {
+	public ResultMessageDTO updateOptionalInfo(long idUser, SaveUserOptionalInfoRequestDTO optionalInfoUserRequestDTO) {
 		
 		if(idUser < 0) {
 			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
@@ -211,8 +211,8 @@ public class UserService {
 	
 	
 	//FINDs
-	public UserResponseDTO findUserById(long idUser) {		
-		UserResponseDTO userResponseDTO = new UserResponseDTO();
+	public GetUserResponseDTO findUserById(long idUser) {		
+		GetUserResponseDTO userResponseDTO = new GetUserResponseDTO();
 		
 		Optional<User> optionalUser = userRepository.findById(idUser);
 		if(!optionalUser.isPresent()) {
@@ -227,8 +227,8 @@ public class UserService {
 	}
 	
 
-	public UserResponseDTO findUserByIdp(String identityProvider, String idIdentityProvided) {
-		UserResponseDTO userResponseDTO = new UserResponseDTO();
+	public GetUserResponseDTO findUserByIdp(String identityProvider, String idIdentityProvided) {
+		GetUserResponseDTO userResponseDTO = new GetUserResponseDTO();
 		
 		User user = userRepository.findByIdentityProviderAndIdIdentityProvided(identityProvider, idIdentityProvided);
 		if(user == null) {
@@ -241,8 +241,8 @@ public class UserService {
 		return userResponseDTO;
 	}
 	
-	public ResourceResponseDTO findUserImageById(long idUser) {
-		ResourceResponseDTO imageResponseDTO = new ResourceResponseDTO();
+	public GetResourceResponseDTO findUserImageById(long idUser) {
+		GetResourceResponseDTO imageResponseDTO = new GetResourceResponseDTO();
 		
 		Optional<User> optionalUser = userRepository.findById(idUser);
 		if(!optionalUser.isPresent()) {
@@ -252,13 +252,13 @@ public class UserService {
 		User user = optionalUser.get();
 		
 
-		if(user.getProfileImageURL() == null) {
+		if(user.getProfileImageKey() == null) {
 			imageResponseDTO.setResource(null);
 			imageResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 			return imageResponseDTO;
 		}
 		
-		imageResponseDTO = imageDAO.getByName(user.getProfileImageURL());
+		imageResponseDTO = imageDAO.getByName(user.getProfileImageKey());
 			
 		/*
 		FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(user.getProfileImageURL());
@@ -276,8 +276,8 @@ public class UserService {
 	}
 
 	
-	public UserResponseDTO findUserByIdConnection(String idConnection) {
-		UserResponseDTO userResponseDTO = new UserResponseDTO();
+	public GetUserResponseDTO findUserByIdConnection(String idConnection) {
+		GetUserResponseDTO userResponseDTO = new GetUserResponseDTO();
 		
 		ChatConnection chatConnection = chatConnectionRepository.findById(idConnection);
 		
@@ -303,8 +303,8 @@ public class UserService {
 	
 	//GETs
 	
-	public ListUserResponseDTO searchUserByUsername(String username, int page){
-		ListUserResponseDTO listUserResponseDTO = new ListUserResponseDTO();
+	public GetListUserResponseDTO searchUserByUsername(String username, int page){
+		GetListUserResponseDTO listUserResponseDTO = new GetListUserResponseDTO();
 		
 		if(username == null) {
 			listUserResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
@@ -318,8 +318,8 @@ public class UserService {
 		return listUserResponseDTO;
 	}
 	
-	public ListUserResponseDTO searchUserWithConversation(long idUser, int page){
-		ListUserResponseDTO listUserResponseDTO = new ListUserResponseDTO();
+	public GetListUserResponseDTO searchUserWithConversation(long idUser, int page){
+		GetListUserResponseDTO listUserResponseDTO = new GetListUserResponseDTO();
 		
 		if(idUser < 0) {
 			listUserResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
@@ -408,11 +408,11 @@ public class UserService {
 	
 	//-----------------------------------------------------------------------------------------------
 
-	public static UserResponseDTO toUserResponseDTO(User user) {
+	public static GetUserResponseDTO toUserResponseDTO(User user) {
 		
 		if(user == null) return null;
 		
-		UserResponseDTO dto = new UserResponseDTO();
+		GetUserResponseDTO dto = new GetUserResponseDTO();
 		dto.setId(user.getId());
 		dto.setUsername(user.getUsername());
 		dto.setPlaceOfResidence(user.getPlaceOfResidence());
@@ -426,29 +426,29 @@ public class UserService {
 		}
 		else dto.setDateOfBirth(null);
 		
-		dto.setResultMessage(new ResultMessageDTO());
+		dto.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return dto;
 	}
 	
-	public static ListUserResponseDTO toListUserResponseDTO(List<User> users){
+	public static GetListUserResponseDTO toListUserResponseDTO(List<User> users){
 		if(users == null) return null;
 		
-		List<UserResponseDTO> dto = new LinkedList<UserResponseDTO>();
+		List<GetUserResponseDTO> dto = new LinkedList<GetUserResponseDTO>();
 		for(User user : users) {
 			dto.add(toUserResponseDTO(user));
 		}
 		
-		ListUserResponseDTO listUserResponseDTO = new ListUserResponseDTO();
+		GetListUserResponseDTO listUserResponseDTO = new GetListUserResponseDTO();
 		listUserResponseDTO.setListUser(dto);
-		listUserResponseDTO.setResultMessage(new ResultMessageDTO());
+		listUserResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return listUserResponseDTO;
 	}
 	
 	
 	//VALIDATORs
-	public static boolean isValidDTO(UpdateUserOptionalInfoRequestDTO optionalInfoDTO) {
+	public static boolean isValidDTO(SaveUserOptionalInfoRequestDTO optionalInfoDTO) {
 		if(optionalInfoDTO == null) return false;
 		
 		String stringDate = optionalInfoDTO.getDateOfBirth();
@@ -473,7 +473,7 @@ public class UserService {
 		return true;
 	}
 
-	public static boolean isValidDTO(AddUserRequestDTO dto) {
+	public static boolean isValidDTO(SaveUserRequestDTO dto) {
 		String username = dto.getUsername();
 		if(username == null || username.isBlank()) return false;
 		

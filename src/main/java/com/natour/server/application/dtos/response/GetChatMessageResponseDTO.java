@@ -1,6 +1,6 @@
 package com.natour.server.application.dtos.response;
 
-public class MessageResponseDTO {
+public class GetChatMessageResponseDTO {
 
 
 	private long id;

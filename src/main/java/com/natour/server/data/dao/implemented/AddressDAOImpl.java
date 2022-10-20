@@ -15,8 +15,8 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import com.natour.server.application.dtos.response.AddressResponseDTO;
-import com.natour.server.application.dtos.response.ListAddressResponseDTO;
+import com.natour.server.application.dtos.response.GetAddressResponseDTO;
+import com.natour.server.application.dtos.response.GetListAddressResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.PointResponseDTO;
 import com.natour.server.application.services.utils.ResultMessageUtils;
@@ -49,11 +49,10 @@ public class AddressDAOImpl implements AddressDAO{
     private static final String KEY_COUNTRY = "country";
     
     
-    private AddressResponseDTO buildAddressDTO(JsonObject jsonObjectResult) {
+    private GetAddressResponseDTO buildAddressDTO(JsonObject jsonObjectResult) {
     	
-    	AddressResponseDTO addressDTO = new AddressResponseDTO();
+    	GetAddressResponseDTO addressDTO = new GetAddressResponseDTO();
         PointResponseDTO pointDTO = new PointResponseDTO();
-        ResultMessageDTO messageResponseDTO = new ResultMessageDTO();
         
     	if (!jsonObjectResult.has(KEY_LATITUDE) ||
             !jsonObjectResult.has(KEY_LONGITUDE) ||
@@ -97,7 +96,7 @@ public class AddressDAOImpl implements AddressDAO{
         	addressLine = addressLine.concat(jsonObjectAddress.get(KEY_COUNTRY).getAsString());
         }
 
-        addressDTO.setAddressLine(addressLine);
+        addressDTO.setAddressName(addressLine);
         return addressDTO;
     }
     
@@ -106,8 +105,8 @@ public class AddressDAOImpl implements AddressDAO{
     
     
     
-    public AddressResponseDTO findAddressByPoint(PointResponseDTO point) {
-    	AddressResponseDTO result = null;
+    public GetAddressResponseDTO findAddressByPoint(PointResponseDTO point) {
+    	GetAddressResponseDTO result = null;
     	
     	String url = NOMINATIM_SERVICE_URL + OPERATON_REVERSE
                 + "?format=json"
@@ -129,8 +128,8 @@ public class AddressDAOImpl implements AddressDAO{
     	return result;
     }
     
-    public ListAddressResponseDTO findAddressesByQuery(String query) {
-    	ListAddressResponseDTO listAddressResponseDTO = new ListAddressResponseDTO();
+    public GetListAddressResponseDTO findAddressesByQuery(String query) {
+    	GetListAddressResponseDTO listAddressResponseDTO = new GetListAddressResponseDTO();
     	
     	String url = null;
         try {
@@ -155,17 +154,17 @@ public class AddressDAOImpl implements AddressDAO{
     	JsonElement jsonElementResult = JsonParser.parseString(jsonStringResult);
         JsonArray jsonArrayResult = jsonElementResult.getAsJsonArray();
 		
-		List<AddressResponseDTO> addresses = new ArrayList<AddressResponseDTO>();
+		List<GetAddressResponseDTO> addresses = new ArrayList<GetAddressResponseDTO>();
 	
 		for(int i = 0; i < jsonArrayResult.size(); i++){
 			JsonObject jsonObjectResult = jsonArrayResult.get(i).getAsJsonObject();
-            AddressResponseDTO address = buildAddressDTO(jsonObjectResult);
+            GetAddressResponseDTO address = buildAddressDTO(jsonObjectResult);
             if(address != null) addresses.add(address);
         }
         
 		
-		listAddressResponseDTO.setListAddresses(addresses);
-		listAddressResponseDTO.setResultMessage(new ResultMessageDTO());
+		listAddressResponseDTO.setListAddress(addresses);
+		listAddressResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
     	return listAddressResponseDTO;
     }

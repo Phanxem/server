@@ -5,21 +5,19 @@ import java.util.List;
 
 import com.mapbox.services.commons.geojson.LineString;
 
-public class RouteResponseDTO {
+public class GetRouteResponseDTO {
 	
 	private ResultMessageDTO resultMessage;
 	
 	private List<PointResponseDTO> wayPoints;
-	private List<RouteLegResponseDTO> tracks;
+	private List<GetRouteLegResponseDTO> tracks;
 	
-	//private List<PointDTO> geometry;
+	public GetRouteResponseDTO() {}
 	
-	public RouteResponseDTO() {}
-	
-	public RouteResponseDTO(float distance, float duration, LineString geometry) {
+	public GetRouteResponseDTO(float distance, float duration, LineString geometry) {
 	
 		this.setWayPoints(new ArrayList<PointResponseDTO>());
-		this.tracks = new ArrayList<RouteLegResponseDTO>();
+		this.tracks = new ArrayList<GetRouteLegResponseDTO>();
 	}
 
 	
@@ -35,11 +33,11 @@ public class RouteResponseDTO {
 		this.resultMessage = resultMessage;
 	}
 
-	public List<RouteLegResponseDTO> getTracks() {
+	public List<GetRouteLegResponseDTO> getTracks() {
 		return tracks;
 	}
 
-	public void setTracks(List<RouteLegResponseDTO> tracks) {
+	public void setTracks(List<GetRouteLegResponseDTO> tracks) {
 		this.tracks = tracks;
 	}
 

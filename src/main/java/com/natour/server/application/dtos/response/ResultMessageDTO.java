@@ -4,11 +4,6 @@ public class ResultMessageDTO {
 	private long code;
 	private String message;
 	
-	public ResultMessageDTO() {
-		this.code = 200;
-		this.message = "Operazione effettuata con successo";
-	}
-	
 	public ResultMessageDTO(long code, String message) {
 		this.code = code;
 		this.message = message;

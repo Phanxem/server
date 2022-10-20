@@ -17,10 +17,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.natour.server.application.dtos.request.ItineraryRequestDTO;
-import com.natour.server.application.dtos.response.ItineraryResponseDTO;
-import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
-import com.natour.server.application.dtos.response.ResourceResponseDTO;
+import com.natour.server.application.dtos.request.SaveItineraryRequestDTO;
+import com.natour.server.application.dtos.response.GetItineraryResponseDTO;
+import com.natour.server.application.dtos.response.GetListItineraryResponseDTO;
+import com.natour.server.application.dtos.response.GetResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.StringResponseDTO;
 import com.natour.server.application.services.utils.ResultMessageUtils;
@@ -49,7 +49,7 @@ public class ItineraryService {
 	private GpxDAO gpxDAO;
 	
 	//ADDs
-	public ResultMessageDTO addItinerary(ItineraryRequestDTO itineraryRequestDTO) {
+	public ResultMessageDTO addItinerary(SaveItineraryRequestDTO itineraryRequestDTO) {
 		
 		if(!isValidDTO(itineraryRequestDTO)) {
 			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
@@ -82,7 +82,7 @@ public class ItineraryService {
 		}
 		
 		
-		String gpxUrl = stringResponseDTO.getString();
+		String gpxKey = stringResponseDTO.getString();
 		
 		/*
 		String gpxUrl;	
@@ -97,7 +97,7 @@ public class ItineraryService {
 		*/
 		
 		
-		itinerary.setGpxURL(gpxUrl);
+		itinerary.setGpxKey(gpxKey);
 		itinerary = itineraryRepository.save(itinerary);
 		
 		return ResultMessageUtils.SUCCESS_MESSAGE;
@@ -105,7 +105,7 @@ public class ItineraryService {
 
 	
 	//UPDATEs
-	public ResultMessageDTO updateItineraray(long idItinerary, ItineraryRequestDTO itineraryRequestDTO) {
+	public ResultMessageDTO updateItineraray(long idItinerary, SaveItineraryRequestDTO itineraryRequestDTO) {
 		
 		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(idItinerary);
 		if(!optionalItinerary.isPresent()) {
@@ -161,9 +161,9 @@ public class ItineraryService {
 		}
 		
 		itinerary.setId(idItinerary);
-		itinerary.setGpxURL(gpxUrl);
+		itinerary.setGpxKey(gpxUrl);
 		
-		gpxDAO.delete(oldItinerary.getGpxURL());
+		gpxDAO.delete(oldItinerary.getGpxKey());
 		
 		itinerary = itineraryRepository.save(itinerary);
 		
@@ -174,8 +174,8 @@ public class ItineraryService {
 	
 	
 	//FINDs
-	public ItineraryResponseDTO findItineraryById(long id) {
-		ItineraryResponseDTO itineraryResponseDTO = new ItineraryResponseDTO();
+	public GetItineraryResponseDTO findItineraryById(long id) {
+		GetItineraryResponseDTO itineraryResponseDTO = new GetItineraryResponseDTO();
 		
 		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(id);
 		if(!optionalItinerary.isPresent()) {
@@ -189,8 +189,8 @@ public class ItineraryService {
 		return itineraryResponseDTO;
 	}
 	
-	public ResourceResponseDTO findItineraryGpxById(long idItinerary) {
-		ResourceResponseDTO gpxResponseDTO = new ResourceResponseDTO();
+	public GetResourceResponseDTO findItineraryGpxById(long idItinerary) {
+		GetResourceResponseDTO gpxResponseDTO = new GetResourceResponseDTO();
 		
 		Optional<Itinerary> optionalItinerary = itineraryRepository.findById(idItinerary);
 		if(!optionalItinerary.isPresent()) {
@@ -199,12 +199,12 @@ public class ItineraryService {
 		}
 		Itinerary itinerary = optionalItinerary.get();
 		
-		if(itinerary.getGpxURL() == null) {
+		if(itinerary.getGpxKey() == null) {
 			gpxResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_FAILURE);
 			return gpxResponseDTO;
 		}
 		
-		gpxResponseDTO = gpxDAO.getByName(itinerary.getGpxURL());
+		gpxResponseDTO = gpxDAO.getByName(itinerary.getGpxKey());
 		
 /*
 		FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(itinerary.getGpxURL());
@@ -221,8 +221,8 @@ public class ItineraryService {
 	}
 	
 	
-	public ListItineraryResponseDTO findItineraryByIdUser(Long idUser, int page) {
-		ListItineraryResponseDTO listItineraryResponseDTO = new ListItineraryResponseDTO();
+	public GetListItineraryResponseDTO findItineraryByIdUser(Long idUser, int page) {
+		GetListItineraryResponseDTO listItineraryResponseDTO = new GetListItineraryResponseDTO();
 		
 		if(idUser == null || idUser < 0) {
 			listItineraryResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
@@ -242,24 +242,24 @@ public class ItineraryService {
 		return listItineraryResponseDTO;
 	}
 		
-	public ListItineraryResponseDTO findRandomItineraries() {
+	public GetListItineraryResponseDTO findRandomItineraries() {
 		
 		Pageable pageable = PageRequest.of(0, ITINERARY_PER_PAGE);
 		List<Itinerary> itineraries = itineraryRepository.findRandom(pageable);
-		ListItineraryResponseDTO listItineraryResponseDTO = toListItineraryResponseDTO(itineraries);
+		GetListItineraryResponseDTO listItineraryResponseDTO = toListItineraryResponseDTO(itineraries);
 		
 		return listItineraryResponseDTO;
 	}
 
 	
 	//SEARCHs
-	public ListItineraryResponseDTO searchItineraryByName(String name, int page) {
+	public GetListItineraryResponseDTO searchItineraryByName(String name, int page) {
 		Pageable pageable = PageRequest.of(page, ITINERARY_PER_PAGE);
 		List<Itinerary> itineraries = itineraryRepository.findByNameContaining(name,pageable);
 		
 		System.out.println("size: " + itineraries.size());
 		
-		ListItineraryResponseDTO listItineraryResponseDTO = toListItineraryResponseDTO(itineraries);
+		GetListItineraryResponseDTO listItineraryResponseDTO = toListItineraryResponseDTO(itineraries);
 
 		return listItineraryResponseDTO;
 	}
@@ -272,7 +272,7 @@ public class ItineraryService {
 			return ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND;
 		}
 		Itinerary itinerary = optionalItinerary.get();
-		String gpxUrl = itinerary.getGpxURL();
+		String gpxUrl = itinerary.getGpxKey();
 		
 		itineraryRepository.delete(itinerary);
 		gpxDAO.delete(gpxUrl);
@@ -294,7 +294,7 @@ public class ItineraryService {
 	
 	//MAPPER
 
-	public Itinerary toItineraryEntity(ItineraryRequestDTO itineraryDTO) {
+	public Itinerary toItineraryEntity(SaveItineraryRequestDTO itineraryDTO) {
 		
 		Itinerary itinerary = new Itinerary();
 		itinerary.setName(itineraryDTO.getName());
@@ -309,7 +309,7 @@ public class ItineraryService {
 		}
 		itinerary.setUser(user.get());
 		
-		itinerary.setGpxURL("");
+		itinerary.setGpxKey("");
 		
 		return itinerary;
 	}
@@ -320,11 +320,11 @@ public class ItineraryService {
 	
 	//----
 	
-	public ItineraryResponseDTO toItineraryResponseDTO(Itinerary itinerary) {
+	public GetItineraryResponseDTO toItineraryResponseDTO(Itinerary itinerary) {
 		
 		if(itinerary == null) return null;
 		
-		ItineraryResponseDTO dto = new ItineraryResponseDTO();
+		GetItineraryResponseDTO dto = new GetItineraryResponseDTO();
 		
 		dto.setId(itinerary.getId());
 		dto.setName(itinerary.getName());
@@ -335,21 +335,21 @@ public class ItineraryService {
 		
 		dto.setIdUser(itinerary.getUser().getId());
 		
-		dto.setResultMessage(new ResultMessageDTO());
+		dto.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return dto;
 	}
 	
 	
-	public ListItineraryResponseDTO toListItineraryResponseDTO(List<Itinerary> itineraries){
+	public GetListItineraryResponseDTO toListItineraryResponseDTO(List<Itinerary> itineraries){
 		
-		ListItineraryResponseDTO listItineraryResponseDTO = new ListItineraryResponseDTO();
-		List<ItineraryResponseDTO> itinerariesDTO = new LinkedList<ItineraryResponseDTO>();
+		GetListItineraryResponseDTO listItineraryResponseDTO = new GetListItineraryResponseDTO();
+		List<GetItineraryResponseDTO> itinerariesDTO = new LinkedList<GetItineraryResponseDTO>();
 		
 		
 		if(itineraries == null) {
 			listItineraryResponseDTO.setListItinerary(null);
-			listItineraryResponseDTO.setResultMessage(new ResultMessageDTO());
+			listItineraryResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 			return listItineraryResponseDTO;
 		}
 		
@@ -359,14 +359,14 @@ public class ItineraryService {
 		}
 		
 		listItineraryResponseDTO.setListItinerary(itinerariesDTO);
-		listItineraryResponseDTO.setResultMessage(new ResultMessageDTO());
+		listItineraryResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		return listItineraryResponseDTO;
 	}
 	
 	
 	
 	//VALIDATORs	
-	public boolean isValidDTO(ItineraryRequestDTO itineraryDTO) {
+	public boolean isValidDTO(SaveItineraryRequestDTO itineraryDTO) {
 		
 		if(itineraryDTO == null) return false;
 				

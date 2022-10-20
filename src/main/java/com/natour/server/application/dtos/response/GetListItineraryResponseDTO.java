@@ -2,21 +2,25 @@ package com.natour.server.application.dtos.response;
 
 import java.util.List;
 
-public class ListMessageResponseDTO {
+public class GetListItineraryResponseDTO {
 
 	private ResultMessageDTO resultMessage;
-	private List<MessageResponseDTO> listMessage;
+	private List<GetItineraryResponseDTO> listItinerary;
+	
+	
+	
+	
 	public ResultMessageDTO getResultMessage() {
 		return resultMessage;
 	}
 	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
-	public List<MessageResponseDTO> getListMessage() {
-		return listMessage;
+	public List<GetItineraryResponseDTO> getListItinerary() {
+		return listItinerary;
 	}
-	public void setListMessage(List<MessageResponseDTO> listMessage) {
-		this.listMessage = listMessage;
+	public void setListItinerary(List<GetItineraryResponseDTO> listItinerary) {
+		this.listItinerary = listItinerary;
 	}
 	
 	

@@ -14,8 +14,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.PointResponseDTO;
-import com.natour.server.application.dtos.response.RouteLegResponseDTO;
-import com.natour.server.application.dtos.response.RouteResponseDTO;
+import com.natour.server.application.dtos.response.GetRouteLegResponseDTO;
+import com.natour.server.application.dtos.response.GetRouteResponseDTO;
 import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.interfaces.RouteDAO;
 
@@ -37,9 +37,9 @@ public class RouteDAOImpl implements RouteDAO{
     private static final String KEY_DURATION = "duration";
     
 	
-    private RouteResponseDTO buildRouteDTO(JsonObject jsonObject) {
+    private GetRouteResponseDTO buildRouteDTO(JsonObject jsonObject) {
 
-    	RouteResponseDTO routeDTO = new RouteResponseDTO();
+    	GetRouteResponseDTO routeDTO = new GetRouteResponseDTO();
     	
     	
     	if(!jsonObject.has(KEY_CODE) ||
@@ -71,10 +71,10 @@ public class RouteDAOImpl implements RouteDAO{
     	}
     	
     	
-    	List<RouteLegResponseDTO> tracks = new ArrayList<RouteLegResponseDTO>();
+    	List<GetRouteLegResponseDTO> tracks = new ArrayList<GetRouteLegResponseDTO>();
     	int j = 0;
     	for(int i = 0; i < jsonArrayLegs.size(); i++) {
-    		RouteLegResponseDTO routeLeg = new RouteLegResponseDTO();
+    		GetRouteLegResponseDTO routeLeg = new GetRouteLegResponseDTO();
     		
     		routeLeg.setStartingPoint(wayPoints.get(i));
     		routeLeg.setDestinationPoint(wayPoints.get(i+1));
@@ -107,14 +107,14 @@ public class RouteDAOImpl implements RouteDAO{
     	
     	routeDTO.setWayPoints(wayPoints);
     	routeDTO.setTracks(tracks);
-    	routeDTO.setResultMessage(new ResultMessageDTO());
+    	routeDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
     	
     	return routeDTO;
     }
     
 
 	@Override
-	public RouteResponseDTO findRouteByCoordinates(String coordinates) {
+	public GetRouteResponseDTO findRouteByCoordinates(String coordinates) {
 		String url = ROUTING_SERVICE_URL + MEAN_BY_FOOT
 				   + coordinates
 				   + "?overview=full"
@@ -134,7 +134,7 @@ public class RouteDAOImpl implements RouteDAO{
 		
         
         
-        RouteResponseDTO result = buildRouteDTO(jsonObjectResult);
+        GetRouteResponseDTO result = buildRouteDTO(jsonObjectResult);
 
 		return result;
 	}

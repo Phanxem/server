@@ -1,6 +1,6 @@
 package com.natour.server.application.dtos.response;
 
-public class UserResponseDTO {
+public class GetUserResponseDTO {
 
 	private ResultMessageDTO resultMessage;
 	
@@ -8,12 +8,6 @@ public class UserResponseDTO {
 	private String username;
 	private String placeOfResidence;
 	private String dateOfBirth;
-	
-	private boolean isFacebookLinked;
-	private boolean isGoogleLinked;
-	
-	
-	
 	
 	
 	public ResultMessageDTO getResultMessage() {
@@ -46,22 +40,4 @@ public class UserResponseDTO {
 	public void setDateOfBirth(String dateOfBirth) {
 		this.dateOfBirth = dateOfBirth;
 	}
-	public boolean isFacebookLinked() {
-		return isFacebookLinked;
-	}
-	public void setFacebookLinked(boolean isFacebookLinked) {
-		this.isFacebookLinked = isFacebookLinked;
-	}
-	public boolean isGoogleLinked() {
-		return isGoogleLinked;
-	}
-	public void setGoogleLinked(boolean isGoogleLinked) {
-		this.isGoogleLinked = isGoogleLinked;
-	}
-	
-	
-	
-	
-	
-	
 }

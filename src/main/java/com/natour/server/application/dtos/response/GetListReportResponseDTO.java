@@ -2,11 +2,10 @@ package com.natour.server.application.dtos.response;
 
 import java.util.List;
 
-public class ListItineraryResponseDTO {
+public class GetListReportResponseDTO {
 
 	private ResultMessageDTO resultMessage;
-	private List<ItineraryResponseDTO> listItinerary;
-	
+	private List<GetReportResponseDTO> listReport;
 	
 	
 	
@@ -16,11 +15,11 @@ public class ListItineraryResponseDTO {
 	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
-	public List<ItineraryResponseDTO> getListItinerary() {
-		return listItinerary;
+	public List<GetReportResponseDTO> getListReport() {
+		return listReport;
 	}
-	public void setListItinerary(List<ItineraryResponseDTO> listItinerary) {
-		this.listItinerary = listItinerary;
+	public void setListReport(List<GetReportResponseDTO> listReport) {
+		this.listReport = listReport;
 	}
 	
 	

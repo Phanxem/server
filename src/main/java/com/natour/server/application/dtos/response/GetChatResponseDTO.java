@@ -1,6 +1,6 @@
 package com.natour.server.application.dtos.response;
 
-public class ChatResponseDTO {
+public class GetChatResponseDTO {
 
 	private ResultMessageDTO resultMessage;
 	
@@ -9,6 +9,8 @@ public class ChatResponseDTO {
 	private long idUser;
 	private String nameChat;
 	private String lastMessage;
+	private String inputTime;
+	private boolean hasMessageToRead;
 	
 	
 	
@@ -42,6 +44,18 @@ public class ChatResponseDTO {
 	}
 	public void setLastMessage(String lastMessage) {
 		this.lastMessage = lastMessage;
+	}
+	public boolean hasMessageToRead() {
+		return hasMessageToRead;
+	}
+	public void setHasMessageToRead(boolean hasMessageToRead) {
+		this.hasMessageToRead = hasMessageToRead;
+	}
+	public String getInputTime() {
+		return inputTime;
+	}
+	public void setInputTime(String inputTime) {
+		this.inputTime = inputTime;
 	}
 	
 	

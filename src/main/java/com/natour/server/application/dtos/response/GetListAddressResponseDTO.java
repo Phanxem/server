@@ -2,10 +2,10 @@ package com.natour.server.application.dtos.response;
 
 import java.util.List;
 
-public class ListAddressResponseDTO {
+public class GetListAddressResponseDTO {
 
 	private ResultMessageDTO resultMessage;
-	private List<AddressResponseDTO> listAddresses;
+	private List<GetAddressResponseDTO> listAddress;
 	
 	
 	public ResultMessageDTO getResultMessage() {
@@ -14,11 +14,11 @@ public class ListAddressResponseDTO {
 	public void setResultMessage(ResultMessageDTO resultMessage) {
 		this.resultMessage = resultMessage;
 	}
-	public List<AddressResponseDTO> getListAddresses() {
-		return listAddresses;
+	public List<GetAddressResponseDTO> getListAddress() {
+		return listAddress;
 	}
-	public void setListAddresses(List<AddressResponseDTO> listAddresses) {
-		this.listAddresses = listAddresses;
+	public void setListAddress(List<GetAddressResponseDTO> listAddress) {
+		this.listAddress = listAddress;
 	}
 	
 	

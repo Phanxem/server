@@ -1,14 +1,11 @@
-package com.natour.server.application.dtos.response;
+package com.natour.server.application.dtos.request;
 
-import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
-public class ItineraryResponseDTO {
+public class SaveItineraryRequestDTO {
 
-	private ResultMessageDTO resultMessage;
-	
-	private Long id;
 	private String name;
+	private MultipartFile gpx;
 	private Float duration;
 	private Float lenght;
 	private Integer difficulty;
@@ -16,25 +13,6 @@ public class ItineraryResponseDTO {
 	
 	private Long idUser;
 	
-	
-	
-
-	public ResultMessageDTO getResultMessage() {
-		return resultMessage;
-	}
-
-	public void setResultMessage(ResultMessageDTO resultMessage) {
-		this.resultMessage = resultMessage;
-	}
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public String getName() {
 		return name;
 	}
@@ -43,6 +21,15 @@ public class ItineraryResponseDTO {
 		this.name = name;
 	}
 
+
+
+	public MultipartFile getGpx() {
+		return gpx;
+	}
+
+	public void setGpx(MultipartFile gpx) {
+		this.gpx = gpx;
+	}
 
 	public Float getDuration() {
 		return duration;
@@ -85,4 +72,7 @@ public class ItineraryResponseDTO {
 	}
 
 	
+	
+	
+
 }

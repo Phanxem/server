@@ -21,10 +21,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.natour.server.application.dtos.request.ItineraryRequestDTO;
-import com.natour.server.application.dtos.response.ItineraryResponseDTO;
-import com.natour.server.application.dtos.response.ListItineraryResponseDTO;
-import com.natour.server.application.dtos.response.ResourceResponseDTO;
+import com.natour.server.application.dtos.request.SaveItineraryRequestDTO;
+import com.natour.server.application.dtos.response.GetItineraryResponseDTO;
+import com.natour.server.application.dtos.response.GetListItineraryResponseDTO;
+import com.natour.server.application.dtos.response.GetResourceResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.services.ItineraryService;
 import com.natour.server.application.services.utils.ResultMessageUtils;
@@ -42,14 +42,14 @@ public class ItineraryRestController {
 	//GETs
 	@RequestMapping(value="/get/{idItinerary}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ItineraryResponseDTO> getItineraryById(@PathVariable("idItinerary") long idItinerary){
+	public ResponseEntity<GetItineraryResponseDTO> getItineraryById(@PathVariable("idItinerary") long idItinerary){
 		System.out.println("TEST: GET id");
 		
-		ItineraryResponseDTO result = itineraryService.findItineraryById(idItinerary);
+		GetItineraryResponseDTO result = itineraryService.findItineraryById(idItinerary);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<ItineraryResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetItineraryResponseDTO>(result, resultHttpStatus);
 		
 	}
 	
@@ -59,7 +59,7 @@ public class ItineraryRestController {
 	public ResponseEntity<Resource> getItineraryGpxById(@PathVariable("idItinerary") long idItinerary, HttpServletRequest request){
 		System.out.println("TEST: GET IMAGE id");
 
-		ResourceResponseDTO result = itineraryService.findItineraryGpxById(idItinerary);
+		GetResourceResponseDTO result = itineraryService.findItineraryGpxById(idItinerary);
 
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus;
@@ -92,26 +92,26 @@ public class ItineraryRestController {
 	
 	@RequestMapping(value="/get/random", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ListItineraryResponseDTO> getRandomItineraries(){
+	public ResponseEntity<GetListItineraryResponseDTO> getRandomItineraries(){
 		System.out.println("TEST: GET random");
 		
-		ListItineraryResponseDTO result = itineraryService.findRandomItineraries();
+		GetListItineraryResponseDTO result = itineraryService.findRandomItineraries();
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<ListItineraryResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetListItineraryResponseDTO>(result, resultHttpStatus);
 	}
 	
 	@RequestMapping(value="/get/user/{idUser}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ListItineraryResponseDTO> getItinerariesByIdUser(@PathVariable("idUser") long idUser, @RequestParam int page){
+	public ResponseEntity<GetListItineraryResponseDTO> getItinerariesByIdUser(@PathVariable("idUser") long idUser, @RequestParam int page){
 		System.out.println("TEST: GET by idUser");
 		
-		ListItineraryResponseDTO result = itineraryService.findItineraryByIdUser(idUser, page);
+		GetListItineraryResponseDTO result = itineraryService.findItineraryByIdUser(idUser, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<ListItineraryResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetListItineraryResponseDTO>(result, resultHttpStatus);
 	}
 	
 	//---
@@ -120,14 +120,14 @@ public class ItineraryRestController {
 	//SEARCH
 	@RequestMapping(value="/search", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ListItineraryResponseDTO> searchItineraryByName(@RequestParam String name, @RequestParam(defaultValue = "0") Integer page){
+	public ResponseEntity<GetListItineraryResponseDTO> searchItineraryByName(@RequestParam String name, @RequestParam(defaultValue = "0") Integer page){
 		System.out.println("TEST: SEARCH");
 		
-		ListItineraryResponseDTO result = itineraryService.searchItineraryByName(name, page);
+		GetListItineraryResponseDTO result = itineraryService.searchItineraryByName(name, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<ListItineraryResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetListItineraryResponseDTO>(result, resultHttpStatus);
 	}
 	
 	
@@ -135,7 +135,7 @@ public class ItineraryRestController {
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<ResultMessageDTO> addItinerary(@ModelAttribute ItineraryRequestDTO itineraryRequestDTO){
+	public ResponseEntity<ResultMessageDTO> addItinerary(@ModelAttribute SaveItineraryRequestDTO itineraryRequestDTO){
 		System.out.println("TEST: ADD");
 		
 		ResultMessageDTO result = itineraryService.addItinerary(itineraryRequestDTO);
@@ -151,7 +151,7 @@ public class ItineraryRestController {
 	@RequestMapping(value="/update/{idItinerary}", method=RequestMethod.PUT)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> updateItinerary(@PathVariable("idItinerary") long idItinerary,
-															@ModelAttribute ItineraryRequestDTO itineraryDTO)
+															@ModelAttribute SaveItineraryRequestDTO itineraryDTO)
 	{
 		System.out.println("TEST: UPDATE ITINERARY");
 		

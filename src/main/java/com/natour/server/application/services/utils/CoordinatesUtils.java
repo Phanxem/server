@@ -57,7 +57,6 @@ public class CoordinatesUtils {
 	
 	public static PointResponseDTO toPointDTO(String coordinates) {
 		PointResponseDTO pointDTO = new PointResponseDTO();
-		ResultMessageDTO resultMessageDTO = new ResultMessageDTO();
 		
 		String[] stringCoordinates = coordinates.split(",");
 		
@@ -71,7 +70,7 @@ public class CoordinatesUtils {
 	
 		pointDTO.setLon(lon);
 		pointDTO.setLat(lat);
-		pointDTO.setResultMessage(resultMessageDTO);
+		pointDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return pointDTO;
 	}

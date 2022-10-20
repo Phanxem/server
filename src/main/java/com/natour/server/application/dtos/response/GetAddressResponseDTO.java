@@ -1,13 +1,13 @@
 package com.natour.server.application.dtos.response;
 
-public class AddressResponseDTO {
+public class GetAddressResponseDTO {
 
 	private ResultMessageDTO resultMessage;
 	
 	private PointResponseDTO point;
-	private String addressLine;
+	private String addressName;
 	
-	public AddressResponseDTO() {
+	public GetAddressResponseDTO() {
 		this.point = new PointResponseDTO();
 	}
 	
@@ -45,12 +45,12 @@ public class AddressResponseDTO {
 		this.point = point;
 	}
 
-	public String getAddressLine() {
-		return addressLine;
+	public String getAddressName() {
+		return addressName;
 	}
 
-	public void setAddressLine(String addressLine) {
-		this.addressLine = addressLine;
+	public void setAddressName(String addressName) {
+		this.addressName = addressName;
 	}
 
 

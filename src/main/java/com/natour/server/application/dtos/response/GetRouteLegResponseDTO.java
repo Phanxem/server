@@ -2,7 +2,7 @@ package com.natour.server.application.dtos.response;
 
 import java.util.List;
 
-public class RouteLegResponseDTO {
+public class GetRouteLegResponseDTO {
 	private PointResponseDTO startingPoint;
 	private PointResponseDTO destinationPoint;
 	

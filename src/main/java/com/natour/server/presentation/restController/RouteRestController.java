@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.natour.server.application.dtos.response.ResultMessageDTO;
-import com.natour.server.application.dtos.response.RouteResponseDTO;
+import com.natour.server.application.dtos.response.GetRouteResponseDTO;
 import com.natour.server.application.services.RouteService;
 import com.natour.server.application.services.utils.ResultMessageUtils;
 
@@ -24,14 +24,14 @@ public class RouteRestController {
 	//GETs
 	@RequestMapping(value="/get/{coordinates}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<RouteResponseDTO> getRouteByCoordinates(@PathVariable("coordinates") String coordinates){
+	public ResponseEntity<GetRouteResponseDTO> getRouteByCoordinates(@PathVariable("coordinates") String coordinates){
 		System.out.println("TEST: GET route");
 		System.out.println(coordinates);
 		
-		RouteResponseDTO result = routeService.findRouteByCoordinates(coordinates);
+		GetRouteResponseDTO result = routeService.findRouteByCoordinates(coordinates);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<RouteResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetRouteResponseDTO>(result, resultHttpStatus);
 	}	
 }

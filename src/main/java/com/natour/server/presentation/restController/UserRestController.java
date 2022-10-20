@@ -21,12 +21,12 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.natour.server.application.dtos.request.AddUserRequestDTO;
-import com.natour.server.application.dtos.request.UpdateUserOptionalInfoRequestDTO;
-import com.natour.server.application.dtos.response.ResourceResponseDTO;
-import com.natour.server.application.dtos.response.ListUserResponseDTO;
+import com.natour.server.application.dtos.request.SaveUserRequestDTO;
+import com.natour.server.application.dtos.request.SaveUserOptionalInfoRequestDTO;
+import com.natour.server.application.dtos.response.GetResourceResponseDTO;
+import com.natour.server.application.dtos.response.GetListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
-import com.natour.server.application.dtos.response.UserResponseDTO;
+import com.natour.server.application.dtos.response.GetUserResponseDTO;
 import com.natour.server.application.services.UserService;
 import com.natour.server.application.services.utils.ResultMessageUtils;
 
@@ -54,14 +54,14 @@ public class UserRestController {
 	//GETs
 	@RequestMapping(value="/get/{idUser}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<UserResponseDTO> getUserById(@PathVariable("idUser") long idUser){
+	public ResponseEntity<GetUserResponseDTO> getUserById(@PathVariable("idUser") long idUser){
 		System.out.println("TEST: GET user");
 
-		UserResponseDTO result = userService.findUserById(idUser);
+		GetUserResponseDTO result = userService.findUserById(idUser);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<UserResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetUserResponseDTO>(result, resultHttpStatus);
 	}	
 			
 	
@@ -70,7 +70,7 @@ public class UserRestController {
 	public ResponseEntity<Resource> getUserImageById(@PathVariable("idUser") long idUser, HttpServletRequest request){
 		System.out.println("TEST: GET IMAGE id");
 
-		ResourceResponseDTO result = userService.findUserImageById(idUser);
+		GetResourceResponseDTO result = userService.findUserImageById(idUser);
 
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus;
@@ -101,27 +101,27 @@ public class UserRestController {
 	
 	@RequestMapping(value="/get/identityProvider", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<UserResponseDTO> getUserByIdP(@RequestParam String identityProvider, @RequestParam String idIdentityProvided){
+	public ResponseEntity<GetUserResponseDTO> getUserByIdP(@RequestParam String identityProvider, @RequestParam String idIdentityProvided){
 		System.out.println("TEST: GET user");
 
-		UserResponseDTO result = userService.findUserByIdp(identityProvider, idIdentityProvided);
+		GetUserResponseDTO result = userService.findUserByIdp(identityProvider, idIdentityProvided);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<UserResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetUserResponseDTO>(result, resultHttpStatus);
 	}	
 
 	
 	@RequestMapping(value="/get/connection/{idConnection}", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<UserResponseDTO> getUserByIdConnection(@PathVariable("idConnection") String idConnection){
+	public ResponseEntity<GetUserResponseDTO> getUserByIdConnection(@PathVariable("idConnection") String idConnection){
 		System.out.println("TEST: GET user connection");
 
-		UserResponseDTO result = userService.findUserByIdConnection(idConnection);
+		GetUserResponseDTO result = userService.findUserByIdConnection(idConnection);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<UserResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetUserResponseDTO>(result, resultHttpStatus);
 	}
 	
 	
@@ -129,27 +129,27 @@ public class UserRestController {
 	//SEARCH
 	@RequestMapping(value="/search", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ListUserResponseDTO> searchUserByUsername(@RequestParam String username, @RequestParam(defaultValue = "0") Integer page){
+	public ResponseEntity<GetListUserResponseDTO> searchUserByUsername(@RequestParam String username, @RequestParam(defaultValue = "0") Integer page){
 		System.out.println("TEST: SEARCH");
 		
-		ListUserResponseDTO result = userService.searchUserByUsername(username, page);
+		GetListUserResponseDTO result = userService.searchUserByUsername(username, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<ListUserResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetListUserResponseDTO>(result, resultHttpStatus);
 		
 	}
 	
 	@RequestMapping(value="/get/{idUser}/conversation", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<ListUserResponseDTO> searchUserConversation(@PathVariable("idUser") long idUser, @RequestParam(defaultValue = "0") Integer page){
+	public ResponseEntity<GetListUserResponseDTO> searchUserConversation(@PathVariable("idUser") long idUser, @RequestParam(defaultValue = "0") Integer page){
 		System.out.println("TEST: GET Conversation");
 		
-		ListUserResponseDTO result = userService.searchUserWithConversation(idUser, page);
+		GetListUserResponseDTO result = userService.searchUserWithConversation(idUser, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
-		return new ResponseEntity<ListUserResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetListUserResponseDTO>(result, resultHttpStatus);
 		
 	}
 	
@@ -159,7 +159,7 @@ public class UserRestController {
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<ResultMessageDTO> addUser(@RequestBody AddUserRequestDTO addUserRequest){
+	public ResponseEntity<ResultMessageDTO> addUser(@RequestBody SaveUserRequestDTO addUserRequest){
 		System.out.println("TEST: ADD");
 		
 		ResultMessageDTO result = userService.addUser(addUserRequest);
@@ -192,7 +192,7 @@ public class UserRestController {
 	@RequestMapping(value="/update/{idUser}/optionalInfo", method=RequestMethod.PUT)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> updateOptionalInfo(@PathVariable("idUser") long idUser,
-															   @RequestBody UpdateUserOptionalInfoRequestDTO optionalInfo)
+															   @RequestBody SaveUserOptionalInfoRequestDTO optionalInfo)
 	{
 		System.out.println("TEST: UPDATE OPTIONAL INFO");
 		ResultMessageDTO result = userService.updateOptionalInfo(idUser, optionalInfo);
