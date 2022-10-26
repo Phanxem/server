@@ -35,6 +35,7 @@ import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionRequ
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionResult;
 import com.google.gson.JsonObject;
 import com.natour.server.application.dtos.request.ChatRequestDTO;
+import com.natour.server.application.dtos.request.SendMessageRequestDTO;
 import com.natour.server.application.dtos.response.GetChatResponseDTO;
 import com.natour.server.application.dtos.response.IdChatResponseDTO;
 import com.natour.server.application.dtos.response.GetListChatResponseDTO;
@@ -419,9 +420,18 @@ public class ChatService {
 		}
 		
 		
-		String idConnectionDestination = destinationUserConnection.getIdConnection();
 		
-		ResultMessageDTO sendMessage_resultMessageDTO = messageDAO.sendMessage(idConnectionDestination, payloadMessage);
+		String idConnectionDestination = destinationUserConnection.getIdConnection();
+		//String jsonMessage = "{ \"idUserSource\": \""+ idUserSource +"\", \"message\": \""+ payloadMessage +"\" }";
+		
+		SendMessageRequestDTO sendMessageRequestDTO = new SendMessageRequestDTO();
+		sendMessageRequestDTO.setIdConnectionDestination(idConnectionDestination);
+		sendMessageRequestDTO.setIdUserSource(idUserSource);
+		sendMessageRequestDTO.setMessage(payloadMessage);
+		sendMessageRequestDTO.setInputTime(stringInputTime);
+		
+		
+		ResultMessageDTO sendMessage_resultMessageDTO = messageDAO.sendMessage(sendMessageRequestDTO);
 		
 		return sendMessage_resultMessageDTO;
 	}

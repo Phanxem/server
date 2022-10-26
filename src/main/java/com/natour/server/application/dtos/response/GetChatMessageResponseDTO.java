@@ -10,6 +10,8 @@ public class GetChatMessageResponseDTO {
     private long idUser;
     private long idChat;
     
+    private boolean toRead;
+    
     
 	public long getId() {
 		return id;
@@ -40,6 +42,12 @@ public class GetChatMessageResponseDTO {
 	}
 	public void setIdChat(long idChat) {
 		this.idChat = idChat;
+	}
+	public boolean isToRead() {
+		return toRead;
+	}
+	public void setToRead(boolean toRead) {
+		this.toRead = toRead;
 	}
     
     

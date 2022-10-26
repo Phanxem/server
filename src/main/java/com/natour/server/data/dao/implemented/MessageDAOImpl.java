@@ -16,6 +16,7 @@ import com.amazonaws.services.apigatewaymanagementapi.model.GetConnectionRequest
 import com.amazonaws.services.apigatewaymanagementapi.model.GetConnectionResult;
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionRequest;
 import com.amazonaws.services.apigatewaymanagementapi.model.PostToConnectionResult;
+import com.natour.server.application.dtos.request.SendMessageRequestDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.interfaces.MessageDAO;
@@ -27,16 +28,24 @@ public class MessageDAOImpl implements MessageDAO{
 	private AmazonApiGatewayManagementApi amazonApiGatewayManagementApi;
 
 	@Override
-	public ResultMessageDTO sendMessage(String idConnection, String message) {
+	public ResultMessageDTO sendMessage(SendMessageRequestDTO sendMessageRequestDTO) {
 		
-		String stringMessage = "{\"message\":\"" + message + "\" }";
-		ByteBuffer byteBufferMessage = ByteBuffer.wrap(stringMessage.getBytes());
+		long idUserSource = sendMessageRequestDTO.getIdUserSource();
+		String message = sendMessageRequestDTO.getMessage();
+		String inputTime = sendMessageRequestDTO.getInputTime();
+		String idConnectionDestination = sendMessageRequestDTO.getIdConnectionDestination();
+		
+		
+		String jsonMessage = "{ \"idUserSource\": \""+ idUserSource +"\", \"message\": \""+ message +"\", \"inputTime\""+ inputTime +"\" }";
+		
+		//String jsonMessage = "{\"message\":\"" + message + "\" }";
+		ByteBuffer byteBuffer = ByteBuffer.wrap(jsonMessage.getBytes());
 					
-		System.out.println("idConnection: " + idConnection + " | message: " + message );
+		System.out.println("idConnection: " + idConnectionDestination + " | message: " + message );
 				
 		PostToConnectionRequest postToConnectionRequest = new PostToConnectionRequest();
-		postToConnectionRequest.setConnectionId(idConnection);
-		postToConnectionRequest.setData(byteBufferMessage);
+		postToConnectionRequest.setConnectionId(idConnectionDestination);
+		postToConnectionRequest.setData(byteBuffer);
 
 					
 		PostToConnectionResult postToConnectionResult = null;
