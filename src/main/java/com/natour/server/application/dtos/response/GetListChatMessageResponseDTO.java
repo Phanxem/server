@@ -5,6 +5,7 @@ import java.util.List;
 public class GetListChatMessageResponseDTO {
 
 	private ResultMessageDTO resultMessage;
+	private long idChat;
 	private List<GetChatMessageResponseDTO> listMessage;
 	
 	public ResultMessageDTO getResultMessage() {
@@ -18,6 +19,12 @@ public class GetListChatMessageResponseDTO {
 	}
 	public void setListMessage(List<GetChatMessageResponseDTO> listMessage) {
 		this.listMessage = listMessage;
+	}
+	public long getIdChat() {
+		return idChat;
+	}
+	public void setIdChat(long idChat) {
+		this.idChat = idChat;
 	}
 	
 	

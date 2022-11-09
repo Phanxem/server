@@ -19,7 +19,7 @@ import com.amazonaws.services.dynamodbv2.datamodeling.DynamoDBMapper;
 import com.amazonaws.services.dynamodbv2.model.CreateTableRequest;
 import com.natour.server.application.dtos.request.SaveUserRequestDTO;
 import com.natour.server.application.dtos.request.ChatRequestDTO;
-import com.natour.server.application.dtos.response.IdChatResponseDTO;
+import com.natour.server.application.dtos.response.GetIdChatResponseDTO;
 import com.natour.server.application.dtos.response.GetListChatResponseDTO;
 import com.natour.server.application.dtos.response.GetListChatMessageResponseDTO;
 import com.natour.server.application.dtos.response.GetListUserResponseDTO;
@@ -67,14 +67,14 @@ public class ChatRestController {
 	
 	@RequestMapping(value="/get/users", method=RequestMethod.GET)
 	@ResponseBody
-	public ResponseEntity<IdChatResponseDTO> getChatByIdsUser(@RequestParam long idUser1, @RequestParam long idUser2){
+	public ResponseEntity<GetIdChatResponseDTO> getChatByIdsUser(@RequestParam long idUser1, @RequestParam long idUser2){
 		System.out.println("TEST: GET user");
 		
-		IdChatResponseDTO result = chatService.findChatByIdsUser(idUser1, idUser2);
+		GetIdChatResponseDTO result = chatService.findChatByIdsUser(idUser1, idUser2);
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 				
-		return new ResponseEntity<IdChatResponseDTO>(result, resultHttpStatus);
+		return new ResponseEntity<GetIdChatResponseDTO>(result, resultHttpStatus);
 	}	
 	
 	
@@ -83,7 +83,7 @@ public class ChatRestController {
 	@RequestMapping(value="/get/messages", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<GetListChatMessageResponseDTO> getMessagesByIdsUser(@RequestParam long idUser1, @RequestParam long idUser2, @RequestParam(defaultValue = "0") Integer page){
-		System.out.println("TEST: GET user");
+		System.out.println("TEST: GET MESSAGES BY users");
 		
 		GetListChatMessageResponseDTO result = chatService.findMessagesByIdsUser(idUser1, idUser2, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
@@ -120,6 +120,25 @@ public class ChatRestController {
 	}
 	
 	
+	@RequestMapping(value="/readAllMessage", method=RequestMethod.PUT)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> readAllMessageByIdsUser(@RequestParam long idUser1, @RequestParam long idUser2){
+		System.out.println("TEST: ReadAllMessage");
+			
+		ResultMessageDTO result = chatService.readAllMessage(idUser1, idUser2);
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
+		
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	
 	//POSTs
 	@RequestMapping(value="/connect", method=RequestMethod.POST)
@@ -144,6 +163,19 @@ public class ChatRestController {
 							
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
 	}
+	
+	
+	@RequestMapping(value="/add", method=RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> addChat(@RequestParam long idUser1, @RequestParam long idUser2){
+		System.out.println("TEST: addChat");
+							
+		ResultMessageDTO result = chatService.addChat(idUser1, idUser2);
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
+							
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
+	}
+	
 	
 
 	//PUT

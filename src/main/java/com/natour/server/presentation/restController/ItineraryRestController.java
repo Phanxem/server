@@ -57,7 +57,7 @@ public class ItineraryRestController {
 	@RequestMapping(value="/get/{idItinerary}/gpx", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<Resource> getItineraryGpxById(@PathVariable("idItinerary") long idItinerary, HttpServletRequest request){
-		System.out.println("TEST: GET IMAGE id");
+		System.out.println("TEST: GET GPX id");
 
 		GetResourceResponseDTO result = itineraryService.findItineraryGpxById(idItinerary);
 
@@ -140,6 +140,8 @@ public class ItineraryRestController {
 		
 		ResultMessageDTO result = itineraryService.addItinerary(itineraryRequestDTO);
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
+		
+		System.out.println("RESULT: " + result.getCode());
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
 		

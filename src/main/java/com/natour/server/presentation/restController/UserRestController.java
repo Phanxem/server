@@ -7,11 +7,13 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.natour.server.application.dtos.request.SaveUserRequestDTO;
+import com.natour.server.application.dtos.request.SaveUserImageRequestDTO;
 import com.natour.server.application.dtos.request.SaveUserOptionalInfoRequestDTO;
 import com.natour.server.application.dtos.response.GetResourceResponseDTO;
 import com.natour.server.application.dtos.response.GetListUserResponseDTO;
@@ -71,12 +74,15 @@ public class UserRestController {
 		System.out.println("TEST: GET IMAGE id");
 
 		GetResourceResponseDTO result = userService.findUserImageById(idUser);
-
+		
 		ResultMessageDTO resultMessage = result.getResultMessage();
 		HttpStatus resultHttpStatus;
+		
 		if(resultMessage.getCode() != 200) {
 			resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
-			return new ResponseEntity<Resource>((Resource) null, resultHttpStatus);
+			//InputStreamResource inputStreamResource = new InputStreamResource(null);
+			Resource resource = new InputStreamResource(null);
+			return new ResponseEntity<Resource>(resource, resultHttpStatus);
 		}
 		
 		Resource resource = result.getResource();
@@ -91,6 +97,13 @@ public class UserRestController {
 		}
         */
         if(contentType == null) contentType = "application/octet-stream";
+        
+        
+        
+        if(resource == null) {
+        	resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
+			return new ResponseEntity<Resource>(resource, resultHttpStatus);
+        }
         
 		return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
@@ -159,7 +172,7 @@ public class UserRestController {
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<ResultMessageDTO> addUser(@RequestBody SaveUserRequestDTO addUserRequest){
+	public ResponseEntity<ResultMessageDTO> addUser(SaveUserRequestDTO addUserRequest){
 		System.out.println("TEST: ADD");
 		
 		ResultMessageDTO result = userService.addUser(addUserRequest);
@@ -177,11 +190,11 @@ public class UserRestController {
 	@RequestMapping(value="/update/{idUser}/image", method=RequestMethod.PUT)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> updateProfileImage(@PathVariable("idUser") long idUser,
-															   @RequestBody MultipartFile image)
+															   @ModelAttribute SaveUserImageRequestDTO imageRequest)
 	{
 		System.out.println("TEST: UPDATE IMAGE");
 		
-		ResultMessageDTO result = userService.updateProfileImage(idUser, image);
+		ResultMessageDTO result = userService.updateProfileImage(idUser, imageRequest);
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
 		
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);
@@ -192,7 +205,7 @@ public class UserRestController {
 	@RequestMapping(value="/update/{idUser}/optionalInfo", method=RequestMethod.PUT)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> updateOptionalInfo(@PathVariable("idUser") long idUser,
-															   @RequestBody SaveUserOptionalInfoRequestDTO optionalInfo)
+															   SaveUserOptionalInfoRequestDTO optionalInfo)
 	{
 		System.out.println("TEST: UPDATE OPTIONAL INFO");
 		ResultMessageDTO result = userService.updateOptionalInfo(idUser, optionalInfo);

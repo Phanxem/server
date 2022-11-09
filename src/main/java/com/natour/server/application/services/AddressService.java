@@ -16,7 +16,7 @@ import com.natour.server.data.dao.interfaces.AddressDAO;
 @Service
 public class AddressService {
 
-	//TODO test
+
 	AddressDAO addressDAO = new AddressDAOImpl();
 	
 	//FINDs
@@ -26,6 +26,7 @@ public class AddressService {
 		PointResponseDTO pointDTO = CoordinatesUtils.toPointDTO(coordinates);
 		if(!ResultMessageUtils.isSuccess(pointDTO.getResultMessage())) {
 			addressResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_FAILURE);
+			return addressResponseDTO;
 		}
 		
 		addressResponseDTO = addressDAO.findAddressByPoint(pointDTO);

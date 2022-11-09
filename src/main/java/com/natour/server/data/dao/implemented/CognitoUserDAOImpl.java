@@ -36,8 +36,8 @@ public class CognitoUserDAOImpl implements CognitoUserDAO{
 		}
 		
 		
-		//String unconfirmed = "UNCONFIRMED";
-		String unconfirmed = "FORCE_CHANGE_PASSWORD";
+		String unconfirmed = "UNCONFIRMED";
+		//String unconfirmed = "FORCE_CHANGE_PASSWORD";
 		
 		String userStatus = adminGetUserResult.getUserStatus();
 		if(!userStatus.equals(unconfirmed)) {

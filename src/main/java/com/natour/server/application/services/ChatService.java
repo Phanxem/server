@@ -37,7 +37,7 @@ import com.google.gson.JsonObject;
 import com.natour.server.application.dtos.request.ChatRequestDTO;
 import com.natour.server.application.dtos.request.SendMessageRequestDTO;
 import com.natour.server.application.dtos.response.GetChatResponseDTO;
-import com.natour.server.application.dtos.response.IdChatResponseDTO;
+import com.natour.server.application.dtos.response.GetIdChatResponseDTO;
 import com.natour.server.application.dtos.response.GetListChatResponseDTO;
 import com.natour.server.application.dtos.response.GetListChatMessageResponseDTO;
 import com.natour.server.application.dtos.response.GetListUserResponseDTO;
@@ -84,6 +84,7 @@ public class ChatService {
 	
 	@Autowired
 	private MessageDAO messageDAO;
+
 	
 	
 	
@@ -113,7 +114,7 @@ public class ChatService {
 		Pageable pageable = PageRequest.of(page, MESSAGE_PER_PAGE);
 		List<Message> messages = messageRepository.findByChat_idOrderByDateOfInputDesc(idChat, pageable);
 		
-		listMessageResponseDTO = toListMessageResponseDTO(messages);
+		listMessageResponseDTO = toListMessageResponseDTO(idChat, messages);
 		
 		return listMessageResponseDTO;
 	}
@@ -202,8 +203,8 @@ public class ChatService {
 		return listChatResponseDTO;
 	}
 	
-	public IdChatResponseDTO findChatByIdsUser(long idUser1, long idUser2) {
-		IdChatResponseDTO idChatResponseDTO = new IdChatResponseDTO();
+	public GetIdChatResponseDTO findChatByIdsUser(long idUser1, long idUser2) {
+		GetIdChatResponseDTO idChatResponseDTO = new GetIdChatResponseDTO();
 		
 		if(idUser1 < 0 || idUser2 < 0) {
 			idChatResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST);
@@ -241,9 +242,9 @@ public class ChatService {
 	public GetListChatMessageResponseDTO findMessagesByIdsUser(long idUser1, long idUser2, Integer page) {
 		GetListChatMessageResponseDTO listMessageResponseDTO = new GetListChatMessageResponseDTO();
 		
-		IdChatResponseDTO idChatResponseDTO = findChatByIdsUser(idUser1, idUser2);
+		GetIdChatResponseDTO idChatResponseDTO = findChatByIdsUser(idUser1, idUser2);
 		if(!ResultMessageUtils.isSuccess(idChatResponseDTO.getResultMessage())) {
-			listMessageResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_FAILURE);
+			listMessageResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
 			return listMessageResponseDTO;
 		}
 		
@@ -252,6 +253,83 @@ public class ChatService {
 		return listMessageResponseDTO;
 	}
 	
+	
+	public ResultMessageDTO readAllMessage(long idUser1, long idUser2) {
+		if(idUser1 < 0 || idUser2 < 0) {
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
+		}
+		
+		Optional<User> optionalUser1 = userRepository.findById(idUser1);
+		Optional<User> optionalUser2 = userRepository.findById(idUser2);
+		if(optionalUser1.isEmpty() || optionalUser2.isEmpty()) {
+			return ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND;
+		}
+		
+		User user1 = optionalUser1.get();
+		User user2 = optionalUser2.get();
+		
+		List<Chat> chats1 = user1.getChats();
+		List<Chat> chats2 = user2.getChats();
+		
+		List<Chat> intersection = new LinkedList<Chat>();
+		intersection.addAll(chats1);
+		intersection.retainAll(chats2);
+		
+		if(intersection.isEmpty()) {
+			return ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND;
+		}
+		
+		Chat chat = intersection.get(0);
+		
+		List<Message> listMessage = chat.getMessages();
+		for(Message message : listMessage) {
+			if(message.isToRead()) message.setToRead(false);
+		}
+		
+		chat.setMessages(listMessage);
+		
+		chatRepository.save(chat);
+		
+		return ResultMessageUtils.SUCCESS_MESSAGE;
+	}
+	
+	public ResultMessageDTO addChat(long idUser1, long idUser2) {
+		Chat chat = new Chat();
+		
+		Optional<User> user1 = userRepository.findById(idUser1);
+		if(user1.isEmpty()) {
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
+		}
+		
+		Optional<User> user2 = userRepository.findById(idUser2);
+		if(user2.isEmpty()) {
+			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
+		}
+		
+		
+		GetIdChatResponseDTO getIdChatResponseDTO = findChatByIdsUser(idUser1, idUser2);
+		if(ResultMessageUtils.isSuccess(getIdChatResponseDTO.getResultMessage())) {
+			return ResultMessageUtils.ERROR_MESSAGE_UNIQUE_VIOLATION;
+		}
+		ResultMessageDTO resultMessage = getIdChatResponseDTO.getResultMessage();
+		if(resultMessage.getCode() != ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND.getCode()){
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
+		}
+		
+		List<User> listUser = new ArrayList<User>();
+		listUser.add(user1.get());
+		listUser.add(user2.get());
+		
+		List<Message> listMessage = new ArrayList<Message>();
+		
+		
+		chat.setUsers(listUser);
+		chat.setMessages(listMessage);
+		
+		chatRepository.save(chat);
+		
+		return ResultMessageUtils.SUCCESS_MESSAGE;
+	}
 	
 	
 	
@@ -273,10 +351,12 @@ public class ChatService {
 	
 	public ResultMessageDTO initConnection(ChatRequestDTO chatRequestDTO) {		
 		if(!isValid(chatRequestDTO)) {
+			System.out.println("Not valid");
 			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
 		if(!actionIsInit(chatRequestDTO)) {
+			System.out.println("Not init");
 			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
@@ -289,6 +369,7 @@ public class ChatService {
 			chatConnectionRepository.updateWithIdUser(idConnection, idUser);
 		}
 		catch(Exception e) {
+			System.out.println("error with update");
 			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
 		}
 
@@ -385,14 +466,17 @@ public class ChatService {
 			
 			chat = chatRepository.save(tempChat);
 			
+			
 			chats1.add(chat);
 			chats2.add(chat);
 			
 			userSource.setChats(chats1);
 			userDestination.setChats(chats2);
 			
-			//userRepository.save(userSource);
-			//userRepository.save(userDestination);
+			userRepository.save(userSource);
+			userRepository.save(userDestination);
+			 
+			
 		}
 		else chat = intersection.get(0);
 		
@@ -403,8 +487,9 @@ public class ChatService {
 		message.setChat(chat);
 		message.setBody(payloadMessage);
 		message.setDateOfInput(inputTime);
+		message.setToRead(true);
 		
-		//messageRepository.save(message);
+		messageRepository.save(message);
 		
 		ChatConnection destinationUserConnection = null;
 		try {
@@ -457,26 +542,26 @@ public class ChatService {
 	
 	
 
-public GetChatMessageResponseDTO toMessageResponseDTO(Message message){
-	if(message == null) return null;
+	public GetChatMessageResponseDTO toMessageResponseDTO(Message message){
+		if(message == null) return null;
 		
-	GetChatMessageResponseDTO dto = new GetChatMessageResponseDTO();
-	dto.setId(message.getId());
+		GetChatMessageResponseDTO dto = new GetChatMessageResponseDTO();
+		dto.setId(message.getId());
 		
-	Date dateOfInput = new Date(message.getDateOfInput().getTime());
-	DateFormat dateFormat = new SimpleDateFormat();
-	String stringDate = dateFormat.format(dateOfInput);
-	dto.setDateOfInput(stringDate);
+		Date dateOfInput = new Date(message.getDateOfInput().getTime());
+		DateFormat dateFormat = new SimpleDateFormat();
+		String stringDate = dateFormat.format(dateOfInput);
+		dto.setDateOfInput(stringDate);
 		
-	dto.setBody(message.getBody());
+		dto.setBody(message.getBody());
 		
-	dto.setIdUser(message.getUser().getId());
-	dto.setIdChat(message.getChat().getId());
+		dto.setIdUser(message.getUser().getId());
+		dto.setIdChat(message.getChat().getId());
 	
-	return dto;
-}
-
-	public GetListChatMessageResponseDTO toListMessageResponseDTO(List<Message> messages) {
+		return dto;
+	}
+	
+	public GetListChatMessageResponseDTO toListMessageResponseDTO(long idChat, List<Message> messages) {
 		if(messages == null) return null;
 		
 		List<GetChatMessageResponseDTO> dto = new LinkedList<GetChatMessageResponseDTO>();
@@ -486,15 +571,16 @@ public GetChatMessageResponseDTO toMessageResponseDTO(Message message){
 		
 		GetListChatMessageResponseDTO listMessageResponseDTO = new GetListChatMessageResponseDTO();
 		listMessageResponseDTO.setListMessage(dto);
+		listMessageResponseDTO.setIdChat(idChat);
 		listMessageResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
 		
 		return listMessageResponseDTO;
 	}
 	
-	public IdChatResponseDTO toIdChatResponseDTO(Chat chat) {
+	public GetIdChatResponseDTO toIdChatResponseDTO(Chat chat) {
 		if(chat == null) return null;
 		
-		IdChatResponseDTO dto = new IdChatResponseDTO();
+		GetIdChatResponseDTO dto = new GetIdChatResponseDTO();
 		dto.setId(chat.getId());
 		dto.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);	
 		
@@ -567,6 +653,16 @@ public GetChatMessageResponseDTO toMessageResponseDTO(Message message){
 		
 		return true;
 	}
+
+
+
+
+	
+
+
+
+
+	
 
 
 

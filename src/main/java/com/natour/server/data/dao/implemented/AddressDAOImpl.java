@@ -97,6 +97,8 @@ public class AddressDAOImpl implements AddressDAO{
         }
 
         addressDTO.setAddressName(addressLine);
+        addressDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
+        
         return addressDTO;
     }
     

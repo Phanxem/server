@@ -41,6 +41,7 @@ import com.amazonaws.services.cognitoidp.model.AdminLinkProviderForUserRequest;
 import com.amazonaws.services.cognitoidp.model.AdminLinkProviderForUserResult;
 import com.amazonaws.services.cognitoidp.model.ProviderUserIdentifierType;
 import com.natour.server.application.dtos.request.SaveUserRequestDTO;
+import com.natour.server.application.dtos.request.SaveUserImageRequestDTO;
 import com.natour.server.application.dtos.request.SaveUserOptionalInfoRequestDTO;
 import com.natour.server.application.dtos.response.GetResourceResponseDTO;
 import com.natour.server.application.dtos.response.GetListUserResponseDTO;
@@ -95,11 +96,13 @@ public class UserService {
 	//ADDs
 	public ResultMessageDTO addUser(SaveUserRequestDTO addUserRequestDTO) {	
 		if(!isValidDTO(addUserRequestDTO)) {
+			System.out.println("Invalid DTO");
 			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
 		}
 		
 		User user = userRepository.findByIdentityProviderAndIdIdentityProvided(addUserRequestDTO.getIdentityProvider(), addUserRequestDTO.getIdIdentityProvided());
 		if(user != null) {
+			System.out.println("Utente già presente nel sistema");
 			return ResultMessageUtils.ERROR_MESSAGE_UNIQUE_VIOLATION;
 		}
 		
@@ -112,7 +115,7 @@ public class UserService {
 	
 	
 	//UPDATEs
-	public ResultMessageDTO updateProfileImage(long idUser,  MultipartFile image) {
+	public ResultMessageDTO updateProfileImage(long idUser,  SaveUserImageRequestDTO imageRequest) {
 		
 		if(idUser < 0) {
 			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
@@ -123,6 +126,8 @@ public class UserService {
 			return ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND;
 		}
 		User user = optionalUser.get();
+		
+		MultipartFile image = imageRequest.getImage();
 		
 		if(!isValidImage(image)) {
 			return ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST;
@@ -143,17 +148,7 @@ public class UserService {
 		}
 		
 		String imageUrl = stringResponseDTO.getString();
-		
-		/*
-		String imageUrl;
-		try {
-			imageUrl = fileSystemRepository.save("profileImage-" + user.getId(), image.getBytes());
-		}
-		catch (IOException e) {
-			//TODO
-			throw new UserProfileImageSaveFailureException(e);
-		}
-		*/
+	
 		
 		
 		if(user.getProfileImageKey() != null) {
@@ -496,14 +491,17 @@ public class UserService {
 
 	public static boolean isValidImage(MultipartFile image) {
 		
-		if(image == null || image.isEmpty()) return false;
+		if(image == null || image.isEmpty()) {
+			System.out.println("INVALID 1");
+			return false;
+		}
 		
 		InputStream inputStream = null;
 		try {
 			inputStream = image.getInputStream();
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("INVALID 2");
 			return false;
 		}
 		
@@ -512,20 +510,29 @@ public class UserService {
 			bufferedImage = ImageIO.read(inputStream);
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("INVALID 3");
 			return false;
 		}
 		
 		int width = bufferedImage.getWidth();
-		if(width < IMAGE_MIN_WIDTH_PX) return false;
+		if(width < IMAGE_MIN_WIDTH_PX) {
+			System.out.println("INVALID 4");
+			return false;
+		}
 		
 		int height = bufferedImage.getHeight();
-		if(height < IMAGE_MIN_HEIGHT_PX) return false;
+		if(height < IMAGE_MIN_HEIGHT_PX) {
+			System.out.println("INVALID 5");
+			return false;
+		}
 		
 		
 		long imageSizeBytes = image.getSize();
 		
-		if(imageSizeBytes > IMAGE_MAX_SIZE_BYTES) return false;
+		if(imageSizeBytes > IMAGE_MAX_SIZE_BYTES) {
+			System.out.println("INVALID 6");
+			return false;
+		}
 		
 		return true;
 	}

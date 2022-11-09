@@ -48,7 +48,7 @@ public class ReportRestController {
 	@ResponseBody
 	public ResponseEntity<GetListReportResponseDTO> getReportByIdItinerary(@PathVariable("idItinerary") long idItinerary, @RequestParam(defaultValue = "0") Integer page){
 		
-		System.out.println("TEST: GET idItinerary");
+		System.out.println("TEST: GET Report idItinerary");
 		
 		GetListReportResponseDTO result = reportService.findReportByIdItinerary(idItinerary, page);
 		ResultMessageDTO resultMessage = result.getResultMessage();
@@ -62,7 +62,7 @@ public class ReportRestController {
 	//POSTs
 	@RequestMapping(value="/add", method=RequestMethod.POST)
 	@ResponseBody
-	public ResponseEntity<ResultMessageDTO> addReport(@RequestBody SaveReportRequestDTO saveReportRequest){
+	public ResponseEntity<ResultMessageDTO> addReport(SaveReportRequestDTO saveReportRequest){
 		System.out.println("TEST: ADD");
 		
 		ResultMessageDTO result = reportService.addReport(saveReportRequest);

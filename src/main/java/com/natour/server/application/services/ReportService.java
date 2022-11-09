@@ -74,7 +74,7 @@ public class ReportService {
 		}
 		Report report = optionalReport.get();
 		
-		reportResponseDTO = toReportResponseDTO(report);
+		reportResponseDTO = toDto(report);
 		
 		return reportResponseDTO;
 	}
@@ -97,7 +97,7 @@ public class ReportService {
 		Pageable pageable = PageRequest.of(page, REPORT_PER_PAGE);
 		List<Report> reports = reportRepository.findByItinerary_id(idItinerary, pageable);
 		
-		listReportResponseDTO = toListReportResponseDTO(reports);
+		listReportResponseDTO = toDto(reports);
 		return listReportResponseDTO;
 	}
 		
@@ -120,7 +120,7 @@ public class ReportService {
 	
 	
 	//MAPPERs
-	public GetReportResponseDTO toReportResponseDTO(Report report) {
+	public GetReportResponseDTO toDto(Report report) {
 		if(report == null) return null;
 		
 		GetReportResponseDTO reportDTO = new GetReportResponseDTO();
@@ -129,7 +129,9 @@ public class ReportService {
 		reportDTO.setDescription(report.getDescription());
 		
 		reportDTO.setIdUser(report.getUser().getId());
+		
 		reportDTO.setIdItinerary(report.getItinerary().getId());
+		reportDTO.setNameItinerary(report.getItinerary().getName());
 		
 		//Date date = new Date(report.getDateOfInput().getTime());
 		String string = DateUtils.toFullString(report.getDateOfInput());
@@ -140,7 +142,7 @@ public class ReportService {
 		return reportDTO;
 	}
 	
-	public GetListReportResponseDTO toListReportResponseDTO(List<Report> reports){
+	public GetListReportResponseDTO toDto(List<Report> reports){
 		GetListReportResponseDTO listReportResponseDTO = new GetListReportResponseDTO();
 		List<GetReportResponseDTO> reportsDTO = new LinkedList<GetReportResponseDTO>();
 		
@@ -151,7 +153,7 @@ public class ReportService {
 		}
 		
 		for(Report report : reports) {
-			reportsDTO.add(toReportResponseDTO(report));
+			reportsDTO.add(toDto(report));
 		}
 		
 		listReportResponseDTO.setListReport(reportsDTO);

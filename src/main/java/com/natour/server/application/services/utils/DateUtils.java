@@ -23,8 +23,10 @@ public class DateUtils {
         }
         catch (ParseException e) { }
         
-        simpleDateFormat = new SimpleDateFormat(DATE_FULL_PATTERN);
-        date = simpleDateFormat.parse(string);
+        if(date == null) {
+        	simpleDateFormat = new SimpleDateFormat(DATE_FULL_PATTERN);
+        	date = simpleDateFormat.parse(string);    
+        }
         
         calendar.setTime(date);
 

@@ -24,9 +24,10 @@ public class User {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private long id;
 	private String identityProvider;
+	@Column(nullable=false,unique=true)
 	private String idIdentityProvided;
 	
-	@Column(nullable=false,unique=true)
+	@Column(nullable=false)
 	private String username;
 	private String profileImageKey;
 	private String placeOfResidence;

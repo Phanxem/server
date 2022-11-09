@@ -13,8 +13,9 @@ public class GetReportResponseDTO {
 	private String description;
 	
 	private Long idUser;
-	private Long idItinerary;
 	
+	private Long idItinerary;
+	private String nameItinerary;
 	
 	
 	
@@ -60,6 +61,12 @@ public class GetReportResponseDTO {
 	}
 	public void setIdItinerary(Long idItinerary) {
 		this.idItinerary = idItinerary;
+	}
+	public String getNameItinerary() {
+		return nameItinerary;
+	}
+	public void setNameItinerary(String nameItinerary) {
+		this.nameItinerary = nameItinerary;
 	}
 
 	
