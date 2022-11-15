@@ -80,22 +80,13 @@ public class UserRestController {
 		
 		if(resultMessage.getCode() != 200) {
 			resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
-			//InputStreamResource inputStreamResource = new InputStreamResource(null);
 			Resource resource = new InputStreamResource(null);
 			return new ResponseEntity<Resource>(resource, resultHttpStatus);
 		}
 		
 		Resource resource = result.getResource();
 		String contentType = null;
-        /*
-		try {
-			contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-		}
-        catch (IOException e) {
-			//TODO
-			return new ResponseEntity<Resource>((Resource) null, HttpStatus.NOT_FOUND);
-		}
-        */
+
         if(contentType == null) contentType = "application/octet-stream";
         
         

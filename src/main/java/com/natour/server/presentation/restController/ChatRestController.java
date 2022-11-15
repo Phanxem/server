@@ -25,6 +25,7 @@ import com.natour.server.application.dtos.response.GetListChatMessageResponseDTO
 import com.natour.server.application.dtos.response.GetListUserResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.GetUserResponseDTO;
+import com.natour.server.application.dtos.response.HasMessageToReadResponseDTO;
 import com.natour.server.application.services.ChatService;
 import com.natour.server.application.services.RouteService;
 import com.natour.server.application.services.utils.ResultMessageUtils;
@@ -38,20 +39,6 @@ public class ChatRestController {
 	private ChatService chatService;
 	
 
-		@RequestMapping(value="/get/test", method=RequestMethod.GET)
-		@ResponseBody
-		public ResponseEntity<ResultMessageDTO> getTest(@RequestParam String idUser){
-			System.out.println("TEST: test");
-			
-
-			ResultMessageDTO resultMessage = chatService.test(idUser);
-			HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
-				
-			return new ResponseEntity<ResultMessageDTO>(resultMessage, resultHttpStatus);
-		}	
-	
-	
-	
 	//GETs	
 	@RequestMapping(value="/get/{idChat}/messages", method=RequestMethod.GET)
 	@ResponseBody
@@ -77,9 +64,6 @@ public class ChatRestController {
 		return new ResponseEntity<GetIdChatResponseDTO>(result, resultHttpStatus);
 	}	
 	
-	
-	
-	
 	@RequestMapping(value="/get/messages", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<GetListChatMessageResponseDTO> getMessagesByIdsUser(@RequestParam long idUser1, @RequestParam long idUser2, @RequestParam(defaultValue = "0") Integer page){
@@ -92,20 +76,6 @@ public class ChatRestController {
 		return new ResponseEntity<GetListChatMessageResponseDTO>(result, resultHttpStatus);
 	}
 	
-	
-	
-	@RequestMapping(value="/default", method=RequestMethod.GET)
-	@ResponseBody
-	public ResponseEntity<ResultMessageDTO> defaultRoute(){
-		System.out.println("TEST: Default");
-					
-		
-					
-		return new ResponseEntity<ResultMessageDTO>(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST, HttpStatus.BAD_REQUEST);		
-	}
-	
-	
-	//SEARCHs
 	@RequestMapping(value="/get/user/{idUser}", method=RequestMethod.GET)
 	@ResponseBody
 	public ResponseEntity<GetListChatResponseDTO> searchConversation(@PathVariable("idUser") long idUser, @RequestParam(defaultValue = "0") Integer page){
@@ -116,7 +86,20 @@ public class ChatRestController {
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
 		
 		return new ResponseEntity<GetListChatResponseDTO>(result, resultHttpStatus);
+	}
+	
+	@RequestMapping(value="/has/messageToRead/{idUser}", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<HasMessageToReadResponseDTO> hasMessageToRead(@PathVariable("idUser") long idUser){
+		System.out.println("TEST: HAS messageToRead");
 		
+		HasMessageToReadResponseDTO result = chatService.checkHasMessageToReadByIdUser(idUser);
+		ResultMessageDTO resultMessage = result.getResultMessage();
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(resultMessage);
+		
+		System.out.println("has result: " + result.isHasMessageToRead());
+		
+		return new ResponseEntity<HasMessageToReadResponseDTO>(result, resultHttpStatus);
 	}
 	
 	
@@ -133,11 +116,37 @@ public class ChatRestController {
 	
 	
 	
+	@RequestMapping(value="/add", method=RequestMethod.POST)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> addChat(@RequestParam long idUser1, @RequestParam long idUser2){
+		System.out.println("TEST: addChat");
+							
+		ResultMessageDTO result = chatService.addChat(idUser1, idUser2);
+		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
+							
+		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
+	}
 	
 	
+
+	
+
 	
 	
+		
 	
+	//WEBSOCKET
+	
+	
+	@RequestMapping(value="/default", method=RequestMethod.GET)
+	@ResponseBody
+	public ResponseEntity<ResultMessageDTO> defaultRoute(){
+		System.out.println("TEST: Default");
+					
+		
+					
+		return new ResponseEntity<ResultMessageDTO>(ResultMessageUtils.ERROR_MESSAGE_INVALID_REQUEST, HttpStatus.BAD_REQUEST);		
+	}
 	
 	
 	//POSTs
@@ -152,7 +161,6 @@ public class ChatRestController {
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
 	}
 	
-
 	@RequestMapping(value="/sendMessage", method=RequestMethod.POST)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> sendMessage(@RequestBody ChatRequestDTO chatRequestDTO){
@@ -164,36 +172,21 @@ public class ChatRestController {
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
 	}
 	
-	
-	@RequestMapping(value="/add", method=RequestMethod.POST)
-	@ResponseBody
-	public ResponseEntity<ResultMessageDTO> addChat(@RequestParam long idUser1, @RequestParam long idUser2){
-		System.out.println("TEST: addChat");
-							
-		ResultMessageDTO result = chatService.addChat(idUser1, idUser2);
-		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
-							
-		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
-	}
-	
-	
 
 	//PUT
 	@RequestMapping(value="/initConnection", method=RequestMethod.PUT)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> updateConnection(@RequestBody ChatRequestDTO chatRequestDTO){
 		System.out.println("TEST: initConnection");
-								
+									
 		ResultMessageDTO result = chatService.initConnection(chatRequestDTO);
 		HttpStatus resultHttpStatus = ResultMessageUtils.toHttpStatus(result);
-		
+			
 		return new ResponseEntity<ResultMessageDTO>(result, resultHttpStatus);		
 	}
-	
-	//todo readAllMessage
+		
 	
 	//DELETESs
-	//TODO
 	@RequestMapping(value="/disconnect", method=RequestMethod.DELETE)
 	@ResponseBody
 	public ResponseEntity<ResultMessageDTO> disconnectFromChat(@RequestBody ChatRequestDTO chatRequestDTO){
@@ -203,5 +196,4 @@ public class ChatRestController {
 				
 		return new ResponseEntity<ResultMessageDTO>(result, HttpStatus.OK);		
 	}
-		
 }

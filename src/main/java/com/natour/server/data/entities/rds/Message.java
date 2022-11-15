@@ -12,6 +12,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToOne;
 
+import org.hibernate.annotations.Type;
+
 @Entity
 public class Message implements Comparable<Message>{
 
@@ -76,7 +78,7 @@ public class Message implements Comparable<Message>{
 	}
 
 	
-	
+
 	public boolean isToRead() {
 		return toRead;
 	}

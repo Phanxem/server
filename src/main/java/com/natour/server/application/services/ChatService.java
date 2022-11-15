@@ -44,6 +44,7 @@ import com.natour.server.application.dtos.response.GetListUserResponseDTO;
 import com.natour.server.application.dtos.response.GetChatMessageResponseDTO;
 import com.natour.server.application.dtos.response.ResultMessageDTO;
 import com.natour.server.application.dtos.response.GetUserResponseDTO;
+import com.natour.server.application.dtos.response.HasMessageToReadResponseDTO;
 import com.natour.server.application.services.utils.DateUtils;
 import com.natour.server.application.services.utils.ResultMessageUtils;
 import com.natour.server.data.dao.implemented.MessageDAOImpl;
@@ -276,14 +277,18 @@ public class ChatService {
 		intersection.retainAll(chats2);
 		
 		if(intersection.isEmpty()) {
-			return ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND;
+			return ResultMessageUtils.SUCCESS_MESSAGE;
 		}
 		
 		Chat chat = intersection.get(0);
 		
 		List<Message> listMessage = chat.getMessages();
+		User sender = null;
 		for(Message message : listMessage) {
-			if(message.isToRead()) message.setToRead(false);
+			sender = message.getUser();
+			if(message.isToRead() && sender.getId() != idUser1) {
+				message.setToRead(false);
+			}
 		}
 		
 		chat.setMessages(listMessage);
@@ -291,6 +296,41 @@ public class ChatService {
 		chatRepository.save(chat);
 		
 		return ResultMessageUtils.SUCCESS_MESSAGE;
+	}
+	
+	public HasMessageToReadResponseDTO checkHasMessageToReadByIdUser(long idUser) {
+		HasMessageToReadResponseDTO hasMessageToReadResponseDTO = new HasMessageToReadResponseDTO();
+		
+		Optional<User> optionalUser = userRepository.findById(idUser);
+		if(optionalUser.isEmpty() ) {
+			hasMessageToReadResponseDTO.setResultMessage(ResultMessageUtils.ERROR_MESSAGE_NOT_FOUND);
+			return hasMessageToReadResponseDTO;
+		}
+		User user = optionalUser.get();
+		
+		List<Chat> listChat = user.getChats();
+		
+		List<Message> tempListMessage = null;
+		for(Chat chat: listChat) {
+			tempListMessage = chat.getMessages();
+			Message tempMessage = null;
+			for(int i = tempListMessage.size()-1; i >= 0; i--) {
+				tempMessage = tempListMessage.get(i);
+				User sender = tempMessage.getUser();
+				if(sender.getId() != idUser) {
+					if(tempMessage.isToRead()) {
+						hasMessageToReadResponseDTO.setHasMessageToRead(true);
+						hasMessageToReadResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
+						return hasMessageToReadResponseDTO;
+					}
+					break;
+				}
+			}
+		}
+		
+		hasMessageToReadResponseDTO.setHasMessageToRead(false);
+		hasMessageToReadResponseDTO.setResultMessage(ResultMessageUtils.SUCCESS_MESSAGE);
+		return hasMessageToReadResponseDTO;
 	}
 	
 	public ResultMessageDTO addChat(long idUser1, long idUser2) {
@@ -364,6 +404,25 @@ public class ChatService {
 		Map<String, String> payload = chatRequestDTO.getPayload();
 		
 		String idUser = payload.get(KEY_ID_USER);
+		
+		//TODO vedi se in dynamo è già presente una connessione col relativo id
+		//se è presente rimuovila.
+		ChatConnection oldUserConnection = null;
+		try {
+			oldUserConnection = chatConnectionRepository.findByIdUser(idUser);
+		}
+		catch(Exception e) {
+			return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
+		}
+		
+		if(oldUserConnection != null) {
+			try {
+				chatConnectionRepository.delete(oldUserConnection.getIdConnection());
+			}
+			catch(Exception e) {
+				return ResultMessageUtils.ERROR_MESSAGE_FAILURE;
+			}
+		}
 		
 		try {
 			chatConnectionRepository.updateWithIdUser(idConnection, idUser);
@@ -553,6 +612,8 @@ public class ChatService {
 		String stringDate = dateFormat.format(dateOfInput);
 		dto.setDateOfInput(stringDate);
 		
+		dto.setToRead(message.isToRead());
+		
 		dto.setBody(message.getBody());
 		
 		dto.setIdUser(message.getUser().getId());
@@ -653,6 +714,11 @@ public class ChatService {
 		
 		return true;
 	}
+
+
+
+
+
 
 
 

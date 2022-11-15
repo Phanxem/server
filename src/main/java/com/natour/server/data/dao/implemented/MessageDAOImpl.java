@@ -36,7 +36,7 @@ public class MessageDAOImpl implements MessageDAO{
 		String idConnectionDestination = sendMessageRequestDTO.getIdConnectionDestination();
 		
 		
-		String jsonMessage = "{ \"idUserSource\": \""+ idUserSource +"\", \"message\": \""+ message +"\", \"inputTime\""+ inputTime +"\" }";
+		String jsonMessage = "{ \"idUserSource\": \""+ idUserSource +"\", \"message\": \""+ message +"\", \"inputTime\": \""+ inputTime +"\" }";
 		
 		//String jsonMessage = "{\"message\":\"" + message + "\" }";
 		ByteBuffer byteBuffer = ByteBuffer.wrap(jsonMessage.getBytes());
