@@ -27,7 +27,8 @@ import com.natour.server.data.dao.interfaces.ImageDAO;
 @Component
 public class ImageDAOImpl implements ImageDAO{
 
-	private final static String BUCKET_NAME = "natour-images";
+	//private final static String BUCKET_NAME = "natour-images";
+	private final static String BUCKET_NAME = "natour-profile-image";
 	
 	@Autowired
 	private AmazonS3 amazonS3;

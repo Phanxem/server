@@ -13,8 +13,7 @@ import com.natour.server.data.dao.interfaces.RouteDAO;
 @Service
 public class RouteService {
 
-	//TODO test
-	RouteDAO routeDAO = new RouteDAOImpl();
+	private RouteDAO routeDAO = new RouteDAOImpl();
 		
 	//FINDs
 	public GetRouteResponseDTO findRouteByCoordinates(String coordinates) {		

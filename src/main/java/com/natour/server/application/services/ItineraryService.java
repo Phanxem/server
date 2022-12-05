@@ -41,10 +41,7 @@ public class ItineraryService {
 	@Autowired
 	private ItineraryRepository itineraryRepository;
 	@Autowired
-	private UserRepository userRepository;
-	//@Autowired
-	//private FileSystemRepository fileSystemRepository;
-	
+	private UserRepository userRepository;	
 	@Autowired
 	private GpxDAO gpxDAO;
 	

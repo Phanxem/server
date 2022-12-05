@@ -16,11 +16,8 @@ import com.natour.server.data.entities.rds.Itinerary;
 @Repository
 public interface ItineraryRepository extends JpaRepository<Itinerary, Long>{
 	
-	//DA TESTARE
-	//ricerca itinerario
 	List<Itinerary> findByNameContaining(String name, Pageable pageable);
 
-	//DA TESTARE
 	List<Itinerary> findByUser_id(long idUser, Pageable pageable);
 	
 	@Query("select i " +
@@ -32,19 +29,5 @@ public interface ItineraryRepository extends JpaRepository<Itinerary, Long>{
 	
 	
 	
-	//DA TESTARE
-	//List<Itinerary> findByUser(User user);
 
-	//DA TESTARE
-	//List<Itinerary> findByUser_username(String usernameUser);
-
-	/*TODO usare save invece di questa funzione
-	//DA TESTARE
-	@Transactional
-	@Modifying
-	@Query("update Itinerary i " + 
-		   "set i.gpxURL = :gpxURL " +
-		   "where i.id = :id " )
-	int updateGPXFileURL(@Param("id") long id,@Param("gpxURL") String gpxURL);
-	*/
 }

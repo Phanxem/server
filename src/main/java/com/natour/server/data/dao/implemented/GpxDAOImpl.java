@@ -26,7 +26,8 @@ import com.natour.server.data.dao.interfaces.GpxDAO;
 @Component
 public class GpxDAOImpl implements GpxDAO{
 
-	private final static String BUCKET_NAME = "natour-gpxs";
+	//private final static String BUCKET_NAME = "natour-gpxs";
+	private final static String BUCKET_NAME = "natour-itinerary-gpx";
 	
 	@Autowired
 	private AmazonS3 amazonS3;
